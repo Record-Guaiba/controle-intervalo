@@ -1,0 +1,3962 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ponto - Record Guaíba</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.28/dist/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --vermelho:  #4361ee;
+            --preto: #000000;
+            --branco: #FFFFFF;
+            --cinza-claro: #F5F5F5;
+            --cinza-escuro: #333333;
+            --cinza-medio: #666666;
+            --verde: #28a745;
+            --amarelo: #ffc107;
+            --azul: #007bff;
+            --vermelho-suave: rgba(220, 53, 69, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--cinza-claro);
+            color: var(--cinza-escuro);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(90deg, var(--vermelho), var(--preto));
+            color: var(--branco);
+            padding: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background-color: var(--branco);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vermelho);
+            font-weight: bold;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--branco);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--vermelho);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--cinza-claro);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--preto);
+        }
+
+        /* Botões */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--vermelho);
+            color: var(--branco);
+        }
+
+        .btn-primary:hover {
+            background-color: #4361ee;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--preto);
+            color: var(--branco);
+        }
+
+        .btn-secondary:hover {
+            background-color: #333;
+        }
+
+        .btn-success {
+            background-color: var(--verde);
+            color: var(--branco);
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background-color: var(--amarelo);
+            color: var(--preto);
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: var(--branco);
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Formulários */
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--cinza-escuro);
+            text-align: left;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            text-align: left;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--vermelho);
+            box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Tela de não autenticado */
+        .not-authenticated-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--vermelho) 0%, var(--preto) 100%);
+            padding: 20px;
+        }
+
+        .not-authenticated-card {
+            background-color: var(--branco);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+
+        .not-authenticated-title {
+            color: var(--vermelho);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* Registro de Ponto */
+        .ponto-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .ponto-horarios {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 576px) {
+            .ponto-horarios {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .ponto-hora {
+            background-color: var(--cinza-claro);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .ponto-hora.registrado {
+            border-color: var(--verde);
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+
+        .ponto-hora.atrasado {
+            border-color: var(--vermelho);
+            background-color: var(--vermelho-suave);
+            animation: pulse 2s infinite;
+        }
+
+        .ponto-hora-label {
+            font-weight: 600;
+            color: var(--cinza-escuro);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .ponto-hora-valor {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--preto);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+
+        /* Selfie Container */
+        .selfie-container {
+            border: 2px solid var(--preto);
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: var(--branco);
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .selfie-preview {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            border: 2px dashed var(--cinza-medio);
+            border-radius: 5px;
+            margin: 0 auto 1rem;
+            background-color: var(--cinza-claro);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .selfie-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .selfie-icon {
+            font-size: 3rem;
+            color: var(--cinza-medio);
+        }
+
+        .selfie-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        /* Assinatura Container */
+        .assinatura-container {
+            border: 2px solid var(--preto);
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: var(--branco);
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .assinatura-canvas-container {
+            border: 2px dashed var(--cinza-medio);
+            border-radius: 5px;
+            background-color: var(--cinza-claro);
+            margin: 0 auto 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .assinatura-canvas-container canvas {
+            width: 100%;
+            height: 150px;
+            display: block;
+            background-color: white;
+            touch-action: none;
+            cursor: crosshair;
+        }
+
+        .assinatura-preview {
+            width: 100%;
+            max-width: 300px;
+            height: 150px;
+            border: 2px dashed var(--cinza-medio);
+            border-radius: 5px;
+            margin: 0 auto 1rem;
+            background-color: var(--cinza-claro);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .assinatura-preview canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .assinatura-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .assinatura-icon {
+            font-size: 3rem;
+            color: var(--cinza-medio);
+        }
+
+        /* Câmera Modal */
+        .camera-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .camera-view {
+            width: 100%;
+            max-width: 500px;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            background-color: #000;
+        }
+
+        #cameraVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1rem;
+        }
+
+        .camera-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--branco);
+        }
+
+        .camera-footer {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .camera-button {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: var(--branco);
+            border: 4px solid rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .camera-button:hover {
+            transform: scale(1.1);
+            border-color: var(--vermelho);
+        }
+
+        .camera-button i {
+            font-size: 1.8rem;
+            color: var(--preto);
+        }
+
+        .switch-camera-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: var(--branco);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .switch-camera-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* Tabelas */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .table th {
+            background-color: var(--cinza-claro);
+            color: var(--cinza-escuro);
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.875rem;
+        }
+
+        .table tr:hover {
+            background-color: rgba(255, 0, 0, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: var(--verde);
+        }
+
+        .badge-warning {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #856404;
+        }
+
+        .badge-danger {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+
+        /* Navegação */
+        .nav-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--cinza-claro);
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--cinza-medio);
+            position: relative;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-tab:hover {
+            color: var(--vermelho);
+        }
+
+        .nav-tab.active {
+            color: var(--vermelho);
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--vermelho);
+        }
+
+        /* Status */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--verde);
+        }
+
+        .status-offline {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--branco);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notificações */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 5px;
+            color: var(--branco);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1200;
+            max-width: 350px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-success {
+            background-color: var(--verde);
+        }
+
+        .notification-error {
+            background-color: var(--vermelho);
+        }
+
+        .notification-warning {
+            background-color: var(--amarelo);
+            color: var(--preto);
+        }
+
+        .notification-info {
+            background-color: var(--azul);
+        }
+
+        .close-notification {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* Utilitários */
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .mb-3 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mt-3 {
+            margin-top: 1rem;
+        }
+
+        .mt-4 {
+            margin-top: 1.5rem;
+        }
+
+        .d-none {
+            display: none !important;
+        }
+
+        .d-flex {
+            display: flex;
+        }
+
+        .d-block {
+            display: block;
+        }
+
+        .justify-content-between {
+            justify-content: space-between;
+        }
+
+        .align-items-center {
+            align-items: center;
+        }
+
+        .w-100 {
+            width: 100%;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .flex-fill {
+            flex: 1 1 0;
+        }
+
+        /* Modal de Justificativa Atrasada */
+        .modal-justificativa-atrasada {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-justificativa-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.4s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-justificativa-header {
+            background: linear-gradient(90deg, var(--vermelho), var(--preto));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+        }
+
+        .modal-justificativa-body {
+            padding: 2rem;
+        }
+
+        .modal-justificativa-footer {
+            padding: 1.5rem;
+            background-color: var(--cinza-claro);
+            border-radius: 0 0 15px 15px;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .alert-atraso {
+            background-color: var(--vermelho-suave);
+            border-left: 4px solid var(--vermelho);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-atraso h4 {
+            color: var(--vermelho);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .logo h1 {
+                font-size: 1.3rem;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+            
+            .camera-view {
+                height: 70vh;
+                max-height: 500px;
+            }
+            
+            .camera-button {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .camera-button i {
+                font-size: 1.5rem;
+            }
+            
+            .switch-camera-btn {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .btn {
+                padding: 0.75rem 1rem;
+            }
+            
+            .ponto-hora {
+                padding: 1rem;
+            }
+            
+            .modal-justificativa-content {
+                margin: 0 10px;
+            }
+            
+            .modal-justificativa-footer {
+                flex-direction: column;
+            }
+            
+            .modal-justificativa-footer .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .nav-tabs {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+            
+            .nav-tab {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+            
+            .camera-button {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .selfie-preview {
+                height: 180px;
+            }
+            
+            .form-group .d-flex {
+                flex-direction: column;
+            }
+            
+            .form-group .flex-fill {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .assinatura-canvas-container {
+                height: 120px;
+            }
+            
+            .assinatura-canvas-container canvas {
+                height: 120px;
+            }
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* Time Display */
+        .time-display {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--vermelho);
+            background: rgba(255, 0, 0, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        /* Instruction Box */
+        .instruction-box {
+            background-color: rgba(255, 0, 0, 0.05);
+            border-left: 4px solid var(--vermelho);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .instruction-box h4 {
+            color: var(--vermelho);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .instruction-box p {
+            font-size: 0.9rem;
+            color: var(--cinza-escuro);
+            margin-bottom: 0.25rem;
+        }
+
+        /* Stat values */
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--vermelho);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--cinza-medio);
+        }
+
+        /* Modal de Visualização */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Camera Guide */
+        .camera-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        @media (max-width: 576px) {
+            .camera-guide {
+                width: 150px;
+                height: 150px;
+            }
+        }
+        
+        /* Assinatura styles */
+        .signature-clear-button {
+            margin-top: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .signature-clear-button:hover {
+            background-color: #e9ecef;
+        }
+        
+        /* Placeholder alignment */
+        .form-control::placeholder {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de não autenticado -->
+    <div id="notAuthenticated" class="not-authenticated-container d-none">
+        <div class="not-authenticated-card">
+            <div class="login-logo">
+                <i class="fas fa-tv"></i>
+            </div>
+            <h2 class="not-authenticated-title">Acesso Não Autorizado</h2>
+            <p style="margin-bottom: 1.5rem; color: var(--cinza-medio);">
+                Você precisa fazer login para acessar o sistema de controle de intervalo.
+            </p>
+            <button id="goToLoginBtn" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Ir para Página de Login
+            </button>
+            <div class="login-support mt-3">
+                <p>
+                    Para suporte técnico: 
+                    <a href="mailto:agawlinski@recordguaiba.tv.br">
+                        agawlinski@recordguaiba.tv.br
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema Principal (apenas para usuários autenticados) -->
+    <div id="mainSystem" class="d-none">
+        <!-- Cabeçalho -->
+        <header class="header">
+            <div class="container header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-tv"></i>
+                    </div>
+                    <h1>Controle de Intervalo</h1>
+                </div>
+                
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">F</div>
+                    <div>
+                        <div id="userName">Funcionário Teste</div>
+                        <div class="status-indicator status-online" id="statusIndicator">
+                            <i class="fas fa-circle"></i>
+                            <span>Online</span>
+                        </div>
+                    </div>
+                    <button id="logoutBtn" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navegação -->
+        <div class="container mt-3">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-page="registrarPonto">
+                    <i class="fas fa-clock"></i> Registrar Intervalo
+                </button>
+                <button class="nav-tab" data-page="meusRegistros">
+                    <i class="fas fa-history"></i> Meus Registros
+                </button>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="container">
+            <!-- Registrar Ponto -->
+            <div id="registrarPontoPage" class="page-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Registro de Intervalo</h2>
+                        <div id="pontoDateTime" class="time-display"></div>
+                    </div>
+                    
+                    <div class="instruction-box">
+                        <h4><i class="fas fa-info-circle"></i> Instruções Importantes:</h4>
+                        <p>1. Selfie é obrigatória para todos os registros</p>
+                        <p>6. <strong>ATENÇÃO:</strong> Registros pendentes por mais de 1 dia exigirão justificativa</p>
+                    </div>
+                    
+                    <div class="ponto-container">
+                        <div class="ponto-horarios">
+                            <div class="ponto-hora" id="saidaIntervalo">
+                                <div class="ponto-hora-label">Saída para Intervalo</div>
+                                <div class="ponto-hora-valor">--:--</div>
+                            </div>
+                            
+                            <div class="ponto-hora" id="retornoIntervalo">
+                                <div class="ponto-hora-label">Retorno do Intervalo</div>
+                                <div class="ponto-hora-valor">--:--</div>
+                            </div>
+                            
+                            <div class="ponto-hora" id="statusRegistro">
+                                <div class="ponto-hora-label">Status do Dia</div>
+                                <div class="ponto-hora-valor" id="statusValor">Pendente</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Tipo de Registro</label>
+                            <div class="d-flex gap-2">
+                                <label class="flex-fill text-center p-3" style="border: 2px solid var(--preto); border-radius: 8px; cursor: pointer;">
+                                    <input type="radio" name="tipoPonto" value="saida_intervalo" checked style="display: none;">
+                                    <div>
+                                        <i class="fas fa-sign-out-alt" style="font-size: 2rem; color: var(--vermelho); display: block; margin-bottom: 0.5rem;"></i>
+                                        <strong>Saída Intervalo</strong>
+                                    </div>
+                                </label>
+                                
+                                <label class="flex-fill text-center p-3" style="border: 2px solid var(--preto); border-radius: 8px; cursor: pointer;">
+                                    <input type="radio" name="tipoPonto" value="retorno_intervalo" style="display: none;">
+                                    <div>
+                                        <i class="fas fa-sign-in-alt" style="font-size: 2rem; color: var(--verde); display: block; margin-bottom: 0.5rem;"></i>
+                                        <strong>Retorno Intervalo</strong>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Selfie Container -->
+                        <div class="selfie-container" id="selfieContainer">
+                            <h4 style="margin-bottom: 1rem; color: var(--vermelho);">
+                                <i class="fas fa-camera"></i> Selfie Obrigatória
+                                <span style="font-size: 0.8rem; color: var(--cinza-medio);">(exceto com justificativa)</span>
+                            </h4>
+                            
+                            <div class="selfie-preview" id="selfiePreview">
+                                <div id="selfiePlaceholder" class="selfie-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <img id="selfieImage" class="d-none" alt="Selfie capturada">
+                            </div>
+                            
+                            <div class="selfie-controls">
+                                <button id="takeSelfieBtn" class="btn btn-primary">
+                                    <i class="fas fa-camera"></i> Tirar Selfie
+                                </button>
+                                <button id="retakeSelfieBtn" class="btn btn-warning d-none">
+                                    <i class="fas fa-redo"></i> Tirar Outra
+                                </button>
+                            </div>
+                            
+                            <p class="mt-3" style="font-size: 0.9rem; color: var(--cinza-medio);">
+                                Clique em "Tirar Selfie" para capturar sua foto
+                            </p>
+                            
+                            <div id="cameraStatus" class="mt-2" style="font-size: 0.8rem; color: var(--cinza-medio);"></div>
+                        </div>
+                        
+                        <!-- Seção de Justificativa com Assinatura -->
+                        <div class="form-group">
+                            <label class="form-label" style="cursor: pointer;">
+                                <input type="checkbox" id="requerJustificativa" style="margin-right: 8px;">
+                                <i class="fas fa-comment-alt"></i> Adicionar justificativa (opcional - dispensa selfie)
+                            </label>
+                            <div id="justificativaContainer" class="d-none">
+                                <textarea id="justificativaTexto" class="form-control mb-3" placeholder="Descreva a justificativa para o registro sem selfie..." rows="3"></textarea>
+                                
+                                <!-- Container de Assinatura -->
+                                <div class="assinatura-container">
+                                    <h5 style="margin-bottom: 1rem; color: var(--vermelho);">
+                                        <i class="fas fa-signature"></i> Assinatura Digital
+                                    </h5>
+                                    
+                                    <div class="assinatura-canvas-container">
+                                        <canvas id="assinaturaCanvas"></canvas>
+                                    </div>
+                                    
+                                    <div class="assinatura-preview d-none" id="assinaturaPreview">
+                                        <canvas id="assinaturaPreviewCanvas"></canvas>
+                                    </div>
+                                    
+                                    <div class="assinatura-controls">
+                                        <button id="limparAssinaturaBtn" class="btn btn-warning">
+                                            <i class="fas fa-eraser"></i> Limpar
+                                        </button>
+                                        <button id="salvarAssinaturaBtn" class="btn btn-success">
+                                            <i class="fas fa-check"></i> Salvar Assinatura
+                                        </button>
+                                    </div>
+                                    
+                                    <div id="assinaturaStatus" class="mt-2" style="font-size: 0.8rem; color: var(--cinza-medio);">
+                                        Assinatura não salva
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button id="registrarPontoBtn" class="btn btn-success btn-block" disabled>
+                            <i class="fas fa-clock"></i> Registrar Ponto (Selfie obrigatória ou justificativa)
+                        </button>
+                        
+                        <div class="mt-3 text-center">
+                            <small style="color: var(--cinza-medio);">
+                                Sistema de Controle de Intervalo - Record Guaíba
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meus Registros -->
+            <div id="meusRegistrosPage" class="page-content d-none">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Meus Registros de Intervalo</h2>
+                        <button id="exportarPDFBtn" class="btn btn-danger btn-sm">
+                            <i class="fas fa-file-pdf"></i> Exportar Relatório PDF
+                        </button>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Data Início</label>
+                            <input type="date" id="dataInicio" class="form-control">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Data Fim</label>
+                            <input type="date" id="dataFim" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <button id="filtrarRegistrosBtn" class="btn btn-primary">
+                            <i class="fas fa-filter"></i> Filtrar
+                        </button>
+                        <button id="limparFiltrosBtn" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Limpar
+                        </button>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table" id="registrosTable">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Saída</th>
+                                    <th>Retorno</th>
+                                    <th>Status</th>
+                                    <th>Email</th>
+                                    <th>PDF</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="registrosTableBody">
+                                <!-- Os registros serão inseridos aqui via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="registrosPagination" class="text-center mt-4 mb-5"></div>
+                    
+                    <div class="mt-5 mb-4">
+                        <h4 class="card-title mb-4" style="padding-bottom: 0.5rem; border-bottom: 2px solid var(--cinza-claro);">
+                            <i class="fas fa-chart-bar"></i> Estatísticas
+                        </h4>
+                        <div class="d-flex justify-content-around text-center" style="gap: 2rem;">
+                            <div class="p-3" style="background: var(--cinza-claro); border-radius: 10px; min-width: 120px;">
+                                <div class="stat-value mb-2" id="totalRegistros">0</div>
+                                <div class="stat-label" style="font-size: 0.9rem; font-weight: 500;">Total Registros</div>
+                            </div>
+                            <div class="p-3" style="background: rgba(40, 167, 69, 0.1); border-radius: 10px; min-width: 120px;">
+                                <div class="stat-value mb-2" id="registrosCompletos">0</div>
+                                <div class="stat-label" style="font-size: 0.9rem; font-weight: 500;">Completos</div>
+                            </div>
+                            <div class="p-3" style="background: rgba(0, 123, 255, 0.1); border-radius: 10px; min-width: 120px;">
+                                <div class="stat-value mb-2" id="emailsEnviados">0</div>
+                                <div class="stat-label" style="font-size: 0.9rem; font-weight: 500;">Emails Enviados</div>
+                            </div>
+                            <div class="p-3" style="background: rgba(220, 53, 69, 0.1); border-radius: 10px; min-width: 120px;">
+                                <div class="stat-value mb-2" id="registrosAtrasados">0</div>
+                                <div class="stat-label" style="font-size: 0.9rem; font-weight: 500;">Atrasados</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal da Câmera -->
+    <div id="cameraModal" class="camera-modal">
+        <div class="camera-view">
+            <video id="cameraVideo" autoplay playsinline></video>
+            <div class="camera-guide"></div>
+            <div class="camera-overlay">
+                <div class="camera-header">
+                    <button id="closeCameraBtn" class="btn btn-danger btn-sm">
+                        <i class="fas fa-times"></i> Fechar
+                    </button>
+                    <div id="cameraTimer" style="color: white; font-weight: bold; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px;"></div>
+                </div>
+                <div class="camera-footer">
+                    <button id="switchCameraBtn" class="switch-camera-btn" title="Trocar câmera">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <div class="camera-button" id="captureBtn" title="Tirar foto">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <button id="cancelCaptureBtn" class="switch-camera-btn d-none" title="Cancelar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3" style="color: white; text-align: center;">
+            <p>Posicione seu rosto dentro do círculo e toque no botão da câmera</p>
+            <p style="font-size: 0.9rem; opacity: 0.8;">A selfie será automaticamente espelhada</p>
+        </div>
+    </div>
+
+    <!-- Modal de Visualização -->
+    <div id="visualizarModal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Detalhes do Registro</h3>
+                <button onclick="closeVisualizarModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--cinza-escuro);">&times;</button>
+            </div>
+            <div id="visualizarConteudo"></div>
+            <div class="text-center mt-3">
+                <button onclick="closeVisualizarModal()" class="btn btn-primary">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Justificativa para Registros Atrasados -->
+    <div id="modalJustificativaAtrasada" class="modal-justificativa-atrasada">
+        <div class="modal-justificativa-content">
+            <div class="modal-justificativa-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Registro Pendente de Justificativa</h3>
+                <p>Preencha a justificativa para o registro atrasado</p>
+            </div>
+            
+            <div class="modal-justificativa-body">
+                <div class="alert-atraso">
+                    <h4><i class="fas fa-clock"></i> Registro Atrasado</h4>
+                    <p id="modalAtrasoDetalhes">O registro do dia XX/XX/XXXX não foi realizado no prazo.</p>
+                    <p><strong>Prazo máximo:</strong> 1 dia após a data do registro</p>
+                    <p><strong>Obrigatório:</strong> Justificativa + Assinatura</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Data do Registro Atrasado</label>
+                    <input type="date" id="modalDataAtrasada" class="form-control" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Tipo de Registro Pendente</label>
+                    <select id="modalTipoAtrasado" class="form-control">
+                        <option value="saida_intervalo">Saída para Intervalo</option>
+                        <option value="retorno_intervalo">Retorno do Intervalo</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Justificativa do Atraso *</label>
+                    <textarea id="modalJustificativaAtraso" class="form-control" rows="4" placeholder="Descreva o motivo do atraso no registro..." required></textarea>
+                </div>
+                
+                <!-- Assinatura para registro atrasado -->
+                <div class="assinatura-container mt-3">
+                    <h5 style="margin-bottom: 1rem; color: var(--vermelho);">
+                        <i class="fas fa-signature"></i> Assinatura Digital (Obrigatória)
+                    </h5>
+                    
+                    <div class="assinatura-canvas-container">
+                        <canvas id="modalAssinaturaCanvas"></canvas>
+                    </div>
+                    
+                    <div class="assinatura-preview d-none" id="modalAssinaturaPreview">
+                        <canvas id="modalAssinaturaPreviewCanvas"></canvas>
+                    </div>
+                    
+                    <div class="assinatura-controls">
+                        <button id="modalLimparAssinaturaBtn" class="btn btn-warning">
+                            <i class="fas fa-eraser"></i> Limpar
+                        </button>
+                        <button id="modalSalvarAssinaturaBtn" class="btn btn-success">
+                            <i class="fas fa-check"></i> Salvar Assinatura
+                        </button>
+                    </div>
+                    
+                    <div id="modalAssinaturaStatus" class="mt-2" style="font-size: 0.8rem; color: var(--cinza-medio);">
+                        Assinatura não salva
+                    </div>
+                </div>
+                
+                <div class="form-group mt-3">
+                    <label class="form-label">Hora Estimada do Registro</label>
+                    <input type="time" id="modalHoraEstimada" class="form-control" value="12:00">
+                </div>
+            </div>
+            
+            <div class="modal-justificativa-footer">
+                <button id="modalCancelarJustificativaBtn" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button id="modalSalvarJustificativaBtn" class="btn btn-primary" disabled>
+                    <i class="fas fa-save"></i> Salvar Justificativa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== SISTEMA DE CONTROLE DE INTERVALO - RECORD GUAÍBA ==========
+
+        // ========== VARIÁVEIS GLOBAIS ==========
+        let currentUser = null;
+        let currentStream = null;
+        let capturedSelfie = null;
+        let cameraFacingMode = 'user';
+        let currentPage = 1;
+        const recordsPerPage = 10;
+        let isCameraInitialized = false;
+        let mediaStreamTrack = null;
+        let signaturePad = null;
+        let signatureCaptured = false;
+        let signatureData = null;
+        let modalSignaturePad = null;
+        let modalSignatureCaptured = false;
+        let modalSignatureData = null;
+        let registrosAtrasadosParaJustificar = [];
+
+        // ========== VERIFICAÇÃO DE AUTENTICAÇÃO ==========
+        function checkAuthentication() {
+            try {
+                const currentUserData = localStorage.getItem('ponto_currentUser');
+                
+                if (!currentUserData) {
+                    // Não autenticado - mostrar tela de não autenticado
+                    document.getElementById('notAuthenticated').classList.remove('d-none');
+                    document.getElementById('mainSystem').classList.add('d-none');
+                    return null;
+                }
+                
+                const user = JSON.parse(currentUserData);
+                
+                if (!user || !user.ativo) {
+                    // Usuário inválido ou inativo
+                    localStorage.removeItem('ponto_currentUser');
+                    document.getElementById('notAuthenticated').classList.remove('d-none');
+                    document.getElementById('mainSystem').classList.add('d-none');
+                    return null;
+                }
+                
+                // Autenticado - mostrar sistema
+                document.getElementById('notAuthenticated').classList.add('d-none');
+                document.getElementById('mainSystem').classList.remove('d-none');
+                
+                return user;
+            } catch (error) {
+                console.error('Erro na verificação de autenticação:', error);
+                localStorage.removeItem('ponto_currentUser');
+                document.getElementById('notAuthenticated').classList.remove('d-none');
+                document.getElementById('mainSystem').classList.add('d-none');
+                return null;
+            }
+        }
+
+        // ========== BANCO DE DADOS (LocalStorage) ==========
+        function initDatabase() {
+            if (!localStorage.getItem('ponto_record_usuarios')) {
+                // Se não existir, usar os dados do login
+                const usuarios = JSON.parse(localStorage.getItem('ponto_record_usuarios_login') || '[]');
+                if (usuarios.length > 0) {
+                    localStorage.setItem('ponto_record_usuarios', JSON.stringify(usuarios));
+                } else {
+                    // Dados padrão de fallback
+                    const usuariosPadrao = [
+                        {
+                            id: 1,
+                            nome: 'Funcionário Teste',
+                            empresa: 'Record Guaíba',
+                            login: 'funcionario',
+                            senha: 'senha123',
+                            email: 'agawlinski@recordguaiba.tv.br',
+                            cargo: 'Analista',
+                            ativo: true
+                        }
+                    ];
+                    localStorage.setItem('ponto_record_usuarios', JSON.stringify(usuariosPadrao));
+                }
+            }
+            
+            if (!localStorage.getItem('ponto_record_registros')) {
+                localStorage.setItem('ponto_record_registros', JSON.stringify([]));
+            }
+            
+            if (!localStorage.getItem('ponto_record_logs_email')) {
+                localStorage.setItem('ponto_record_logs_email', JSON.stringify([]));
+            }
+            
+            if (!localStorage.getItem('ponto_record_registros_atrasados')) {
+                localStorage.setItem('ponto_record_registros_atrasados', JSON.stringify([]));
+            }
+            
+            console.log('Banco de dados inicializado!');
+        }
+
+        // ========== FUNÇÕES DE BANCO DE DADOS ==========
+        function loginUser(login, password) {
+            const usuarios = JSON.parse(localStorage.getItem('ponto_record_usuarios') || '[]');
+            const usuario = usuarios.find(u => u.login === login && u.senha === password && u.ativo);
+            return usuario || null;
+        }
+
+        function salvarRegistro(registro) {
+            try {
+                const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                
+                // Verificar se já existe registro para este usuário nesta data
+                const index = registros.findIndex(r => 
+                    r.usuarioId === registro.usuarioId && r.data === registro.data
+                );
+                
+                if (index >= 0) {
+                    // Atualizar registro existente
+                    registros[index] = { ...registros[index], ...registro };
+                } else {
+                    // Adicionar novo registro
+                    registro.id = Date.now();
+                    registros.push(registro);
+                }
+                
+                localStorage.setItem('ponto_record_registros', JSON.stringify(registros));
+                return registro.id || registros[registros.length - 1].id;
+            } catch (error) {
+                console.error('Erro ao salvar registro:', error);
+                throw error;
+            }
+        }
+
+        function buscarRegistros(usuarioId, dataInicio, dataFim) {
+            try {
+                let registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                
+                // Filtrar por usuário
+                registros = registros.filter(r => r.usuarioId === usuarioId);
+                
+                // Filtrar por data se fornecido
+                if (dataInicio && dataFim) {
+                    registros = registros.filter(reg => {
+                        const dataReg = new Date(reg.data);
+                        return dataReg >= new Date(dataInicio) && dataReg <= new Date(dataFim);
+                    });
+                }
+                
+                // Ordenar por data (mais recente primeiro)
+                registros.sort((a, b) => new Date(b.data) - new Date(a.data));
+                
+                return registros;
+            } catch (error) {
+                console.error('Erro ao buscar registros:', error);
+                return [];
+            }
+        }
+
+        function buscarRegistroHoje(usuarioId) {
+            const hoje = new Date().toISOString().split('T')[0];
+            const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+            
+            return registros.find(r => 
+                r.usuarioId === usuarioId && r.data === hoje
+            ) || null;
+        }
+
+        function salvarRegistroAtrasado(registroAtrasado) {
+            try {
+                const registrosAtrasados = JSON.parse(localStorage.getItem('ponto_record_registros_atrasados') || '[]');
+                registroAtrasado.id = Date.now();
+                registroAtrasado.dataCriacao = new Date().toISOString();
+                registrosAtrasados.push(registroAtrasado);
+                
+                localStorage.setItem('ponto_record_registros_atrasados', JSON.stringify(registrosAtrasados));
+                return registroAtrasado.id;
+            } catch (error) {
+                console.error('Erro ao salvar registro atrasado:', error);
+                throw error;
+            }
+        }
+
+        function buscarRegistrosAtrasadosPendentes(usuarioId) {
+            try {
+                const hoje = new Date();
+                const ontem = new Date(hoje);
+                ontem.setDate(hoje.getDate() - 1);
+                
+                // Buscar registros dos últimos 30 dias
+                const trintaDiasAtras = new Date(hoje);
+                trintaDiasAtras.setDate(hoje.getDate() - 30);
+                
+                const registros = buscarRegistros(
+                    usuarioId,
+                    trintaDiasAtras.toISOString().split('T')[0],
+                    ontem.toISOString().split('T')[0]
+                );
+                
+                // Filtrar registros incompletos (faltando saída ou retorno)
+                const registrosIncompletos = registros.filter(reg => {
+                    return !reg.saidaIntervalo || !reg.retornoIntervalo;
+                });
+                
+                // Verificar quais estão atrasados (mais de 1 dia)
+                const registrosAtrasados = registrosIncompletos.filter(reg => {
+                    const dataRegistro = new Date(reg.data);
+                    const diferencaDias = Math.floor((ontem - dataRegistro) / (1000 * 60 * 60 * 24));
+                    return diferencaDias >= 1;
+                });
+                
+                return registrosAtrasados;
+            } catch (error) {
+                console.error('Erro ao buscar registros atrasados:', error);
+                return [];
+            }
+        }
+
+        function salvarLogEmail(log) {
+            try {
+                const logs = JSON.parse(localStorage.getItem('ponto_record_logs_email') || '[]');
+                log.id = Date.now();
+                logs.push(log);
+                
+                localStorage.setItem('ponto_record_logs_email', JSON.stringify(logs));
+                return log.id;
+            } catch (error) {
+                console.error('Erro ao salvar log de email:', error);
+                throw error;
+            }
+        }
+
+        // ========== FUNÇÕES DE UTILIDADE ==========
+        function formatDate(date, includeTime = false) {
+            try {
+                const d = new Date(date);
+                if (includeTime) {
+                    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                }
+                return d.toLocaleDateString('pt-BR');
+            } catch (error) {
+                console.error('Erro ao formatar data:', error);
+                return 'Data inválida';
+            }
+        }
+
+        function getCurrentTime() {
+            return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function showNotification(message, type = 'info', duration = 5000) {
+            try {
+                // Remover notificações antigas
+                document.querySelectorAll('.notification').forEach(n => n.remove());
+                
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.innerHTML = `
+                    <span>${message}</span>
+                    <button class="close-notification">&times;</button>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                notification.querySelector('.close-notification').addEventListener('click', () => {
+                    notification.remove();
+                });
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, duration);
+            } catch (error) {
+                console.error('Erro ao mostrar notificação:', error);
+            }
+        }
+
+        function showLoading(buttonId, text = 'Processando...') {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                const originalText = button.innerHTML;
+                button.innerHTML = `<span class="loading"></span> ${text}`;
+                button.disabled = true;
+                return () => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                };
+            }
+            return () => {};
+        }
+
+        function updateDateTime() {
+            try {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                const timeStr = now.toLocaleTimeString('pt-BR');
+                
+                if (document.getElementById('pontoDateTime')) {
+                    document.getElementById('pontoDateTime').textContent = `${dateStr} - ${timeStr}`;
+                }
+                
+                if (document.getElementById('cameraTimer')) {
+                    document.getElementById('cameraTimer').textContent = timeStr;
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar data/hora:', error);
+            }
+        }
+
+        // ========== FUNÇÕES DE CÂMERA ==========
+        async function startCamera(facingMode = 'user') {
+            try {
+                stopCamera();
+                
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('API de mídia não suportada pelo navegador');
+                }
+                
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                const constraints = {
+                    video: {
+                        facingMode: facingMode,
+                        width: { ideal: isMobile ? 640 : 1280 },
+                        height: { ideal: isMobile ? 480 : 720 },
+                        frameRate: { ideal: 30 }
+                    },
+                    audio: false
+                };
+                
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                mediaStreamTrack = currentStream.getVideoTracks()[0];
+                
+                const videoElement = document.getElementById('cameraVideo');
+                if (!videoElement) {
+                    throw new Error('Elemento de vídeo não encontrado');
+                }
+                
+                videoElement.srcObject = currentStream;
+                isCameraInitialized = true;
+                
+                updateCameraStatus('Câmera ativa - Toque no botão para capturar');
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Erro ao acessar câmera:', error);
+                isCameraInitialized = false;
+                
+                let errorMessage = 'Não foi possível acessar a câmera. ';
+                
+                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                    errorMessage = 'Permissão de câmera negada. Por favor, permita o acesso à câmera nas configurações do navegador ou do dispositivo.';
+                } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                    errorMessage = 'Nenhuma câmera encontrada. Verifique se seu dispositivo possui uma câmera frontal.';
+                } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                    errorMessage = 'A câmera está sendo usada por outro aplicativo. Feche outros apps de câmera e tente novamente.';
+                } else if (error.name === 'OverconstrainedError') {
+                    errorMessage = 'Não foi possível encontrar uma câmera que atenda aos requisitos. Tente novamente.';
+                } else {
+                    errorMessage += 'Verifique as permissões e tente novamente.';
+                }
+                
+                updateCameraStatus(errorMessage);
+                showNotification(errorMessage, 'error', 7000);
+                
+                return false;
+            }
+        }
+
+        function stopCamera() {
+            try {
+                if (mediaStreamTrack) {
+                    mediaStreamTrack.stop();
+                    mediaStreamTrack = null;
+                }
+                
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => {
+                        track.stop();
+                    });
+                    currentStream = null;
+                }
+                
+                const videoElement = document.getElementById('cameraVideo');
+                if (videoElement) {
+                    videoElement.srcObject = null;
+                }
+                
+                isCameraInitialized = false;
+                updateCameraStatus('Câmera desativada');
+                
+            } catch (error) {
+                console.error('Erro ao parar câmera:', error);
+            }
+        }
+
+        function updateCameraStatus(message) {
+            const statusElement = document.getElementById('cameraStatus');
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.style.color = message.includes('ativa') ? 'var(--verde)' : 'var(--vermelho)';
+            }
+        }
+
+        function captureSelfie() {
+            try {
+                const videoElement = document.getElementById('cameraVideo');
+                
+                if (!videoElement || !currentStream || videoElement.readyState !== 4) {
+                    showNotification('Câmera não está pronta. Aguarde a inicialização.', 'warning');
+                    return;
+                }
+                
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                
+                canvas.width = videoElement.videoWidth || 640;
+                canvas.height = videoElement.videoHeight || 480;
+                
+                context.save();
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                context.restore();
+                
+                capturedSelfie = canvas.toDataURL('image/jpeg', 0.8);
+                
+                console.log('Selfie capturada com sucesso. Tamanho:', capturedSelfie.length, 'bytes');
+                
+                updateSelfiePreview();
+                
+                closeCameraModal();
+                
+                updateRegisterButton();
+                
+                showNotification('Selfie capturada com sucesso! Agora você pode registrar seu ponto.', 'success');
+                
+            } catch (error) {
+                console.error('Erro ao capturar selfie:', error);
+                showNotification('Erro ao capturar selfie. Tente novamente.', 'error');
+            }
+        }
+
+        function updateSelfiePreview() {
+            try {
+                const previewImg = document.getElementById('selfieImage');
+                const placeholder = document.getElementById('selfiePlaceholder');
+                const retakeBtn = document.getElementById('retakeSelfieBtn');
+                
+                if (previewImg && capturedSelfie) {
+                    previewImg.src = capturedSelfie;
+                    previewImg.classList.remove('d-none');
+                    
+                    if (placeholder) placeholder.classList.add('d-none');
+                    if (retakeBtn) retakeBtn.classList.remove('d-none');
+                    
+                    previewImg.onload = () => {
+                        console.log('Selfie carregada no preview');
+                    };
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar preview:', error);
+            }
+        }
+
+        // ========== FUNÇÕES DE ASSINATURA ==========
+        function initSignaturePad() {
+            try {
+                const canvas = document.getElementById('assinaturaCanvas');
+                if (!canvas) return;
+                
+                // Garantir que o canvas tenha um tamanho adequado
+                const container = canvas.parentElement;
+                if (container) {
+                    canvas.width = container.clientWidth;
+                    canvas.height = container.clientHeight;
+                    
+                    // Reajustar se as dimensões forem muito pequenas
+                    if (canvas.width < 200) {
+                        canvas.width = 400;
+                    }
+                    if (canvas.height < 100) {
+                        canvas.height = 150;
+                    }
+                }
+                
+                // Limpar canvas antes de inicializar
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                signaturePad = new SignaturePad(canvas, {
+                    backgroundColor: 'rgba(255, 255, 255, 0)',
+                    penColor: 'black',
+                    minWidth: 0.5,
+                    maxWidth: 2.5,
+                    throttle: 16,
+                    minDistance: 0
+                });
+                
+                console.log('SignaturePad inicializado com sucesso. Dimensões:', canvas.width, 'x', canvas.height);
+                
+                // Adicionar eventos para melhor controle
+                canvas.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                });
+                
+                canvas.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                });
+                
+                // Adicionar feedback visual quando o usuário começar a desenhar
+                signaturePad.addEventListener('beginStroke', () => {
+                    canvas.style.borderColor = 'var(--vermelho)';
+                });
+                
+                signaturePad.addEventListener('endStroke', () => {
+                    canvas.style.borderColor = 'var(--cinza-medio)';
+                });
+                
+            } catch (error) {
+                console.error('Erro ao inicializar SignaturePad:', error);
+                showNotification('Erro ao inicializar área de assinatura', 'error');
+            }
+        }
+
+        function initModalSignaturePad() {
+            try {
+                const canvas = document.getElementById('modalAssinaturaCanvas');
+                if (!canvas) return;
+                
+                // Garantir que o canvas tenha um tamanho adequado
+                const container = canvas.parentElement;
+                if (container) {
+                    canvas.width = container.clientWidth;
+                    canvas.height = container.clientHeight;
+                    
+                    // Reajustar se as dimensões forem muito pequenas
+                    if (canvas.width < 200) {
+                        canvas.width = 400;
+                    }
+                    if (canvas.height < 100) {
+                        canvas.height = 150;
+                    }
+                }
+                
+                // Limpar canvas antes de inicializar
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                modalSignaturePad = new SignaturePad(canvas, {
+                    backgroundColor: 'rgba(255, 255, 255, 0)',
+                    penColor: 'black',
+                    minWidth: 0.5,
+                    maxWidth: 2.5,
+                    throttle: 16,
+                    minDistance: 0
+                });
+                
+                console.log('Modal SignaturePad inicializado com sucesso. Dimensões:', canvas.width, 'x', canvas.height);
+                
+                // Adicionar eventos para melhor controle
+                canvas.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                });
+                
+                canvas.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                });
+                
+                // Adicionar feedback visual quando o usuário começar a desenhar
+                modalSignaturePad.addEventListener('beginStroke', () => {
+                    canvas.style.borderColor = 'var(--vermelho)';
+                });
+                
+                modalSignaturePad.addEventListener('endStroke', () => {
+                    canvas.style.borderColor = 'var(--cinza-medio)';
+                });
+                
+            } catch (error) {
+                console.error('Erro ao inicializar modal SignaturePad:', error);
+            }
+        }
+
+        function clearSignature() {
+            try {
+                if (signaturePad) {
+                    signaturePad.clear();
+                    signatureCaptured = false;
+                    signatureData = null;
+                    
+                    const preview = document.getElementById('assinaturaPreview');
+                    if (preview) {
+                        preview.classList.add('d-none');
+                    }
+                    
+                    const status = document.getElementById('assinaturaStatus');
+                    if (status) {
+                        status.textContent = 'Assinatura não salva';
+                        status.style.color = 'var(--cinza-medio)';
+                    }
+                    
+                    updateRegisterButton();
+                    
+                    // Limpar visualmente o canvas
+                    const canvas = document.getElementById('assinaturaCanvas');
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao limpar assinatura:', error);
+            }
+        }
+
+        function clearModalSignature() {
+            try {
+                if (modalSignaturePad) {
+                    modalSignaturePad.clear();
+                    modalSignatureCaptured = false;
+                    modalSignatureData = null;
+                    
+                    const preview = document.getElementById('modalAssinaturaPreview');
+                    if (preview) {
+                        preview.classList.add('d-none');
+                    }
+                    
+                    const status = document.getElementById('modalAssinaturaStatus');
+                    if (status) {
+                        status.textContent = 'Assinatura não salva';
+                        status.style.color = 'var(--cinza-medio)';
+                    }
+                    
+                    updateModalSaveButton();
+                    
+                    // Limpar visualmente o canvas
+                    const canvas = document.getElementById('modalAssinaturaCanvas');
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao limpar assinatura do modal:', error);
+            }
+        }
+
+        function saveSignature() {
+            try {
+                if (!signaturePad || signaturePad.isEmpty()) {
+                    showNotification('Por favor, faça sua assinatura antes de salvar', 'warning');
+                    return;
+                }
+                
+                signatureData = signaturePad.toDataURL('image/png');
+                signatureCaptured = true;
+                
+                const preview = document.getElementById('assinaturaPreview');
+                const previewCanvas = document.getElementById('assinaturaPreviewCanvas');
+                
+                if (preview && previewCanvas) {
+                    const ctx = previewCanvas.getContext('2d');
+                    const img = new Image();
+                    
+                    img.onload = function() {
+                        // Configurar tamanho do canvas de preview
+                        previewCanvas.width = preview.clientWidth;
+                        previewCanvas.height = preview.clientHeight;
+                        
+                        // Desenhar a imagem mantendo proporção
+                        const ratio = Math.min(
+                            previewCanvas.width / img.width,
+                            previewCanvas.height / img.height
+                        );
+                        const x = (previewCanvas.width - img.width * ratio) / 2;
+                        const y = (previewCanvas.height - img.height * ratio) / 2;
+                        
+                        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+                        ctx.drawImage(img, x, y, img.width * ratio, img.height * ratio);
+                        
+                        preview.classList.remove('d-none');
+                    };
+                    
+                    img.src = signatureData;
+                }
+                
+                const status = document.getElementById('assinaturaStatus');
+                if (status) {
+                    status.textContent = 'Assinatura salva ✓';
+                    status.style.color = 'var(--verde)';
+                }
+                
+                updateRegisterButton();
+                
+                showNotification('Assinatura salva com sucesso!', 'success');
+                
+            } catch (error) {
+                console.error('Erro ao salvar assinatura:', error);
+                showNotification('Erro ao salvar assinatura', 'error');
+            }
+        }
+
+        function saveModalSignature() {
+            try {
+                if (!modalSignaturePad || modalSignaturePad.isEmpty()) {
+                    showNotification('Por favor, faça sua assinatura antes de salvar', 'warning');
+                    return;
+                }
+                
+                modalSignatureData = modalSignaturePad.toDataURL('image/png');
+                modalSignatureCaptured = true;
+                
+                const preview = document.getElementById('modalAssinaturaPreview');
+                const previewCanvas = document.getElementById('modalAssinaturaPreviewCanvas');
+                
+                if (preview && previewCanvas) {
+                    const ctx = previewCanvas.getContext('2d');
+                    const img = new Image();
+                    
+                    img.onload = function() {
+                        // Configurar tamanho do canvas de preview
+                        previewCanvas.width = preview.clientWidth;
+                        previewCanvas.height = preview.clientHeight;
+                        
+                        // Desenhar a imagem mantendo proporção
+                        const ratio = Math.min(
+                            previewCanvas.width / img.width,
+                            previewCanvas.height / img.height
+                        );
+                        const x = (previewCanvas.width - img.width * ratio) / 2;
+                        const y = (previewCanvas.height - img.height * ratio) / 2;
+                        
+                        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+                        ctx.drawImage(img, x, y, img.width * ratio, img.height * ratio);
+                        
+                        preview.classList.remove('d-none');
+                    };
+                    
+                    img.src = modalSignatureData;
+                }
+                
+                const status = document.getElementById('modalAssinaturaStatus');
+                if (status) {
+                    status.textContent = 'Assinatura salva ✓';
+                    status.style.color = 'var(--verde)';
+                }
+                
+                updateModalSaveButton();
+                
+                showNotification('Assinatura salva com sucesso!', 'success');
+                
+            } catch (error) {
+                console.error('Erro ao salvar assinatura do modal:', error);
+                showNotification('Erro ao salvar assinatura', 'error');
+            }
+        }
+
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function updateRegisterButton() {
+            const registrarBtn = document.getElementById('registrarPontoBtn');
+            if (!registrarBtn) return;
+            
+            const justificativaAtiva = document.getElementById('requerJustificativa').checked;
+            
+            if (justificativaAtiva) {
+                if (signatureCaptured) {
+                    registrarBtn.disabled = false;
+                    registrarBtn.innerHTML = '<i class="fas fa-clock"></i> Registrar Ponto (com justificativa)';
+                } else {
+                    registrarBtn.disabled = true;
+                    registrarBtn.innerHTML = '<i class="fas fa-clock"></i> Salve a assinatura primeiro';
+                }
+            } else {
+                if (capturedSelfie) {
+                    registrarBtn.disabled = false;
+                    registrarBtn.innerHTML = '<i class="fas fa-clock"></i> Registrar Ponto';
+                } else {
+                    registrarBtn.disabled = true;
+                    registrarBtn.innerHTML = '<i class="fas fa-clock"></i> Registrar Ponto (Selfie obrigatória ou justificativa)';
+                }
+            }
+        }
+
+        function updateModalSaveButton() {
+            const salvarBtn = document.getElementById('modalSalvarJustificativaBtn');
+            if (salvarBtn) {
+                const justificativaPreenchida = document.getElementById('modalJustificativaAtraso').value.trim();
+                
+                if (justificativaPreenchida && modalSignatureCaptured) {
+                    salvarBtn.disabled = false;
+                } else {
+                    salvarBtn.disabled = true;
+                }
+            }
+        }
+
+        // ========== FUNÇÕES DE INTERFACE ==========
+        function showPage(pageId) {
+            try {
+                document.querySelectorAll('.page-content').forEach(page => {
+                    page.classList.add('d-none');
+                });
+                
+                const pageElement = document.getElementById(pageId);
+                if (pageElement) {
+                    pageElement.classList.remove('d-none');
+                }
+                
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                const pageName = pageId.replace('Page', '');
+                const activeTab = document.querySelector(`.nav-tab[data-page="${pageName}"]`);
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                }
+                
+                if (pageId === 'registrarPontoPage') {
+                    loadPontoPage();
+                } else if (pageId === 'meusRegistrosPage') {
+                    loadRegistrosTable();
+                }
+            } catch (error) {
+                console.error('Erro ao mostrar página:', error);
+            }
+        }
+
+        function loadPontoPage() {
+            if (!currentUser) return;
+            
+            try {
+                const registroHoje = buscarRegistroHoje(currentUser.id);
+                
+                updatePontoDisplay(registroHoje);
+                
+                resetSelfie();
+                resetJustificativa();
+                
+                updateRegisterButton();
+                
+                verificarRegistrosAtrasados();
+            } catch (error) {
+                console.error('Erro ao carregar página de ponto:', error);
+            }
+        }
+
+        function updatePontoDisplay(registro) {
+            try {
+                const saidaElement = document.getElementById('saidaIntervalo');
+                const retornoElement = document.getElementById('retornoIntervalo');
+                const statusElement = document.getElementById('statusValor');
+                
+                if (registro) {
+                    if (registro.saidaIntervalo && saidaElement) {
+                        const valorElement = saidaElement.querySelector('.ponto-hora-valor');
+                        if (valorElement) valorElement.textContent = registro.saidaIntervalo;
+                        saidaElement.classList.add('registrado');
+                        saidaElement.classList.remove('atrasado');
+                    }
+                    
+                    if (registro.retornoIntervalo && retornoElement) {
+                        const valorElement = retornoElement.querySelector('.ponto-hora-valor');
+                        if (valorElement) valorElement.textContent = registro.retornoIntervalo;
+                        retornoElement.classList.add('registrado');
+                        retornoElement.classList.remove('atrasado');
+                    }
+                    
+                    if (statusElement) {
+                        if (registro.saidaIntervalo && registro.retornoIntervalo) {
+                            statusElement.textContent = 'Completo';
+                            statusElement.style.color = 'var(--verde)';
+                        } else if (registro.saidaIntervalo || registro.retornoIntervalo) {
+                            statusElement.textContent = 'Parcial';
+                            statusElement.style.color = 'var(--amarelo)';
+                        } else {
+                            statusElement.textContent = 'Pendente';
+                            statusElement.style.color = 'var(--vermelho)';
+                        }
+                    }
+                } else {
+                    if (saidaElement) {
+                        const valorElement = saidaElement.querySelector('.ponto-hora-valor');
+                        if (valorElement) valorElement.textContent = '--:--';
+                        saidaElement.classList.remove('registrado');
+                        saidaElement.classList.remove('atrasado');
+                    }
+                    
+                    if (retornoElement) {
+                        const valorElement = retornoElement.querySelector('.ponto-hora-valor');
+                        if (valorElement) valorElement.textContent = '--:--';
+                        retornoElement.classList.remove('registrado');
+                        retornoElement.classList.remove('atrasado');
+                    }
+                    
+                    if (statusElement) {
+                        statusElement.textContent = 'Pendente';
+                        statusElement.style.color = 'var(--vermelho)';
+                    }
+                }
+                
+                const registrarBtn = document.getElementById('registrarPontoBtn');
+                if (registro && registro.bloqueado && registrarBtn) {
+                    registrarBtn.disabled = true;
+                    registrarBtn.innerHTML = '<i class="fas fa-lock"></i> Ponto Bloqueado (Email Enviado)';
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar display de ponto:', error);
+            }
+        }
+
+        function resetSelfie() {
+            try {
+                capturedSelfie = null;
+                const previewImg = document.getElementById('selfieImage');
+                const placeholder = document.getElementById('selfiePlaceholder');
+                const retakeBtn = document.getElementById('retakeSelfieBtn');
+                
+                if (previewImg) {
+                    previewImg.src = '';
+                    previewImg.classList.add('d-none');
+                }
+                
+                if (placeholder) {
+                    placeholder.classList.remove('d-none');
+                }
+                
+                if (retakeBtn) {
+                    retakeBtn.classList.add('d-none');
+                }
+                
+                stopCamera();
+                updateCameraStatus('Clique em "Tirar Selfie" para iniciar a câmera');
+                
+            } catch (error) {
+                console.error('Erro ao resetar selfie:', error);
+            }
+        }
+
+        function resetJustificativa() {
+            try {
+                const requerJustificativa = document.getElementById('requerJustificativa');
+                const justificativaContainer = document.getElementById('justificativaContainer');
+                const justificativaTexto = document.getElementById('justificativaTexto');
+                
+                if (requerJustificativa) {
+                    requerJustificativa.checked = false;
+                }
+                
+                if (justificativaContainer) {
+                    justificativaContainer.classList.add('d-none');
+                }
+                
+                if (justificativaTexto) {
+                    justificativaTexto.value = '';
+                }
+                
+                clearSignature();
+                
+                signatureCaptured = false;
+                signatureData = null;
+                
+            } catch (error) {
+                console.error('Erro ao resetar justificativa:', error);
+            }
+        }
+
+        async function openCameraModal() {
+            try {
+                const modal = document.getElementById('cameraModal');
+                if (!modal) {
+                    showNotification('Modal de câmera não encontrado', 'error');
+                    return;
+                }
+                
+                modal.style.display = 'flex';
+                
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                const success = await startCamera(cameraFacingMode);
+                
+                if (!success) {
+                    closeCameraModal();
+                }
+                
+            } catch (error) {
+                console.error('Erro ao abrir modal da câmera:', error);
+                showNotification('Erro ao abrir câmera', 'error');
+            }
+        }
+
+        function closeCameraModal() {
+            try {
+                stopCamera();
+                const modal = document.getElementById('cameraModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Erro ao fechar modal da câmera:', error);
+            }
+        }
+
+        async function switchCamera() {
+            try {
+                cameraFacingMode = cameraFacingMode === 'user' ? 'environment' : 'user';
+                const success = await startCamera(cameraFacingMode);
+                
+                if (!success) {
+                    showNotification('Não foi possível trocar a câmera', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao trocar câmera:', error);
+                showNotification('Erro ao trocar câmera', 'error');
+            }
+        }
+
+        function closeVisualizarModal() {
+            const modal = document.getElementById('visualizarModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // ========== FUNÇÕES DE REGISTROS ATRASADOS ==========
+        function verificarRegistrosAtrasados() {
+            if (!currentUser) return;
+            
+            try {
+                registrosAtrasadosParaJustificar = buscarRegistrosAtrasadosPendentes(currentUser.id);
+                
+                if (registrosAtrasadosParaJustificar.length > 0) {
+                    showNotification(`Você tem ${registrosAtrasadosParaJustificar.length} registro(s) atrasado(s) para justificar!`, 'warning', 8000);
+                    
+                    setTimeout(() => {
+                        abrirModalJustificativaAtrasada();
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Erro ao verificar registros atrasados:', error);
+            }
+        }
+
+        function abrirModalJustificativaAtrasada() {
+            if (registrosAtrasadosParaJustificar.length === 0) return;
+            
+            try {
+                const registroAtrasado = registrosAtrasadosParaJustificar[0];
+                const modal = document.getElementById('modalJustificativaAtrasada');
+                
+                if (!modal) return;
+                
+                const dataFormatada = formatDate(registroAtrasado.data);
+                document.getElementById('modalAtrasoDetalhes').textContent = 
+                    `O registro do dia ${dataFormatada} não foi realizado no prazo.`;
+                
+                document.getElementById('modalDataAtrasada').value = registroAtrasado.data;
+                
+                const tipoPendente = !registroAtrasado.saidaIntervalo ? 'saida_intervalo' : 'retorno_intervalo';
+                document.getElementById('modalTipoAtrasado').value = tipoPendente;
+                
+                setTimeout(initModalSignaturePad, 100);
+                
+                modal.style.display = 'flex';
+                
+                setupModalEvents(registroAtrasado);
+                
+            } catch (error) {
+                console.error('Erro ao abrir modal de justificativa atrasada:', error);
+            }
+        }
+
+        function setupModalEvents(registroAtrasado) {
+            const justificativaInput = document.getElementById('modalJustificativaAtraso');
+            if (justificativaInput) {
+                justificativaInput.addEventListener('input', updateModalSaveButton);
+            }
+            
+            const cancelarBtn = document.getElementById('modalCancelarJustificativaBtn');
+            if (cancelarBtn) {
+                cancelarBtn.addEventListener('click', closeModalJustificativa);
+            }
+            
+            const salvarBtn = document.getElementById('modalSalvarJustificativaBtn');
+            if (salvarBtn) {
+                salvarBtn.addEventListener('click', () => {
+                    salvarJustificativaAtrasada(registroAtrasado);
+                });
+            }
+            
+            const limparAssinaturaBtn = document.getElementById('modalLimparAssinaturaBtn');
+            if (limparAssinaturaBtn) {
+                limparAssinaturaBtn.addEventListener('click', clearModalSignature);
+            }
+            
+            const salvarAssinaturaBtn = document.getElementById('modalSalvarAssinaturaBtn');
+            if (salvarAssinaturaBtn) {
+                salvarAssinaturaBtn.addEventListener('click', saveModalSignature);
+            }
+        }
+
+        function closeModalJustificativa() {
+            const modal = document.getElementById('modalJustificativaAtrasada');
+            if (modal) {
+                modal.style.display = 'none';
+                clearModalSignature();
+                document.getElementById('modalJustificativaAtraso').value = '';
+            }
+        }
+
+        async function salvarJustificativaAtrasada(registroAtrasado) {
+            try {
+                const justificativa = document.getElementById('modalJustificativaAtraso').value.trim();
+                const tipoAtrasado = document.getElementById('modalTipoAtrasado').value;
+                const horaEstimada = document.getElementById('modalHoraEstimada').value;
+                
+                if (!justificativa) {
+                    showNotification('Preencha a justificativa do atraso', 'warning');
+                    return;
+                }
+                
+                if (!modalSignatureCaptured) {
+                    showNotification('Salve sua assinatura antes de continuar', 'warning');
+                    return;
+                }
+                
+                const stopLoading = showLoading('modalSalvarJustificativaBtn', 'Salvando...');
+                
+                const registroAtrasadoObj = {
+                    usuarioId: currentUser.id,
+                    usuarioNome: currentUser.nome,
+                    data: registroAtrasado.data,
+                    tipoRegistro: tipoAtrasado,
+                    horaEstimada: horaEstimada,
+                    justificativa: justificativa,
+                    assinatura: modalSignatureData,
+                    dataRegistro: new Date().toISOString(),
+                    status: 'justificado'
+                };
+                
+                const registroId = await salvarRegistroAtrasado(registroAtrasadoObj);
+                console.log('Registro atrasado salvo com ID:', registroId);
+                
+                let registroAtualizado = registroAtrasado;
+                if (!registroAtualizado) {
+                    registroAtualizado = {
+                        usuarioId: currentUser.id,
+                        usuarioNome: currentUser.nome,
+                        data: registroAtrasadoObj.data,
+                        saidaIntervalo: null,
+                        retornoIntervalo: null,
+                        tipoRegistro: 'com_justificativa_atrasada',
+                        justificativa: justificativa,
+                        assinatura: modalSignatureData,
+                        emailEnviado: false,
+                        bloqueado: false,
+                        dataRegistro: new Date().toISOString()
+                    };
+                }
+                
+                if (tipoAtrasado === 'saida_intervalo') {
+                    registroAtualizado.saidaIntervalo = horaEstimada;
+                } else {
+                    registroAtualizado.retornoIntervalo = horaEstimada;
+                }
+                
+                registroAtualizado.tipoRegistro = 'com_justificativa_atrasada';
+                registroAtualizado.justificativa = justificativa;
+                registroAtualizado.assinatura = modalSignatureData;
+                
+                await salvarRegistro(registroAtualizado);
+                
+                registrosAtrasadosParaJustificar.shift();
+                
+                stopLoading();
+                closeModalJustificativa();
+                
+                loadPontoPage();
+                
+                if (registrosAtrasadosParaJustificar.length > 0) {
+                    setTimeout(() => {
+                        abrirModalJustificativaAtrasada();
+                    }, 1000);
+                } else {
+                    showNotification('Justificativa de atraso salva com sucesso!', 'success');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao salvar justificativa atrasada:', error);
+                showNotification('Erro ao salvar justificativa', 'error');
+            }
+        }
+
+        // ========== FUNÇÕES DE PDF ==========
+        async function gerarPDFRegistro(registro) {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                const marginLeft = 15;
+                const marginTop = 20;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                
+                let yPos = marginTop;
+                
+                // Cabeçalho do PDF
+                doc.setFontSize(20);
+                doc.setTextColor(67, 97, 238);
+                doc.text('RECORD GUAÍBA', pageWidth / 2, yPos, { align: 'center' });
+                
+                yPos += 8;
+                doc.setFontSize(16);
+                doc.setTextColor(0, 0, 0);
+                doc.text('COMPROVANTE DE REGISTRO DE INTERVALO', pageWidth / 2, yPos, { align: 'center' });
+                
+                yPos += 15;
+                
+                // Informações da empresa
+                doc.setFontSize(10);
+                doc.text('Empresa: Record Guaíba', marginLeft, yPos);
+                yPos += 6;
+                doc.text('Departamento: TI', marginLeft, yPos);
+                yPos += 6;
+                doc.text('Email: agawlinski@recordguaiba.tv.br', marginLeft, yPos);
+                
+                yPos += 10;
+                
+                // Linha divisória
+                doc.setDrawColor(67, 97, 238);
+                doc.setLineWidth(0.5);
+                doc.line(marginLeft, yPos, pageWidth - marginLeft, yPos);
+                
+                yPos += 10;
+                
+                // Informações do funcionário
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('DADOS DO FUNCIONÁRIO', marginLeft, yPos);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Nome: ${registro.usuarioNome}`, marginLeft, yPos);
+                yPos += 6;
+                doc.text(`Data do Registro: ${formatDate(registro.data)}`, marginLeft, yPos);
+                yPos += 6;
+                doc.text(`Hora do Registro: ${formatDate(registro.dataRegistro, true)}`, marginLeft, yPos);
+                yPos += 6;
+                doc.text(`Tipo de Registro: ${registro.tipoRegistro === 'com_selfie' ? 'Com Selfie' : 
+                    registro.tipoRegistro === 'com_justificativa_atrasada' ? 'Com Justificativa (Atrasado)' : 'Com Justificativa'}`, marginLeft, yPos);
+                
+                yPos += 10;
+                
+                // Horários registrados
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('HORÁRIOS REGISTRADOS', marginLeft, yPos);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                
+                const tableData = [
+                    ['Tipo', 'Horário'],
+                    ['Saída para Intervalo', registro.saidaIntervalo || 'Não registrado'],
+                    ['Retorno do Intervalo', registro.retornoIntervalo || 'Não registrado']
+                ];
+                
+                doc.autoTable({
+                    startY: yPos,
+                    head: [tableData[0]],
+                    body: tableData.slice(1),
+                    margin: { left: marginLeft },
+                    headStyles: { fillColor: [67, 97, 238], textColor: 255 },
+                    theme: 'grid'
+                });
+                
+                yPos = doc.lastAutoTable.finalY + 10;
+                
+                // Verificar se precisa adicionar nova página
+                if (yPos > pageHeight - 100) {
+                    doc.addPage();
+                    yPos = marginTop;
+                }
+                
+                // Adicionar selfie se existir
+                if (registro.selfie) {
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('SELFIE DO REGISTRO', marginLeft, yPos);
+                    yPos += 8;
+                    
+                    try {
+                        const img = new Image();
+                        img.src = registro.selfie;
+                        
+                        await new Promise((resolve) => {
+                            img.onload = () => {
+                                const imgWidth = 60;
+                                const imgHeight = (img.height * imgWidth) / img.width;
+                                
+                                doc.addImage(img, 'JPEG', marginLeft, yPos, imgWidth, imgHeight);
+                                yPos += imgHeight + 10;
+                                resolve();
+                            };
+                        });
+                    } catch (error) {
+                        console.error('Erro ao adicionar selfie ao PDF:', error);
+                        doc.text('Selfie não disponível para exibição no PDF', marginLeft, yPos);
+                        yPos += 10;
+                    }
+                }
+                
+                // Adicionar justificativa se existir
+                if (registro.justificativa) {
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('JUSTIFICATIVA', marginLeft, yPos);
+                    yPos += 8;
+                    
+                    doc.setFontSize(10);
+                    doc.setFont(undefined, 'normal');
+                    
+                    const justificativaLines = doc.splitTextToSize(registro.justificativa, pageWidth - (marginLeft * 2));
+                    doc.text(justificativaLines, marginLeft, yPos);
+                    yPos += (justificativaLines.length * 6) + 10;
+                }
+                
+                // Adicionar assinatura se existir
+                if (registro.assinatura) {
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('ASSINATURA DIGITAL', marginLeft, yPos);
+                    yPos += 8;
+                    
+                    try {
+                        const img = new Image();
+                        img.src = registro.assinatura;
+                        
+                        await new Promise((resolve) => {
+                            img.onload = () => {
+                                const imgWidth = 80;
+                                const imgHeight = 30;
+                                
+                                doc.addImage(img, 'PNG', marginLeft, yPos, imgWidth, imgHeight);
+                                yPos += imgHeight + 10;
+                                resolve();
+                            };
+                        });
+                    } catch (error) {
+                        console.error('Erro ao adicionar assinatura ao PDF:', error);
+                        doc.text('Assinatura digital não disponível', marginLeft, yPos);
+                        yPos += 10;
+                    }
+                }
+                
+                // Adicionar rodapé
+                yPos = pageHeight - 20;
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Documento gerado automaticamente pelo Sistema de Controle de Intervalo - Record Guaíba', pageWidth / 2, yPos, { align: 'center' });
+                yPos += 4;
+                doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, pageWidth / 2, yPos, { align: 'center' });
+                
+                // Salvar PDF
+                const pdfOutput = doc.output('datauristring');
+                
+                // Salvar PDF no registro
+                registro.pdfData = pdfOutput;
+                await salvarRegistro(registro);
+                
+                return pdfOutput;
+                
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                throw error;
+            }
+        }
+
+        function gerarPDFParaDownload(registroId) {
+            try {
+                const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                const registro = registros.find(r => r.id === registroId);
+                
+                if (!registro) {
+                    showNotification('Registro não encontrado!', 'error');
+                    return;
+                }
+                
+                if (!registro.pdfData) {
+                    showNotification('PDF não disponível para este registro', 'warning');
+                    return;
+                }
+                
+                const link = document.createElement('a');
+                link.href = registro.pdfData;
+                link.download = `registro_intervalo_${registro.usuarioNome}_${registro.data}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification('PDF baixado com sucesso!', 'success');
+                
+            } catch (error) {
+                console.error('Erro ao baixar PDF:', error);
+                showNotification('Erro ao baixar PDF', 'error');
+            }
+        }
+
+        // ========== FUNÇÃO PARA EXPORTAR RELATÓRIO COMPLETO EM PDF ==========
+        async function exportarRelatorioCompletoPDF() {
+            if (!currentUser) {
+                showNotification('Usuário não autenticado!', 'error');
+                return;
+            }
+            
+            try {
+                const stopLoading = showLoading('exportarPDFBtn', 'Gerando relatório...');
+                
+                const dataInicio = document.getElementById('dataInicio')?.value;
+                const dataFim = document.getElementById('dataFim')?.value || new Date().toISOString().split('T')[0];
+                
+                const registros = buscarRegistros(currentUser.id, dataInicio, dataFim);
+                
+                if (registros.length === 0) {
+                    stopLoading();
+                    showNotification('Nenhum registro encontrado para exportar!', 'warning');
+                    return;
+                }
+                
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                const marginLeft = 15;
+                const marginTop = 20;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                
+                let yPos = marginTop;
+                let currentPageNum = 1;
+                
+                // Cabeçalho do relatório
+                doc.setFontSize(20);
+                doc.setTextColor(67, 97, 238);
+                doc.text('RECORD GUAÍBA', pageWidth / 2, yPos, { align: 'center' });
+                
+                yPos += 8;
+                doc.setFontSize(16);
+                doc.setTextColor(0, 0, 0);
+                doc.text('RELATÓRIO COMPLETO DE INTERVALOS', pageWidth / 2, yPos, { align: 'center' });
+                
+                yPos += 10;
+                
+                // Informações do relatório
+                doc.setFontSize(10);
+                doc.text('Empresa: Record Guaíba', marginLeft, yPos);
+                yPos += 5;
+                doc.text(`Funcionário: ${currentUser.nome}`, marginLeft, yPos);
+                yPos += 5;
+                doc.text(`Período: ${dataInicio ? formatDate(dataInicio) : 'Início'} à ${formatDate(dataFim)}`, marginLeft, yPos);
+                yPos += 5;
+                doc.text(`Total de Registros: ${registros.length}`, marginLeft, yPos);
+                yPos += 5;
+                doc.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, marginLeft, yPos);
+                
+                yPos += 10;
+                
+                // Linha divisória
+                doc.setDrawColor(67, 97, 238);
+                doc.setLineWidth(0.5);
+                doc.line(marginLeft, yPos, pageWidth - marginLeft, yPos);
+                
+                yPos += 15;
+                
+                // Tabela de registros
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.text('REGISTROS DE INTERVALO', marginLeft, yPos);
+                yPos += 10;
+                
+                // Preparar dados da tabela
+                const tableData = registros.map(reg => {
+                    const status = reg.saidaIntervalo && reg.retornoIntervalo ? 'Completo' : 'Parcial';
+                    const tipo = reg.tipoRegistro === 'com_selfie' ? 'Selfie' : 
+                                 reg.tipoRegistro === 'com_justificativa_atrasada' ? 'Justificativa (Atrasado)' : 'Justificativa';
+                    const email = reg.emailEnviado ? 'Enviado' : 'Pendente';
+                    
+                    return [
+                        formatDate(reg.data),
+                        reg.saidaIntervalo || '--:--',
+                        reg.retornoIntervalo || '--:--',
+                        status,
+                        tipo,
+                        email
+                    ];
+                });
+                
+                // Adicionar tabela
+                doc.autoTable({
+                    startY: yPos,
+                    head: [['Data', 'Saída', 'Retorno', 'Status', 'Tipo', 'Email']],
+                    body: tableData,
+                    margin: { left: marginLeft, right: marginLeft },
+                    headStyles: { fillColor: [67, 97, 238], textColor: 255 },
+                    theme: 'grid',
+                    styles: { fontSize: 8 },
+                    headStyles: { fontSize: 9 },
+                    didDrawPage: function(data) {
+                        // Adicionar número da página
+                        doc.setFontSize(8);
+                        doc.setTextColor(150, 150, 150);
+                        doc.text(`Página ${currentPageNum}`, pageWidth - marginLeft, pageHeight - 10, { align: 'right' });
+                        currentPageNum++;
+                    }
+                });
+                
+                yPos = doc.lastAutoTable.finalY + 15;
+                
+                // Verificar se precisa adicionar nova página para detalhes
+                if (yPos > pageHeight - 100) {
+                    doc.addPage();
+                    yPos = marginTop;
+                    currentPageNum++;
+                }
+                
+                // Adicionar seção de detalhes
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.text('DETALHES DOS REGISTROS', marginLeft, yPos);
+                yPos += 10;
+                
+                // Para cada registro, adicionar detalhes completos
+                for (let i = 0; i < registros.length; i++) {
+                    const reg = registros[i];
+                    
+                    // Verificar se precisa adicionar nova página
+                    if (yPos > pageHeight - 150) {
+                        doc.addPage();
+                        yPos = marginTop;
+                        currentPageNum++;
+                    }
+                    
+                    doc.setFontSize(11);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`Registro ${i + 1}: ${formatDate(reg.data)}`, marginLeft, yPos);
+                    yPos += 7;
+                    
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.text(`• Saída: ${reg.saidaIntervalo || '--:--'}`, marginLeft, yPos);
+                    yPos += 5;
+                    doc.text(`• Retorno: ${reg.retornoIntervalo || '--:--'}`, marginLeft, yPos);
+                    yPos += 5;
+                    doc.text(`• Status: ${reg.saidaIntervalo && reg.retornoIntervalo ? 'Completo' : 'Parcial'}`, marginLeft, yPos);
+                    yPos += 5;
+                    doc.text(`• Tipo: ${reg.tipoRegistro === 'com_selfie' ? 'Com Selfie' : 
+                        reg.tipoRegistro === 'com_justificativa_atrasada' ? 'Com Justificativa (Atrasado)' : 'Com Justificativa'}`, marginLeft, yPos);
+                    yPos += 5;
+                    doc.text(`• Email: ${reg.emailEnviado ? 'Enviado' : 'Pendente'}`, marginLeft, yPos);
+                    yPos += 5;
+                    doc.text(`• Registrado em: ${formatDate(reg.dataRegistro, true)}`, marginLeft, yPos);
+                    yPos += 5;
+                    
+                    // Adicionar justificativa se existir
+                    if (reg.justificativa) {
+                        doc.text(`• Justificativa: ${reg.justificativa}`, marginLeft, yPos);
+                        yPos += 5;
+                    }
+                    
+                    yPos += 10;
+                    
+                    // Adicionar selfie se existir
+                    if (reg.selfie) {
+                        try {
+                            // Verificar se há espaço na página atual
+                            if (yPos > pageHeight - 100) {
+                                doc.addPage();
+                                yPos = marginTop;
+                                currentPageNum++;
+                            }
+                            
+                            doc.setFontSize(9);
+                            doc.setFont(undefined, 'bold');
+                            doc.text('Selfie do registro:', marginLeft, yPos);
+                            yPos += 5;
+                            
+                            const img = new Image();
+                            img.crossOrigin = 'anonymous';
+                            img.src = reg.selfie;
+                            
+                            await new Promise((resolve, reject) => {
+                                img.onload = () => {
+                                    try {
+                                        const maxWidth = pageWidth - (marginLeft * 2);
+                                        const imgWidth = Math.min(maxWidth, 50);
+                                        const imgHeight = (img.height * imgWidth) / img.width;
+                                        
+                                        doc.addImage(img, 'JPEG', marginLeft, yPos, imgWidth, imgHeight);
+                                        yPos += imgHeight + 15;
+                                        resolve();
+                                    } catch (err) {
+                                        console.error('Erro ao adicionar selfie:', err);
+                                        doc.text('• Selfie: Disponível mas não foi possível incluir no PDF', marginLeft, yPos);
+                                        yPos += 10;
+                                        resolve();
+                                    }
+                                };
+                                
+                                img.onerror = () => {
+                                    console.error('Erro ao carregar imagem selfie');
+                                    doc.text('• Selfie: Disponível mas não foi possível carregar', marginLeft, yPos);
+                                    yPos += 10;
+                                    resolve();
+                                };
+                                
+                                // Timeout para evitar travamento
+                                setTimeout(() => {
+                                    if (img.complete === false) {
+                                        console.error('Timeout ao carregar selfie');
+                                        doc.text('• Selfie: Disponível mas demorou muito para carregar', marginLeft, yPos);
+                                        yPos += 10;
+                                        resolve();
+                                    }
+                                }, 3000);
+                            });
+                        } catch (error) {
+                            console.error('Erro ao adicionar selfie ao relatório:', error);
+                            doc.text('• Selfie: Disponível mas não foi possível incluir no PDF', marginLeft, yPos);
+                            yPos += 10;
+                        }
+                    }
+                    
+                    // Adicionar assinatura se existir
+                    if (reg.assinatura) {
+                        try {
+                            // Verificar se há espaço na página atual
+                            if (yPos > pageHeight - 50) {
+                                doc.addPage();
+                                yPos = marginTop;
+                                currentPageNum++;
+                            }
+                            
+                            doc.setFontSize(9);
+                            doc.setFont(undefined, 'bold');
+                            doc.text('Assinatura digital:', marginLeft, yPos);
+                            yPos += 5;
+                            
+                            const img = new Image();
+                            img.crossOrigin = 'anonymous';
+                            img.src = reg.assinatura;
+                            
+                            await new Promise((resolve, reject) => {
+                                img.onload = () => {
+                                    try {
+                                        const imgWidth = 60;
+                                        const imgHeight = 25;
+                                        doc.addImage(img, 'PNG', marginLeft, yPos, imgWidth, imgHeight);
+                                        yPos += imgHeight + 15;
+                                        resolve();
+                                    } catch (err) {
+                                        console.error('Erro ao adicionar assinatura:', err);
+                                        doc.text('• Assinatura: Disponível mas não foi possível incluir no PDF', marginLeft, yPos);
+                                        yPos += 10;
+                                        resolve();
+                                    }
+                                };
+                                
+                                img.onerror = () => {
+                                    console.error('Erro ao carregar imagem assinatura');
+                                    doc.text('• Assinatura: Disponível mas não foi possível carregar', marginLeft, yPos);
+                                    yPos += 10;
+                                    resolve();
+                                };
+                                
+                                // Timeout para evitar travamento
+                                setTimeout(() => {
+                                    if (img.complete === false) {
+                                        console.error('Timeout ao carregar assinatura');
+                                        doc.text('• Assinatura: Disponível mas demorou muito para carregar', marginLeft, yPos);
+                                        yPos += 10;
+                                        resolve();
+                                    }
+                                }, 3000);
+                            });
+                        } catch (error) {
+                            console.error('Erro ao adicionar assinatura ao relatório:', error);
+                            doc.text('• Assinatura: Disponível mas não foi possível incluir no PDF', marginLeft, yPos);
+                            yPos += 10;
+                        }
+                    }
+                    
+                    // Adicionar linha divisória entre registros
+                    if (i < registros.length - 1) {
+                        doc.setDrawColor(200, 200, 200);
+                        doc.setLineWidth(0.2);
+                        doc.line(marginLeft, yPos, pageWidth - marginLeft, yPos);
+                        yPos += 10;
+                    }
+                }
+                
+                // Adicionar estatísticas no final
+                if (yPos > pageHeight - 100) {
+                    doc.addPage();
+                    yPos = marginTop;
+                    currentPageNum++;
+                }
+                
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.text('ESTATÍSTICAS DO PERÍODO', marginLeft, yPos);
+                yPos += 10;
+                
+                const registrosCompletos = registros.filter(r => r.saidaIntervalo && r.retornoIntervalo).length;
+                const emailsEnviados = registros.filter(r => r.emailEnviado).length;
+                const hoje = new Date();
+                const registrosAtrasados = registros.filter(reg => {
+                    const dataRegistro = new Date(reg.data);
+                    const diferencaDias = Math.floor((hoje - dataRegistro) / (1000 * 60 * 60 * 24));
+                    return diferencaDias > 1 && (!reg.saidaIntervalo || !reg.retornoIntervalo);
+                }).length;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`• Total de Registros: ${registros.length}`, marginLeft, yPos);
+                yPos += 6;
+                doc.text(`• Registros Completos: ${registrosCompletos} (${registros.length > 0 ? Math.round((registrosCompletos / registros.length) * 100) : 0}%)`, marginLeft, yPos);
+                yPos += 6;
+                doc.text(`• Emails Enviados: ${emailsEnviados}`, marginLeft, yPos);
+                yPos += 6;
+                doc.text(`• Registros Atrasados: ${registrosAtrasados}`, marginLeft, yPos);
+                yPos += 6;
+                doc.text(`• Média de Completude: ${registros.length > 0 ? Math.round((registrosCompletos / registros.length) * 100) : 0}%`, marginLeft, yPos);
+                
+                yPos += 15;
+                
+                // Adicionar rodapé final
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Relatório gerado automaticamente pelo Sistema de Controle de Intervalo - Record Guaíba', pageWidth / 2, pageHeight - 15, { align: 'center' });
+                doc.text(`Documento confidencial - Emitido em: ${new Date().toLocaleString('pt-BR')}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                
+                // Gerar PDF e fazer download
+                const pdfBlob = doc.output('blob');
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                
+                // Criar link para download
+                const link = document.createElement('a');
+                link.href = pdfUrl;
+                link.download = `relatorio_intervalos_${currentUser.nome}_${dataInicio || 'inicio'}_a_${dataFim}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Limpar URL
+                setTimeout(() => URL.revokeObjectURL(pdfUrl), 100);
+                
+                stopLoading();
+                showNotification('Relatório PDF gerado com sucesso! Contém todos os dados, fotos e assinaturas.', 'success', 6000);
+                
+            } catch (error) {
+                console.error('Erro ao gerar relatório PDF:', error);
+                showNotification('Erro ao gerar relatório PDF: ' + error.message, 'error');
+            }
+        }
+
+        // ========== REGISTRO DE PONTO ==========
+        async function registrarPonto() {
+            if (!currentUser) {
+                showNotification('Usuário não autenticado!', 'error');
+                return;
+            }
+            
+            const registroHoje = buscarRegistroHoje(currentUser.id);
+            if (registroHoje && registroHoje.bloqueado) {
+                showNotification('Este registro já foi enviado por email e não pode ser alterado!', 'error');
+                return;
+            }
+            
+            const tipoPontoElement = document.querySelector('input[name="tipoPonto"]:checked');
+            if (!tipoPontoElement) {
+                showNotification('Selecione um tipo de registro', 'warning');
+                return;
+            }
+            
+            const tipoPonto = tipoPontoElement.value;
+            const horaAtual = getCurrentTime();
+            const hoje = new Date().toISOString().split('T')[0];
+            
+            if (registroHoje) {
+                if (tipoPonto === 'saida_intervalo' && registroHoje.saidaIntervalo) {
+                    showNotification('Você já registrou a saída para intervalo hoje!', 'warning');
+                    return;
+                }
+                if (tipoPonto === 'retorno_intervalo' && registroHoje.retornoIntervalo) {
+                    showNotification('Você já registrou o retorno do intervalo hoje!', 'warning');
+                    return;
+                }
+            }
+            
+            const justificativaAtiva = document.getElementById('requerJustificativa').checked;
+            
+            if (!justificativaAtiva && !capturedSelfie) {
+                showNotification('Selfie é obrigatória! Ou ative a opção de justificativa com assinatura.', 'warning');
+                return;
+            }
+            
+            if (justificativaAtiva && !signatureCaptured) {
+                showNotification('Salve sua assinatura antes de registrar o ponto!', 'warning');
+                return;
+            }
+            
+            if (justificativaAtiva) {
+                const justificativaTexto = document.getElementById('justificativaTexto');
+                if (!justificativaTexto || !justificativaTexto.value.trim()) {
+                    showNotification('Por favor, preencha a justificativa', 'warning');
+                    justificativaTexto.focus();
+                    return;
+                }
+            }
+            
+            const stopLoading = showLoading('registrarPontoBtn', 'Registrando...');
+            
+            try {
+                let registro = registroHoje || {
+                    usuarioId: currentUser.id,
+                    usuarioNome: currentUser.nome,
+                    data: hoje,
+                    saidaIntervalo: null,
+                    retornoIntervalo: null,
+                    selfie: null,
+                    assinatura: null,
+                    justificativa: null,
+                    emailEnviado: false,
+                    bloqueado: false,
+                    dataRegistro: new Date().toISOString(),
+                    tipoRegistro: justificativaAtiva ? 'com_justificativa' : 'com_selfie'
+                };
+                
+                if (tipoPonto === 'saida_intervalo') {
+                    registro.saidaIntervalo = horaAtual;
+                } else if (tipoPonto === 'retorno_intervalo') {
+                    registro.retornoIntervalo = horaAtual;
+                }
+                
+                if (justificativaAtiva) {
+                    registro.justificativa = document.getElementById('justificativaTexto').value.trim();
+                    registro.assinatura = signatureData;
+                    registro.selfie = null;
+                    registro.tipoRegistro = 'com_justificativa';
+                } else {
+                    registro.selfie = capturedSelfie;
+                    registro.assinatura = null;
+                    registro.justificativa = null;
+                    registro.tipoRegistro = 'com_selfie';
+                }
+                
+                if (registro.saidaIntervalo && registro.retornoIntervalo) {
+                    registro.bloqueado = true;
+                    registro.emailEnviado = true;
+                    
+                    const registroId = await salvarRegistro(registro);
+                    console.log('Registro salvo com ID:', registroId);
+                    
+                    const pdfData = await gerarPDFRegistro(registro);
+                    
+                    await enviarEmailRegistro(registro, pdfData);
+                    
+                    verificarEnviosAutomaticos();
+                    
+                    showNotification('Intervalo completo registrado! PDF gerado e email enviado para agawlinski@recordguaiba.tv.br', 'success');
+                } else {
+                    const registroId = await salvarRegistro(registro);
+                    console.log('Registro parcial salvo com ID:', registroId);
+                    showNotification('Ponto registrado com sucesso!', 'success');
+                }
+                
+                updatePontoDisplay(registro);
+                
+                resetSelfie();
+                resetJustificativa();
+                
+                updateRegisterButton();
+                
+                if (document.getElementById('meusRegistrosPage').classList.contains('d-none') === false) {
+                    loadRegistrosTable(currentPage);
+                }
+                
+                stopLoading();
+                
+            } catch (error) {
+                stopLoading();
+                console.error('Erro no registro:', error);
+                showNotification('Erro ao registrar ponto. Tente novamente.', 'error');
+            }
+        }
+
+        async function enviarEmailRegistro(registro, pdfData) {
+            showNotification('Enviando email com PDF de confirmação...', 'info');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            const log = {
+                usuarioId: currentUser.id,
+                dataEnvio: new Date().toISOString(),
+                tipo: 'registro_intervalo_completo_com_pdf',
+                assunto: `Registro de Intervalo Completo - ${currentUser.nome} - ${registro.data}`,
+                destinatario: 'agawlinski@recordguaiba.tv.br',
+                status: 'enviado',
+                conteudo: `Intervalo completo registrado: Saída ${registro.saidaIntervalo} - Retorno ${registro.retornoIntervalo}. PDF anexado.`,
+                temAnexo: true,
+                tipoAnexo: 'pdf'
+            };
+            
+            salvarLogEmail(log);
+            
+            return true;
+        }
+
+        function verificarEnviosAutomaticos() {
+            if (!currentUser) return;
+            
+            try {
+                const hoje = new Date();
+                const seteDiasAtras = new Date(hoje);
+                seteDiasAtras.setDate(hoje.getDate() - 6);
+                
+                const registros7Dias = buscarRegistros(
+                    currentUser.id,
+                    seteDiasAtras.toISOString().split('T')[0],
+                    hoje.toISOString().split('T')[0]
+                );
+                
+                const registrosCompletos = registros7Dias.filter(r => r.saidaIntervalo && r.retornoIntervalo);
+                
+                if (registrosCompletos.length >= 7) {
+                    enviarRelatorio7Dias(registrosCompletos);
+                }
+                
+                const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+                if (hoje.getDate() === ultimoDiaMes.getDate()) {
+                    enviarRelatorioMensal();
+                }
+            } catch (error) {
+                console.error('Erro ao verificar envios automáticos:', error);
+            }
+        }
+
+        async function enviarRelatorio7Dias(registros) {
+            showNotification('Enviando relatório automático (7 dias)...', 'info');
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const log = {
+                usuarioId: currentUser.id,
+                dataEnvio: new Date().toISOString(),
+                tipo: 'relatorio_7_dias',
+                assunto: `Relatório 7 Dias - ${currentUser.nome}`,
+                destinatario: 'agawlinski@recordguaiba.tv.br',
+                status: 'enviado'
+            };
+            
+            salvarLogEmail(log);
+        }
+
+        async function enviarRelatorioMensal() {
+            showNotification('Enviando relatório mensal...', 'info');
+            
+            const hoje = new Date();
+            const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+            
+            const registrosMes = buscarRegistros(
+                currentUser.id,
+                primeiroDiaMes.toISOString().split('T')[0],
+                ultimoDiaMes.toISOString().split('T')[0]
+            );
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const log = {
+                usuarioId: currentUser.id,
+                dataEnvio: new Date().toISOString(),
+                tipo: 'relatorio_mensal',
+                assunto: `Relatório Mensal - ${currentUser.nome} - ${hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`,
+                destinatario: 'agawlinski@recordguaiba.tv.br',
+                status: 'enviado'
+            };
+            
+            salvarLogEmail(log);
+        }
+
+        // ========== MEUS REGISTROS ==========
+        function loadRegistrosTable(page = 1) {
+            if (!currentUser) return;
+            
+            try {
+                currentPage = page;
+                
+                const dataInicio = document.getElementById('dataInicio')?.value;
+                const dataFim = document.getElementById('dataFim')?.value || new Date().toISOString().split('T')[0];
+                
+                const allRegistros = buscarRegistros(currentUser.id, dataInicio, dataFim);
+                
+                const totalPages = Math.ceil(allRegistros.length / recordsPerPage);
+                const startIndex = (page - 1) * recordsPerPage;
+                const endIndex = startIndex + recordsPerPage;
+                const registros = allRegistros.slice(startIndex, endIndex);
+                
+                const tbody = document.getElementById('registrosTableBody');
+                if (!tbody) return;
+                
+                tbody.innerHTML = '';
+                
+                if (registros.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center">Nenhum registro encontrado</td>
+                        </tr>
+                    `;
+                    updatePagination(1, 1);
+                    updateEstatisticas(allRegistros);
+                    return;
+                }
+                
+                registros.forEach(reg => {
+                    const tr = document.createElement('tr');
+                    
+                    let status = 'Parcial';
+                    let statusClass = 'badge-warning';
+                    let statusIcon = '<i class="fas fa-clock"></i>';
+                    
+                    if (reg.saidaIntervalo && reg.retornoIntervalo) {
+                        status = 'Completo';
+                        statusClass = 'badge-success';
+                        statusIcon = '<i class="fas fa-check-circle"></i>';
+                    }
+                    
+                    const hoje = new Date();
+                    const dataRegistro = new Date(reg.data);
+                    const diferencaDias = Math.floor((hoje - dataRegistro) / (1000 * 60 * 60 * 24));
+                    const atrasado = diferencaDias > 1 && (!reg.saidaIntervalo || !reg.retornoIntervalo);
+                    
+                    if (atrasado) {
+                        status = 'Atrasado';
+                        statusClass = 'badge-danger';
+                        statusIcon = '<i class="fas fa-exclamation-triangle"></i>';
+                    }
+                    
+                    let emailStatus = reg.emailEnviado ? 
+                        '<span class="badge badge-success"><i class="fas fa-check"></i> Enviado</span>' : 
+                        '<span class="badge badge-warning"><i class="fas fa-clock"></i> Pendente</span>';
+                    
+                    let tipoIcon = reg.tipoRegistro === 'com_justificativa' || reg.tipoRegistro === 'com_justificativa_atrasada' ? 
+                        '<i class="fas fa-file-signature" title="Com justificativa"></i>' : 
+                        '<i class="fas fa-camera" title="Com selfie"></i>';
+                    
+                    tr.innerHTML = `
+                        <td>${formatDate(reg.data)} ${tipoIcon} ${atrasado ? '<i class="fas fa-clock text-danger" title="Atrasado"></i>' : ''}</td>
+                        <td>${reg.saidaIntervalo || '--:--'}</td>
+                        <td>${reg.retornoIntervalo || '--:--'}</td>
+                        <td><span class="badge ${statusClass}">${statusIcon} ${status}</span></td>
+                        <td>${emailStatus}</td>
+                        <td>
+                            ${reg.pdfData ? 
+                                `<button class="btn btn-danger btn-sm" onclick="gerarPDFParaDownload(${reg.id})" title="Baixar PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                                </button>` : 
+                                '<span class="text-muted">N/A</span>'}
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="verDetalhesRegistro(${reg.id})" title="Ver detalhes">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
+                
+                updatePagination(page, totalPages);
+                updateEstatisticas(allRegistros);
+            } catch (error) {
+                console.error('Erro ao carregar tabela de registros:', error);
+                showNotification('Erro ao carregar registros', 'error');
+            }
+        }
+
+        function updatePagination(currentPage, totalPages) {
+            try {
+                const paginationDiv = document.getElementById('registrosPagination');
+                if (!paginationDiv) return;
+                
+                if (totalPages <= 1) {
+                    paginationDiv.innerHTML = '';
+                    return;
+                }
+                
+                let html = '<nav><ul class="pagination justify-content-center">';
+                
+                if (currentPage > 1) {
+                    html += `<li class="page-item"><button class="page-link" onclick="loadRegistrosTable(${currentPage - 1})">Anterior</button></li>`;
+                }
+                
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentPage) {
+                        html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+                    } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                        html += `<li class="page-item"><button class="page-link" onclick="loadRegistrosTable(${i})">${i}</button></li>`;
+                    } else if (i === currentPage - 2 || i === currentPage + 2) {
+                        html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                    }
+                }
+                
+                if (currentPage < totalPages) {
+                    html += `<li class="page-item"><button class="page-link" onclick="loadRegistrosTable(${currentPage + 1})">Próximo</button></li>`;
+                }
+                
+                html += '</ul></nav>';
+                paginationDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Erro ao atualizar paginação:', error);
+            }
+        }
+
+        function updateEstatisticas(registros) {
+            try {
+                const totalElement = document.getElementById('totalRegistros');
+                if (totalElement) totalElement.textContent = registros.length;
+                
+                const completos = registros.filter(r => r.saidaIntervalo && r.retornoIntervalo).length;
+                const completosElement = document.getElementById('registrosCompletos');
+                if (completosElement) completosElement.textContent = completos;
+                
+                const emailsEnviados = registros.filter(r => r.emailEnviado).length;
+                const emailsElement = document.getElementById('emailsEnviados');
+                if (emailsElement) emailsElement.textContent = emailsEnviados;
+                
+                const hoje = new Date();
+                const atrasados = registros.filter(reg => {
+                    const dataRegistro = new Date(reg.data);
+                    const diferencaDias = Math.floor((hoje - dataRegistro) / (1000 * 60 * 60 * 24));
+                    return diferencaDias > 1 && (!reg.saidaIntervalo || !reg.retornoIntervalo);
+                }).length;
+                
+                const atrasadosElement = document.getElementById('registrosAtrasados');
+                if (atrasadosElement) atrasadosElement.textContent = atrasados;
+                
+            } catch (error) {
+                console.error('Erro ao atualizar estatísticas:', error);
+            }
+        }
+
+        function verDetalhesRegistro(registroId) {
+            try {
+                const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                const registro = registros.find(r => r.id === registroId);
+                
+                if (!registro) {
+                    showNotification('Registro não encontrado!', 'error');
+                    return;
+                }
+                
+                const modal = document.getElementById('visualizarModal');
+                const conteudo = document.getElementById('visualizarConteudo');
+                
+                if (!modal || !conteudo) return;
+                
+                const hoje = new Date();
+                const dataRegistro = new Date(registro.data);
+                const diferencaDias = Math.floor((hoje - dataRegistro) / (1000 * 60 * 60 * 24));
+                const atrasado = diferencaDias > 1 && (!registro.saidaIntervalo || !registro.retornoIntervalo);
+                
+                let html = `
+                    <div class="mb-3">
+                        ${atrasado ? '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> REGISTRO ATRASADO</div>' : ''}
+                        <p><strong>Funcionário:</strong> ${registro.usuarioNome}</p>
+                        <p><strong>Data:</strong> ${formatDate(registro.data)}</p>
+                        <p><strong>Saída Intervalo:</strong> ${registro.saidaIntervalo || '--:--'}</p>
+                        <p><strong>Retorno Intervalo:</strong> ${registro.retornoIntervalo || '--:--'}</p>
+                        <p><strong>Tipo de Registro:</strong> ${registro.tipoRegistro === 'com_justificativa' ? 'Com Justificativa' : 
+                            registro.tipoRegistro === 'com_justificativa_atrasada' ? 'Com Justificativa (Atrasado)' : 'Com Selfie'}</p>
+                        <p><strong>Status:</strong> ${registro.saidaIntervalo && registro.retornoIntervalo ? 'Completo' : 'Parcial'}</p>
+                        <p><strong>Email:</strong> ${registro.emailEnviado ? 'Enviado' : 'Pendente'}</p>
+                        <p><strong>Bloqueado:</strong> ${registro.bloqueado ? 'Sim' : 'Não'}</p>
+                        <p><strong>Registrado em:</strong> ${formatDate(registro.dataRegistro, true)}</p>
+                    </div>
+                `;
+                
+                if (registro.selfie) {
+                    html += `
+                        <div class="mb-3">
+                            <strong>Selfie do Registro:</strong>
+                            <div class="mt-2">
+                                <img src="${registro.selfie}" style="max-width: 100%; border-radius: 5px; border: 1px solid #ddd;">
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (registro.justificativa) {
+                    html += `
+                        <div class="mb-3">
+                            <strong>Justificativa:</strong>
+                            <p class="mt-1 p-2" style="background: var(--cinza-claro); border-radius: 5px;">${registro.justificativa}</p>
+                        </div>
+                    `;
+                }
+                
+                if (registro.assinatura) {
+                    if (registro.assinatura.startsWith('data:image/')) {
+                        html += `
+                            <div class="mb-3">
+                                <strong>Assinatura Digital:</strong>
+                                <div class="mt-2">
+                                    <img src="${registro.assinatura}" style="max-width: 100%; border-radius: 5px; border: 1px solid #ddd; background-color: white; padding: 10px;">
+                                </div>
+                                <p class="mt-1" style="font-size: 0.8rem; color: var(--cinza-medio);">
+                                    <i class="fas fa-info-circle"></i> Assinatura capturada em: ${formatDate(registro.dataRegistro, true)}
+                                </p>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="mb-3">
+                                <strong>Assinatura Digital:</strong>
+                                <p class="mt-1 p-2" style="background: var(--cinza-claro); border-radius: 5px;">
+                                    <i class="fas fa-signature"></i> Assinatura disponível no sistema
+                                </p>
+                            </div>
+                        `;
+                    }
+                }
+                
+                if (registro.pdfData) {
+                    html += `
+                        <div class="mb-3">
+                            <strong>PDF Gerado:</strong>
+                            <div class="mt-2">
+                                <button class="btn btn-danger" onclick="gerarPDFParaDownload(${registro.id})">
+                                    <i class="fas fa-file-pdf"></i> Baixar PDF
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                conteudo.innerHTML = html;
+                modal.style.display = 'flex';
+            } catch (error) {
+                console.error('Erro ao visualizar registro:', error);
+                showNotification('Erro ao carregar detalhes do registro', 'error');
+            }
+        }
+
+        // ========== INICIALIZAÇÃO ==========
+        async function init() {
+            try {
+                // Verificar autenticação primeiro
+                const authenticatedUser = checkAuthentication();
+                
+                if (!authenticatedUser) {
+                    // Configurar botão para ir para login
+                    const goToLoginBtn = document.getElementById('goToLoginBtn');
+                    if (goToLoginBtn) {
+                        goToLoginBtn.addEventListener('click', () => {
+                            window.location.href = 'index.html';
+                        });
+                    }
+                    return;
+                }
+                
+                // Se autenticado, continuar com a inicialização normal
+                currentUser = authenticatedUser;
+                
+                initDatabase();
+                
+                // Atualizar interface com dados do usuário
+                const userNameElement = document.getElementById('userName');
+                const userAvatarElement = document.getElementById('userAvatar');
+                if (userNameElement) userNameElement.textContent = currentUser.nome;
+                if (userAvatarElement) userAvatarElement.textContent = currentUser.nome.charAt(0).toUpperCase();
+                
+                updateDateTime();
+                setInterval(updateDateTime, 1000);
+                
+                // Inicializar a assinatura com um pequeno atraso
+                setTimeout(() => {
+                    initSignaturePad();
+                }, 300);
+                
+                showPage('registrarPontoPage');
+                
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        stopCamera();
+                        
+                        // Limpar dados de autenticação
+                        localStorage.removeItem('ponto_currentUser');
+                        
+                        // Redirecionar para página de login
+                        window.location.href = 'index.html';
+                    });
+                }
+                
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const page = tab.getAttribute('data-page') + 'Page';
+                        showPage(page);
+                    });
+                });
+                
+                document.querySelectorAll('.flex-fill').forEach(label => {
+                    label.addEventListener('click', function() {
+                        const radio = this.querySelector('input[type="radio"]');
+                        if (radio) {
+                            radio.checked = true;
+                            document.querySelectorAll('.flex-fill').forEach(l => {
+                                l.style.borderColor = 'var(--preto)';
+                                l.style.backgroundColor = 'var(--branco)';
+                            });
+                            this.style.borderColor = 'var(--vermelho)';
+                            this.style.backgroundColor = 'rgba(255, 0, 0, 0.05)';
+                        }
+                    });
+                });
+                
+                const takeSelfieBtn = document.getElementById('takeSelfieBtn');
+                if (takeSelfieBtn) {
+                    takeSelfieBtn.addEventListener('click', openCameraModal);
+                }
+                
+                const retakeSelfieBtn = document.getElementById('retakeSelfieBtn');
+                if (retakeSelfieBtn) {
+                    retakeSelfieBtn.addEventListener('click', resetSelfie);
+                }
+                
+                const captureBtn = document.getElementById('captureBtn');
+                if (captureBtn) {
+                    captureBtn.addEventListener('click', captureSelfie);
+                }
+                
+                const switchCameraBtn = document.getElementById('switchCameraBtn');
+                if (switchCameraBtn) {
+                    switchCameraBtn.addEventListener('click', switchCamera);
+                }
+                
+                const closeCameraBtn = document.getElementById('closeCameraBtn');
+                if (closeCameraBtn) {
+                    closeCameraBtn.addEventListener('click', closeCameraModal);
+                }
+                
+                const requerJustificativa = document.getElementById('requerJustificativa');
+                if (requerJustificativa) {
+                    requerJustificativa.addEventListener('change', (e) => {
+                        const justificativaContainer = document.getElementById('justificativaContainer');
+                        const selfieContainer = document.getElementById('selfieContainer');
+                        
+                        if (justificativaContainer) {
+                            if (e.target.checked) {
+                                justificativaContainer.classList.remove('d-none');
+                                
+                                if (selfieContainer) {
+                                    selfieContainer.style.opacity = '0.5';
+                                    selfieContainer.style.pointerEvents = 'none';
+                                }
+                                
+                                // Inicializar a assinatura quando o container é mostrado
+                                setTimeout(() => {
+                                    if (!signaturePad) {
+                                        initSignaturePad();
+                                    } else {
+                                        // Redimensionar se necessário
+                                        const canvas = document.getElementById('assinaturaCanvas');
+                                        if (canvas && canvas.parentElement) {
+                                            canvas.width = canvas.parentElement.clientWidth;
+                                            canvas.height = canvas.parentElement.clientHeight;
+                                            signaturePad.clear();
+                                        }
+                                    }
+                                }, 100);
+                                
+                                const justificativaTexto = document.getElementById('justificativaTexto');
+                                if (justificativaTexto) {
+                                    setTimeout(() => justificativaTexto.focus(), 300);
+                                }
+                            } else {
+                                justificativaContainer.classList.add('d-none');
+                                
+                                if (selfieContainer) {
+                                    selfieContainer.style.opacity = '1';
+                                    selfieContainer.style.pointerEvents = 'auto';
+                                }
+                                
+                                clearSignature();
+                            }
+                            
+                            updateRegisterButton();
+                        }
+                    });
+                }
+                
+                const limparAssinaturaBtn = document.getElementById('limparAssinaturaBtn');
+                if (limparAssinaturaBtn) {
+                    limparAssinaturaBtn.addEventListener('click', clearSignature);
+                }
+                
+                const salvarAssinaturaBtn = document.getElementById('salvarAssinaturaBtn');
+                if (salvarAssinaturaBtn) {
+                    salvarAssinaturaBtn.addEventListener('click', saveSignature);
+                }
+                
+                const registrarPontoBtn = document.getElementById('registrarPontoBtn');
+                if (registrarPontoBtn) {
+                    registrarPontoBtn.addEventListener('click', registrarPonto);
+                }
+                
+                const filtrarRegistrosBtn = document.getElementById('filtrarRegistrosBtn');
+                if (filtrarRegistrosBtn) {
+                    filtrarRegistrosBtn.addEventListener('click', () => {
+                        loadRegistrosTable(1);
+                    });
+                }
+                
+                const limparFiltrosBtn = document.getElementById('limparFiltrosBtn');
+                if (limparFiltrosBtn) {
+                    limparFiltrosBtn.addEventListener('click', () => {
+                        const hoje = new Date().toISOString().split('T')[0];
+                        const trintaDiasAtras = new Date();
+                        trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
+                        const dataInicio = trintaDiasAtras.toISOString().split('T')[0];
+                        
+                        const dataInicioElement = document.getElementById('dataInicio');
+                        const dataFimElement = document.getElementById('dataFim');
+                        
+                        if (dataInicioElement) dataInicioElement.value = dataInicio;
+                        if (dataFimElement) dataFimElement.value = hoje;
+                        
+                        loadRegistrosTable(1);
+                    });
+                }
+                
+                const exportarPDFBtn = document.getElementById('exportarPDFBtn');
+                if (exportarPDFBtn) {
+                    exportarPDFBtn.addEventListener('click', exportarRelatorioCompletoPDF);
+                }
+                
+                const hoje = new Date().toISOString().split('T')[0];
+                const trintaDiasAtras = new Date();
+                trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
+                const dataInicio = trintaDiasAtras.toISOString().split('T')[0];
+                
+                const dataInicioElement = document.getElementById('dataInicio');
+                const dataFimElement = document.getElementById('dataFim');
+                
+                if (dataInicioElement) dataInicioElement.value = dataInicio;
+                if (dataFimElement) dataFimElement.value = hoje;
+                
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                if (isMobile) {
+                    console.log('Dispositivo móvel detectado');
+                    document.body.classList.add('mobile-device');
+                }
+                
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    console.warn('Câmera não suportada neste navegador');
+                    showNotification('Seu navegador não suporta acesso à câmera. Use a opção de justificativa com assinatura.', 'warning');
+                } else {
+                    navigator.permissions.query({ name: 'camera' }).then(permissionStatus => {
+                        console.log('Status da permissão da câmera:', permissionStatus.state);
+                    });
+                }
+                
+                showNotification(`Bem-vindo, ${currentUser.nome}! Sistema carregado com sucesso.`, 'success', 4000);
+                console.log('Sistema principal inicializado com sucesso!');
+                
+            } catch (error) {
+                console.error('Erro ao inicializar sistema:', error);
+                showNotification('Erro ao inicializar sistema. Verifique o console.', 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        window.verDetalhesRegistro = verDetalhesRegistro;
+        window.loadRegistrosTable = loadRegistrosTable;
+        window.closeVisualizarModal = closeVisualizarModal;
+        window.gerarPDFParaDownload = gerarPDFParaDownload;
+        window.exportarRelatorioCompletoPDF = exportarRelatorioCompletoPDF;
+        
+    </script>
+</body>
+</html>
