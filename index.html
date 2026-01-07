@@ -406,6 +406,24 @@
             opacity: 0.7;
             cursor: not-allowed;
         }
+        
+        .verification-message {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-left: 3px solid var(--verde);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .super-admin-info {
+            background: linear-gradient(45deg, #ff6b6b, #4361ee);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
@@ -418,9 +436,6 @@
             <button class="login-tab" data-tab="register">
                 <i class="fas fa-user-plus"></i> Criar Conta
             </button>
-            <button class="login-tab" data-tab="recover">
-                <i class="fas fa-key"></i> Recuperar Senha
-            </button>
         </div>
         
         <!-- Card Principal -->
@@ -431,6 +446,16 @@
             </div>
             <h1 class="login-title">Controle de Intervalo</h1>
             <h2 class="login-subtitle">Record Guaíba</h2>
+            
+            <!-- Verificação de Email -->
+            <div id="verificationMessage" class="d-none verification-message">
+                <i class="fas fa-envelope"></i> 
+                <strong>Verifique seu email!</strong> 
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+                    Enviamos um link de confirmação para seu email. 
+                    Clique no link para ativar sua conta e depois faça login.
+                </p>
+            </div>
             
             <!-- Formulário de Login -->
             <div id="loginFormContainer" class="login-form-container">
@@ -460,6 +485,12 @@
                 
                 <div class="forgot-password">
                     <a href="#" id="forgotPasswordLink">Esqueci minha senha</a>
+                </div>
+
+                <!-- Informações do Super Admin -->
+                <div class="super-admin-info">
+                    <i class="fas fa-user-shield"></i>
+                    <strong>Super Admin:</strong> admin@recordguaiba.tv.br | Senha: Admin@2024
                 </div>
             </div>
             
@@ -538,36 +569,35 @@
             <!-- Suporte técnico -->
             <div class="login-support mt-3">
                 <p>
-                    <i class="fas fa-headset"></i> Para suporte técnico: 
-                    <a href="mailto:agawlinski@recordguaiba.tv.br">
-                        agawlinski@recordguaiba.tv.br
+                    <i class="fas fa-headset"></i> Para suporte técnico envie e-mail para: 
+                    <a href="mailto:ti@recordguaiba.tv.br">
+                        ti@recordguaiba.tv.br
                     </a>
                 </p>
             </div>
         </div>
         
         <div class="brand-footer">
-            <p>&copy; 2024 <strong>Record Guaíba</strong> - Sistema de Controle de Intervalo</p>
-            <p style="font-size: 0.8rem; margin-top: 0.5rem;">
-                <i class="fas fa-database"></i> Dados sincronizados na nuvem com Supabase
-            </p>
+            <p>© 2024 Sistema de Controle de Intervalo - Record Guaíba</p>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem;">Versão 1.0.0</p>
         </div>
     </div>
 
     <script>
         // ========== CONFIGURAÇÃO SUPABASE ==========
-        // ATENÇÃO: Em produção, essas chaves devem ser protegidas!
-        // Considere usar um backend para armazenar essas credenciais
         const SUPABASE_URL = 'https://izilgduqnrhdsglfnsuh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6aWxnZHVxbnJoZHNnbGZuc3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjk1NTksImV4cCI6MjA4MzMwNTU1OX0.mvTGBwZg4vHTCGuwjKNxU-i1NFjr_xINUUDV_4MLP0E';
         
         // Inicializar Supabase
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // ========== CREDENCIAIS DO SUPER ADMIN ==========
+        const SUPER_ADMIN_EMAIL = 'admin@recordguaiba.tv.br';
+        const SUPER_ADMIN_PASSWORD = 'Admin@2024';
+
         // ========== FUNÇÕES DE UTILIDADE ==========
         function showNotification(message, type = 'info', duration = 5000) {
             try {
-                // Remover notificações existentes
                 document.querySelectorAll('.notification').forEach(n => n.remove());
                 
                 const notification = document.createElement('div');
@@ -579,19 +609,15 @@
                 
                 document.body.appendChild(notification);
                 
-                // Fechar notificação ao clicar no X
                 notification.querySelector('.close-notification').addEventListener('click', () => {
                     notification.remove();
                 });
                 
-                // Auto-remover após duração
-                if (duration > 0) {
-                    setTimeout(() => {
-                        if (notification.parentNode) {
-                            notification.remove();
-                        }
-                    }, duration);
-                }
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, duration);
             } catch (error) {
                 console.error('Erro ao mostrar notificação:', error);
             }
@@ -628,7 +654,6 @@
         function switchTab(tabName) {
             console.log('Mudando para aba:', tabName);
             
-            // Atualizar abas
             document.querySelectorAll('.login-tab').forEach(tab => {
                 tab.classList.remove('active');
                 if (tab.dataset.tab === tabName) {
@@ -636,7 +661,6 @@
                 }
             });
             
-            // Mostrar formulário correspondente
             document.getElementById('loginFormContainer').classList.add('d-none');
             document.getElementById('registerFormContainer').classList.add('d-none');
             document.getElementById('recoverFormContainer').classList.add('d-none');
@@ -653,20 +677,62 @@
             }
         }
 
+        function showVerificationMessage(show = true) {
+            const verificationMessage = document.getElementById('verificationMessage');
+            if (verificationMessage) {
+                if (show) {
+                    verificationMessage.classList.remove('d-none');
+                } else {
+                    verificationMessage.classList.add('d-none');
+                }
+            }
+        }
+
         // ========== FUNÇÕES SUPABASE ==========
         async function loginUser(email, password) {
             try {
+                console.log('Tentando login com:', email);
+                
+                // Verificar se é o super admin
+                if (email === SUPER_ADMIN_EMAIL) {
+                    if (password !== SUPER_ADMIN_PASSWORD) {
+                        throw new Error('Senha do super admin incorreta');
+                    }
+                    
+                    // Criar usuário super admin simulado
+                    return {
+                        id: 'super-admin-id',
+                        email: SUPER_ADMIN_EMAIL,
+                        nome: 'Super Administrador',
+                        cargo: 'Super Admin',
+                        empresa: 'Record Guaíba',
+                        ativo: true,
+                        data_criacao: new Date().toISOString(),
+                        is_super_admin: true
+                    };
+                }
+
+                // Login normal com Supabase
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email: email.trim().toLowerCase(),
                     password: password
                 });
 
                 if (error) {
+                    console.error('Erro Supabase:', error);
                     throw error;
                 }
 
                 if (data.user) {
-                    // Verificar se usuário existe na tabela usuarios
+                    console.log('Usuário autenticado:', data.user.email);
+                    
+                    // Verificar se o email foi confirmado
+                    const emailConfirmed = data.user.email_confirmed_at || data.user.confirmed_at;
+                    if (!emailConfirmed) {
+                        throw new Error('Email não confirmado. Verifique sua caixa de entrada.');
+                    }
+
+                    // Buscar dados do usuário na tabela usuarios
                     const { data: userData, error: userError } = await supabase
                         .from('usuarios')
                         .select('*')
@@ -676,7 +742,6 @@
                     if (userError) {
                         console.warn('Usuário não encontrado na tabela usuarios, criando...');
                         
-                        // Criar registro na tabela usuarios
                         const nome = data.user.email.split('@')[0];
                         const { error: insertError } = await supabase
                             .from('usuarios')
@@ -693,7 +758,6 @@
 
                         if (insertError) {
                             console.error('Erro ao criar usuário:', insertError);
-                            // Continuar mesmo com erro na tabela usuarios
                         }
 
                         return {
@@ -703,7 +767,8 @@
                             cargo: 'Funcionário',
                             empresa: 'Record Guaíba',
                             ativo: true,
-                            data_criacao: new Date().toISOString()
+                            data_criacao: new Date().toISOString(),
+                            is_super_admin: false
                         };
                     }
 
@@ -720,7 +785,8 @@
                         cargo: userData.cargo || 'Funcionário',
                         empresa: userData.empresa || 'Record Guaíba',
                         ativo: userData.ativo !== undefined ? userData.ativo : true,
-                        data_criacao: userData.data_criacao || new Date().toISOString()
+                        data_criacao: userData.data_criacao || new Date().toISOString(),
+                        is_super_admin: userData.is_super_admin || false
                     };
                 }
                 
@@ -733,10 +799,10 @@
 
         async function registerUser(nome, email, cargo, password) {
             try {
-                // Normalizar email
                 const normalizedEmail = email.trim().toLowerCase();
                 
-                // Criar usuário no Auth
+                console.log('Registrando usuário:', normalizedEmail);
+                
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: normalizedEmail,
                     password: password,
@@ -750,11 +816,14 @@
                 });
 
                 if (authError) {
+                    console.error('Erro Supabase signUp:', authError);
                     throw authError;
                 }
 
+                console.log('Usuário criado no auth:', authData);
+
                 if (authData.user) {
-                    // Criar registro na tabela usuarios
+                    // Criar usuário na tabela usuarios
                     const { error: userError } = await supabase
                         .from('usuarios')
                         .insert([{
@@ -770,7 +839,6 @@
 
                     if (userError) {
                         console.error('Erro ao criar usuário na tabela:', userError);
-                        // Não lançar erro aqui para permitir que o usuário seja criado no Auth
                     }
 
                     return {
@@ -780,7 +848,8 @@
                         cargo: cargo,
                         empresa: 'Record Guaíba',
                         ativo: true,
-                        data_criacao: new Date().toISOString()
+                        data_criacao: new Date().toISOString(),
+                        is_super_admin: false
                     };
                 }
                 
@@ -796,70 +865,15 @@
                 const normalizedEmail = email.trim().toLowerCase();
                 
                 const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-                    redirectTo: window.location.origin + '/index.html'
+                    redirectTo: window.location.origin
                 });
 
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
 
                 return true;
             } catch (error) {
                 console.error('Erro ao enviar email de recuperação:', error);
                 throw error;
-            }
-        }
-
-        async function checkExistingSession() {
-            try {
-                const { data, error } = await supabase.auth.getSession();
-                
-                if (error) {
-                    console.error('Erro ao verificar sessão:', error);
-                    return null;
-                }
-
-                if (data.session) {
-                    const { data: userData, error: userError } = await supabase
-                        .from('usuarios')
-                        .select('*')
-                        .eq('id', data.session.user.id)
-                        .maybeSingle();
-
-                    if (userError) {
-                        console.warn('Erro ao buscar dados do usuário:', userError);
-                        return {
-                            id: data.session.user.id,
-                            email: data.session.user.email,
-                            nome: data.session.user.email.split('@')[0],
-                            cargo: 'Funcionário',
-                            empresa: 'Record Guaíba',
-                            ativo: true
-                        };
-                    }
-
-                    // Atualizar último acesso
-                    if (userData) {
-                        await supabase
-                            .from('usuarios')
-                            .update({ ultimo_acesso: new Date().toISOString() })
-                            .eq('id', data.session.user.id);
-                    }
-
-                    return {
-                        id: data.session.user.id,
-                        email: data.session.user.email,
-                        nome: userData?.nome || data.session.user.email.split('@')[0],
-                        cargo: userData?.cargo || 'Funcionário',
-                        empresa: userData?.empresa || 'Record Guaíba',
-                        ativo: userData?.ativo !== undefined ? userData.ativo : true
-                    };
-                }
-                
-                return null;
-            } catch (error) {
-                console.error('Erro ao verificar sessão existente:', error);
-                return null;
             }
         }
 
@@ -889,17 +903,24 @@
                 const usuario = await loginUser(email, password);
                 
                 if (usuario) {
-                    // Salvar no localStorage
+                    // Salvar dados do usuário
                     localStorage.setItem('ponto_currentUser', JSON.stringify(usuario));
                     
+                    // Salvar email se "lembrar-me" estiver marcado
                     if (rememberMe) {
                         localStorage.setItem('ponto_remember_email', email);
                     } else {
                         localStorage.removeItem('ponto_remember_email');
                     }
                     
+                    // Salvar se é super admin
+                    if (usuario.is_super_admin) {
+                        localStorage.setItem('ponto_is_super_admin', 'true');
+                    }
+                    
                     showNotification(`Bem-vindo, ${usuario.nome}! Redirecionando...`, 'success', 2000);
                     
+                    // Redirecionar para a página principal
                     setTimeout(() => {
                         window.location.href = 'controle_intervalo.html';
                     }, 2000);
@@ -912,14 +933,21 @@
                 console.error('Erro no login:', error);
                 
                 let errorMessage = 'Erro ao fazer login. ';
-                if (error.message.includes('Invalid login credentials')) {
+                
+                if (error.message.includes('Invalid login credentials') || 
+                    error.message.includes('invalid_grant') ||
+                    error.message.includes('Senha do super admin incorreta')) {
                     errorMessage = 'Email ou senha incorretos!';
-                } else if (error.message.includes('Email not confirmed')) {
-                    errorMessage = 'Confirme seu email antes de fazer login! Verifique sua caixa de entrada.';
+                } else if (error.message.includes('Email not confirmed') || 
+                          error.message.includes('não confirmado')) {
+                    errorMessage = 'Email não confirmado! Verifique sua caixa de entrada e clique no link de confirmação.';
+                    showVerificationMessage(true);
                 } else if (error.message.includes('User not found')) {
                     errorMessage = 'Usuário não encontrado. Crie uma conta primeiro.';
                 } else if (error.message.includes('rate limit')) {
                     errorMessage = 'Muitas tentativas de login. Tente novamente em alguns minutos.';
+                } else if (error.message.includes('Network Error')) {
+                    errorMessage = 'Erro de conexão. Verifique sua internet.';
                 } else {
                     errorMessage += error.message;
                 }
@@ -941,17 +969,17 @@
             // Validações
             if (!nome || !email || !cargo || !password || !confirmPassword) {
                 showNotification('Preencha todos os campos!', 'warning');
-                if (!nome) document.getElementById('registerNome').focus();
-                else if (!email) document.getElementById('registerEmail').focus();
-                else if (!cargo) document.getElementById('registerCargo').focus();
-                else if (!password) document.getElementById('registerPassword').focus();
-                else document.getElementById('registerConfirmPassword').focus();
                 return;
             }
 
             if (!validateEmail(email)) {
                 showNotification('Digite um email válido!', 'warning');
                 document.getElementById('registerEmail').focus();
+                return;
+            }
+
+            if (email === SUPER_ADMIN_EMAIL) {
+                showNotification('Este email não pode ser usado para cadastro.', 'error');
                 return;
             }
 
@@ -978,7 +1006,10 @@
                 const usuario = await registerUser(nome, email, cargo, password);
                 
                 if (usuario) {
-                    showNotification(`Conta criada com sucesso! Bem-vindo(a), ${usuario.nome}. Verifique seu email para confirmar o cadastro.`, 'success', 5000);
+                    showLoading('registerBtn', false);
+                    showVerificationMessage(true);
+                    
+                    showNotification(`Conta criada com sucesso! Verifique seu email (${email}) para confirmar o cadastro.`, 'success', 10000);
                     
                     // Limpar formulário
                     document.getElementById('registerNome').value = '';
@@ -988,14 +1019,13 @@
                     document.getElementById('registerConfirmPassword').value = '';
                     document.getElementById('termsAccept').checked = false;
                     
-                    showLoading('registerBtn', false);
-                    
-                    // Voltar para login após 3 segundos
+                    // Voltar para login após 5 segundos
                     setTimeout(() => {
                         switchTab('login');
                         document.getElementById('loginEmail').value = email;
                         document.getElementById('loginPassword').focus();
-                    }, 3000);
+                        showVerificationMessage(false);
+                    }, 5000);
                 } else {
                     showLoading('registerBtn', false);
                     showNotification('Erro ao criar conta. Tente novamente.', 'error');
@@ -1005,16 +1035,18 @@
                 console.error('Erro no cadastro:', error);
                 
                 let errorMessage = 'Erro ao criar conta. ';
-                if (error.message.includes('already registered') || error.message.includes('User already registered')) {
+                if (error.message.includes('already registered') || 
+                    error.message.includes('User already registered') ||
+                    error.message.includes('duplicate key')) {
                     errorMessage = 'Este email já está cadastrado! Faça login ou use outro email.';
                 } else if (error.message.includes('weak password')) {
-                    errorMessage = 'A senha é muito fraca. Use uma senha mais forte.';
+                    errorMessage = 'A senha é muito fraca. Use uma senha mais forte (mínimo 6 caracteres).';
                 } else if (error.message.includes('invalid email')) {
                     errorMessage = 'Email inválido! Digite um email válido.';
                 } else if (error.message.includes('rate limit')) {
                     errorMessage = 'Muitas tentativas de cadastro. Tente novamente em alguns minutos.';
-                } else if (error.message.includes('duplicate key')) {
-                    errorMessage = 'Este email já está em uso. Tente fazer login.';
+                } else if (error.message.includes('Network Error')) {
+                    errorMessage = 'Erro de conexão. Verifique sua internet.';
                 } else {
                     errorMessage += error.message;
                 }
@@ -1050,7 +1082,6 @@
                     document.getElementById('recoverEmail').value = '';
                     showLoading('recoverBtn', false);
                     
-                    // Voltar para login após 4 segundos
                     setTimeout(() => {
                         switchTab('login');
                         document.getElementById('loginEmail').value = email;
@@ -1069,6 +1100,8 @@
                     errorMessage = 'Muitas tentativas. Tente novamente em alguns minutos.';
                 } else if (error.message.includes('not found')) {
                     errorMessage = 'Email não encontrado. Verifique se digitou corretamente.';
+                } else if (error.message.includes('Network Error')) {
+                    errorMessage = 'Erro de conexão. Verifique sua internet.';
                 } else {
                     errorMessage += error.message;
                 }
@@ -1092,21 +1125,115 @@
             showNotification('Política de privacidade: Seus dados são protegidos e usados apenas para controle de intervalo. Não compartilhamos seus dados com terceiros.', 'info', 8000);
         }
 
+        // ========== VERIFICAÇÃO DE PARÂMETROS DE URL ==========
+        function checkUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Verificar se veio de confirmação de email
+            if (urlParams.has('type') && urlParams.get('type') === 'signup') {
+                showNotification('Email confirmado com sucesso! Agora faça login com suas credenciais.', 'success', 10000);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            // Verificar se veio de recuperação de senha
+            if (urlParams.has('type') && urlParams.get('type') === 'recovery') {
+                showNotification('Sua senha foi redefinida com sucesso! Agora faça login com sua nova senha.', 'success', 10000);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
+        // ========== VERIFICAR E CRIAR SUPER ADMIN ==========
+        async function checkAndCreateSuperAdmin() {
+            try {
+                // Verificar se o super admin já existe na tabela usuarios
+                const { data: existingAdmin, error: checkError } = await supabase
+                    .from('usuarios')
+                    .select('*')
+                    .eq('email', SUPER_ADMIN_EMAIL)
+                    .single();
+
+                if (checkError && checkError.code !== 'PGRST116') {
+                    console.warn('Erro ao verificar super admin:', checkError);
+                }
+
+                if (!existingAdmin) {
+                    console.log('Criando super admin na tabela usuarios...');
+                    
+                    // Criar super admin na tabela usuarios
+                    const { error: insertError } = await supabase
+                        .from('usuarios')
+                        .insert([{
+                            id: 'super-admin-id',
+                            nome: 'Super Administrador',
+                            email: SUPER_ADMIN_EMAIL,
+                            cargo: 'Super Admin',
+                            empresa: 'Record Guaíba',
+                            ativo: true,
+                            is_super_admin: true,
+                            data_criacao: new Date().toISOString(),
+                            ultimo_acesso: new Date().toISOString()
+                        }]);
+
+                    if (insertError) {
+                        console.error('Erro ao criar super admin:', insertError);
+                    } else {
+                        console.log('Super admin criado na tabela usuarios');
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao verificar/criar super admin:', error);
+            }
+        }
+
         // ========== INICIALIZAÇÃO ==========
         async function init() {
             try {
                 console.log('Inicializando página de login...');
                 
-                // Verificar se há sessão ativa
-                const existingUser = await checkExistingSession();
+                // Verificar e criar super admin
+                await checkAndCreateSuperAdmin();
                 
-                if (existingUser) {
-                    localStorage.setItem('ponto_currentUser', JSON.stringify(existingUser));
-                    showNotification(`Bem-vindo de volta, ${existingUser.nome}! Redirecionando...`, 'info', 2000);
-                    setTimeout(() => {
-                        window.location.href = 'controle_intervalo.html';
-                    }, 2000);
-                    return;
+                // Verificar parâmetros da URL
+                checkUrlParameters();
+                
+                // Verificar se há sessão ativa
+                const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+                
+                if (sessionData.session && !sessionError) {
+                    console.log('Sessão ativa detectada, redirecionando...');
+                    
+                    // Buscar dados do usuário
+                    const { data: userData, error: userError } = await supabase
+                        .from('usuarios')
+                        .select('*')
+                        .eq('id', sessionData.session.user.id)
+                        .maybeSingle();
+
+                    if (!userError && userData) {
+                        const usuario = {
+                            id: sessionData.session.user.id,
+                            email: sessionData.session.user.email,
+                            nome: userData.nome || sessionData.session.user.email.split('@')[0],
+                            cargo: userData.cargo || 'Funcionário',
+                            empresa: userData.empresa || 'Record Guaíba',
+                            ativo: userData.ativo !== undefined ? userData.ativo : true,
+                            data_criacao: userData.data_criacao || new Date().toISOString(),
+                            is_super_admin: userData.is_super_admin || false
+                        };
+                        
+                        localStorage.setItem('ponto_currentUser', JSON.stringify(usuario));
+                        
+                        if (usuario.is_super_admin) {
+                            localStorage.setItem('ponto_is_super_admin', 'true');
+                        }
+                        
+                        showNotification(`Sessão ativa detectada. Redirecionando...`, 'success', 2000);
+                        
+                        setTimeout(() => {
+                            window.location.href = 'controle_intervalo.html';
+                        }, 2000);
+                        return;
+                    }
                 }
 
                 // Preencher email lembrado
@@ -1124,22 +1251,24 @@
                     });
                 });
 
-                // Evento de login
+                // Eventos de login
                 document.getElementById('loginBtn').addEventListener('click', handleLogin);
-                
-                // Evento de Enter no login
                 document.getElementById('loginPassword').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        handleLogin(e);
-                    }
+                    if (e.key === 'Enter') handleLogin(e);
                 });
 
-                // Evento de cadastro
+                // Eventos de cadastro
                 document.getElementById('registerBtn').addEventListener('click', handleRegister);
-                
-                // Evento de recuperação de senha
+                document.getElementById('registerConfirmPassword').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleRegister(e);
+                });
+
+                // Eventos de recuperação
                 document.getElementById('recoverBtn').addEventListener('click', handleRecoverPassword);
-                
+                document.getElementById('recoverEmail').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleRecoverPassword(e);
+                });
+
                 // Eventos de voltar para login
                 document.getElementById('backToLoginFromRegisterBtn').addEventListener('click', (e) => {
                     e.preventDefault();
@@ -1161,21 +1290,7 @@
                 document.getElementById('termsLink').addEventListener('click', showTerms);
                 document.getElementById('privacyLink').addEventListener('click', showPrivacy);
 
-                // Evento de Enter no formulário de cadastro
-                document.getElementById('registerConfirmPassword').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        handleRegister(e);
-                    }
-                });
-
-                // Evento de Enter no formulário de recuperação
-                document.getElementById('recoverEmail').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        handleRecoverPassword(e);
-                    }
-                });
-
-                // Focar no campo de email
+                // Focar no campo apropriado
                 setTimeout(() => {
                     if (document.getElementById('loginEmail').value) {
                         document.getElementById('loginPassword').focus();
