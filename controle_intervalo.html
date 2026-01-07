@@ -2059,6 +2059,7 @@
 
         function showNotification(message, type = 'info', duration = 5000) {
             try {
+                // Remover notificações existentes
                 document.querySelectorAll('.notification').forEach(n => n.remove());
                 
                 const notification = document.createElement('div');
@@ -2335,11 +2336,12 @@
                     e.preventDefault();
                 });
                 
-                signaturePad.addEventListener('beginStroke', () => {
+                // Corrigido: usando addEventListener correto para SignaturePad
+                canvas.addEventListener('mousedown', () => {
                     canvas.style.borderColor = 'var(--vermelho)';
                 });
                 
-                signaturePad.addEventListener('endStroke', () => {
+                canvas.addEventListener('mouseup', () => {
                     canvas.style.borderColor = 'var(--cinza-medio)';
                 });
                 
@@ -2391,11 +2393,11 @@
                     e.preventDefault();
                 });
                 
-                modalSignaturePad.addEventListener('beginStroke', () => {
+                canvas.addEventListener('mousedown', () => {
                     canvas.style.borderColor = 'var(--vermelho)';
                 });
                 
-                modalSignaturePad.addEventListener('endStroke', () => {
+                canvas.addEventListener('mouseup', () => {
                     canvas.style.borderColor = 'var(--cinza-medio)';
                 });
                 
@@ -3307,7 +3309,6 @@
                     headStyles: { fillColor: [67, 97, 238], textColor: 255 },
                     theme: 'grid',
                     styles: { fontSize: 8 },
-                    headStyles: { fontSize: 9 },
                     didDrawPage: function(data) {
                         doc.setFontSize(8);
                         doc.setTextColor(150, 150, 150);
@@ -3846,17 +3847,17 @@
                         <td>${reg.saidaIntervalo || '--:--'}</td>
                         <td>${reg.retornoIntervalo || '--:--'}</td>
                         <td><span class="badge ${statusClass}">${statusIcon} ${status}</span></td>
-                        <td>${tipoTexto}</td>
+                        <td>${tipoIcon} ${tipoTexto}</td>
                         <td>${emailStatus}</td>
                         <td>
                             ${reg.pdfData ? 
-                                `<button class="btn btn-danger btn-sm" onclick="gerarPDFParaDownload(${reg.id})" title="Baixar PDF">
+                                `<button class="btn btn-danger btn-sm" onclick="gerarPDFParaDownload('${reg.id}')" title="Baixar PDF">
                                     <i class="fas fa-file-pdf"></i>
                                 </button>` : 
                                 '<span class="text-muted">N/A</span>'}
                         </td>
                         <td>
-                            <button class="btn btn-primary btn-sm" onclick="verDetalhesRegistro(${reg.id})" title="Ver detalhes">
+                            <button class="btn btn-primary btn-sm" onclick="verDetalhesRegistro('${reg.id}')" title="Ver detalhes">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </td>
@@ -4024,7 +4025,7 @@
                         <div class="mb-3">
                             <strong>PDF Gerado:</strong>
                             <div class="mt-2">
-                                <button class="btn btn-danger" onclick="gerarPDFParaDownload(${registro.id})">
+                                <button class="btn btn-danger" onclick="gerarPDFParaDownload('${registro.id}')">
                                     <i class="fas fa-file-pdf"></i> Baixar PDF
                                 </button>
                             </div>
@@ -4500,4 +4501,4 @@
         
     </script>
 </body>
-</html> 
+</html>
