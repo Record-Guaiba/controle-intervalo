@@ -6,6 +6,7 @@
     <title>Login - Sistema de Ponto Record Guaíba</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --vermelho: #4361ee;
@@ -15,6 +16,8 @@
             --cinza-escuro: #333333;
             --cinza-medio: #666666;
             --verde: #28a745;
+            --azul: #007bff;
+            --vermelho-suave: rgba(220, 53, 69, 0.1);
         }
 
         * {
@@ -37,7 +40,40 @@
 
         .login-container {
             width: 100%;
-            max-width: 420px;
+            max-width: 500px;
+        }
+
+        .login-tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            color: var(--branco);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .login-tab:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .login-tab.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.2);
+            border-bottom: 3px solid var(--branco);
         }
 
         .login-card {
@@ -80,7 +116,6 @@
 
         .form-group {
             margin-bottom: 1.25rem;
-            text-align: left;
         }
 
         .form-label {
@@ -88,6 +123,7 @@
             margin-bottom: 0.5rem;
             font-weight: 500;
             color: var(--cinza-escuro);
+            font-size: 0.9rem;
         }
 
         .form-control {
@@ -97,7 +133,6 @@
             border-radius: 5px;
             font-size: 1rem;
             transition: border-color 0.3s;
-            text-align: left;
         }
 
         .form-control:focus {
@@ -120,6 +155,7 @@
             text-decoration: none;
             gap: 0.5rem;
             width: 100%;
+            font-size: 0.9rem;
         }
 
         .btn-primary {
@@ -128,8 +164,27 @@
         }
 
         .btn-primary:hover {
-            background-color: #4361ee;
+            background-color: #3a56d4;
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--cinza-medio);
+            color: var(--branco);
+        }
+
+        .btn-secondary:hover {
+            background-color: #555;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: var(--preto);
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
         }
 
         .loading {
@@ -140,6 +195,7 @@
             border-radius: 50%;
             border-top-color: var(--branco);
             animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
         }
 
         @keyframes spin {
@@ -218,6 +274,10 @@
             color: var(--preto);
         }
 
+        .notification-info {
+            background-color: var(--azul);
+        }
+
         .close-notification {
             background: none;
             border: none;
@@ -229,6 +289,41 @@
 
         .d-none {
             display: none !important;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .form-check-input {
+            margin-right: 0.5rem;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .form-check-label {
+            font-size: 0.9rem;
+            color: var(--cinza-medio);
+            cursor: pointer;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .forgot-password a {
+            color: var(--vermelho);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
         }
 
         @media (max-width: 576px) {
@@ -248,6 +343,15 @@
             .login-subtitle {
                 font-size: 1rem;
             }
+            
+            .login-tabs {
+                flex-direction: column;
+            }
+            
+            .login-tab {
+                padding: 0.75rem;
+                font-size: 0.8rem;
+            }
         }
 
         .brand-footer {
@@ -261,10 +365,65 @@
         .brand-footer strong {
             color: var(--branco);
         }
+
+        .password-requirements {
+            font-size: 0.8rem;
+            color: var(--cinza-medio);
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .alert-info {
+            background-color: rgba(0, 123, 255, 0.1);
+            border-left: 3px solid var(--azul);
+            color: var(--azul);
+        }
+
+        .alert-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            border-left: 3px solid #ffc107;
+            color: #856404;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-3 {
+            margin-top: 1rem;
+        }
+
+        .btn-loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
+        <!-- Abas de Login/Cadastro -->
+        <div class="login-tabs">
+            <button class="login-tab active" data-tab="login">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button class="login-tab" data-tab="register">
+                <i class="fas fa-user-plus"></i> Criar Conta
+            </button>
+            <button class="login-tab" data-tab="recover">
+                <i class="fas fa-key"></i> Recuperar Senha
+            </button>
+        </div>
+        
+        <!-- Card Principal -->
         <div class="login-card">
             <!-- Logo e Títulos -->
             <div class="login-logo">
@@ -274,73 +433,141 @@
             <h2 class="login-subtitle">Record Guaíba</h2>
             
             <!-- Formulário de Login -->
-            <div class="login-form-container">
-                <div class="form-group">
-                    <label class="form-label" for="loginInput"><strong>Login</strong></label>
-                    <input type="text" id="loginInput" class="form-control" placeholder="Digite seu login" value="funcionario">
+            <div id="loginFormContainer" class="login-form-container">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Use seu email e senha para acessar o sistema
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="passwordInput"><strong>Senha</strong></label>
-                    <input type="password" id="passwordInput" class="form-control" placeholder="Digite sua senha" value="senha123">
+                    <label class="form-label" for="loginEmail"><strong>Email</strong></label>
+                    <input type="email" id="loginEmail" class="form-control" placeholder="seu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="loginPassword"><strong>Senha</strong></label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Digite sua senha" required>
+                </div>
+                
+                <div class="form-check">
+                    <input type="checkbox" id="rememberMe" class="form-check-input">
+                    <label class="form-check-label" for="rememberMe">Lembrar-me</label>
                 </div>
                 
                 <button id="loginBtn" class="btn btn-primary">
-                    <span id="loginBtnText">Entrar no Sistema</span>
+                    <span id="loginBtnText"><i class="fas fa-sign-in-alt"></i> Entrar no Sistema</span>
                     <span id="loginBtnLoading" class="loading d-none"></span>
                 </button>
                 
-                <!-- Credenciais de teste -->
-                <div class="login-test-credentials mt-3">
-                    <p><strong>Credenciais de Teste:</strong></p>
-                    <p>Login: <strong>funcionario</strong></p>
-                    <p>Senha: <strong>senha123</strong></p>
+                <div class="forgot-password">
+                    <a href="#" id="forgotPasswordLink">Esqueci minha senha</a>
+                </div>
+            </div>
+            
+            <!-- Formulário de Cadastro -->
+            <div id="registerFormContainer" class="login-form-container d-none">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> Preencha todos os campos para criar sua conta
                 </div>
                 
-                <!-- Suporte técnico -->
-                <div class="login-support mt-3">
-                    <p>
-                        Para suporte técnico: 
-                        <a href="mailto:agawlinski@recordguaiba.tv.br">
-                            agawlinski@recordguaiba.tv.br
-                        </a>
-                    </p>
+                <div class="form-group">
+                    <label class="form-label" for="registerNome"><strong>Nome Completo</strong></label>
+                    <input type="text" id="registerNome" class="form-control" placeholder="Digite seu nome completo" required>
                 </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="registerEmail"><strong>Email</strong></label>
+                    <input type="email" id="registerEmail" class="form-control" placeholder="seu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="registerCargo"><strong>Cargo/Função</strong></label>
+                    <input type="text" id="registerCargo" class="form-control" placeholder="Ex: Analista, Gerente, etc." required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="registerPassword"><strong>Senha</strong></label>
+                    <input type="password" id="registerPassword" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                    <div class="password-requirements">
+                        <i class="fas fa-info-circle"></i> A senha deve ter pelo menos 6 caracteres
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="registerConfirmPassword"><strong>Confirmar Senha</strong></label>
+                    <input type="password" id="registerConfirmPassword" class="form-control" placeholder="Digite a senha novamente" required>
+                </div>
+                
+                <div class="form-check">
+                    <input type="checkbox" id="termsAccept" class="form-check-input" required>
+                    <label class="form-check-label" for="termsAccept">
+                        Aceito os <a href="#" id="termsLink">termos de uso</a> e <a href="#" id="privacyLink">política de privacidade</a>
+                    </label>
+                </div>
+                
+                <button id="registerBtn" class="btn btn-primary mt-3">
+                    <span id="registerBtnText"><i class="fas fa-user-plus"></i> Criar Minha Conta</span>
+                    <span id="registerBtnLoading" class="loading d-none"></span>
+                </button>
+                
+                <button id="backToLoginFromRegisterBtn" class="btn btn-secondary mt-2">
+                    <i class="fas fa-arrow-left"></i> Voltar para Login
+                </button>
+            </div>
+            
+            <!-- Formulário de Recuperação de Senha -->
+            <div id="recoverFormContainer" class="login-form-container d-none">
+                <div class="alert alert-info">
+                    <i class="fas fa-key"></i> Digite seu email para receber o link de recuperação de senha
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="recoverEmail"><strong>Email</strong></label>
+                    <input type="email" id="recoverEmail" class="form-control" placeholder="seu@email.com" required>
+                </div>
+                
+                <button id="recoverBtn" class="btn btn-warning">
+                    <span id="recoverBtnText"><i class="fas fa-paper-plane"></i> Enviar Link de Recuperação</span>
+                    <span id="recoverBtnLoading" class="loading d-none"></span>
+                </button>
+                
+                <button id="backToLoginFromRecoverBtn" class="btn btn-secondary mt-2">
+                    <i class="fas fa-arrow-left"></i> Voltar para Login
+                </button>
+            </div>
+            
+            <!-- Suporte técnico -->
+            <div class="login-support mt-3">
+                <p>
+                    <i class="fas fa-headset"></i> Para suporte técnico: 
+                    <a href="mailto:agawlinski@recordguaiba.tv.br">
+                        agawlinski@recordguaiba.tv.br
+                    </a>
+                </p>
             </div>
         </div>
         
         <div class="brand-footer">
             <p>&copy; 2024 <strong>Record Guaíba</strong> - Sistema de Controle de Intervalo</p>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem;">
+                <i class="fas fa-database"></i> Dados sincronizados na nuvem com Supabase
+            </p>
         </div>
     </div>
 
     <script>
-        // Banco de dados de usuários
-        const usuarios = [
-            {
-                id: 1,
-                nome: 'Funcionário Teste',
-                empresa: 'Record Guaíba',
-                login: 'funcionario',
-                senha: 'senha123',
-                email: 'agawlinski@recordguaiba.tv.br',
-                cargo: 'Analista',
-                ativo: true
-            }
-        ];
+        // ========== CONFIGURAÇÃO SUPABASE ==========
+        // ATENÇÃO: Em produção, essas chaves devem ser protegidas!
+        // Considere usar um backend para armazenar essas credenciais
+        const SUPABASE_URL = 'https://izilgduqnrhdsglfnsuh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6aWxnZHVxbnJoZHNnbGZuc3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjk1NTksImV4cCI6MjA4MzMwNTU1OX0.mvTGBwZg4vHTCGuwjKNxU-i1NFjr_xINUUDV_4MLP0E';
+        
+        // Inicializar Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Salvar usuários no localStorage para o sistema principal usar
-        function initDatabase() {
-            if (!localStorage.getItem('ponto_record_usuarios')) {
-                localStorage.setItem('ponto_record_usuarios', JSON.stringify(usuarios));
-            }
-            console.log('Banco de dados de usuários inicializado!');
-        }
-
-        // Função para mostrar notificações
+        // ========== FUNÇÕES DE UTILIDADE ==========
         function showNotification(message, type = 'info', duration = 5000) {
             try {
-                // Remover notificações antigas
+                // Remover notificações existentes
                 document.querySelectorAll('.notification').forEach(n => n.remove());
                 
                 const notification = document.createElement('div');
@@ -352,118 +579,625 @@
                 
                 document.body.appendChild(notification);
                 
+                // Fechar notificação ao clicar no X
                 notification.querySelector('.close-notification').addEventListener('click', () => {
                     notification.remove();
                 });
                 
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.remove();
-                    }
-                }, duration);
+                // Auto-remover após duração
+                if (duration > 0) {
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, duration);
+                }
             } catch (error) {
                 console.error('Erro ao mostrar notificação:', error);
             }
         }
 
-        // Função para mostrar/ocultar loading
-        function showLoading(buttonId, text = 'Processando...') {
+        function showLoading(buttonId, show = true, text = 'Processando...') {
             const button = document.getElementById(buttonId);
-            if (button) {
-                const originalText = button.innerHTML;
-                button.innerHTML = `<span class="loading"></span> ${text}`;
+            if (!button) return;
+            
+            const textSpan = button.querySelector('span:not(.loading)');
+            const loadingSpan = button.querySelector('.loading');
+            
+            if (show) {
                 button.disabled = true;
-                return () => {
-                    button.innerHTML = originalText;
-                    button.disabled = false;
-                };
+                button.classList.add('btn-loading');
+                if (loadingSpan) loadingSpan.classList.remove('d-none');
+                if (textSpan) {
+                    button.setAttribute('data-original-text', textSpan.textContent);
+                    textSpan.textContent = text;
+                }
+            } else {
+                button.disabled = false;
+                button.classList.remove('btn-loading');
+                if (loadingSpan) loadingSpan.classList.add('d-none');
+                if (textSpan) {
+                    const originalText = button.getAttribute('data-original-text');
+                    if (originalText) {
+                        textSpan.textContent = originalText;
+                    }
+                }
             }
-            return () => {};
         }
 
-        // Função de login
-        async function login() {
-            const loginInput = document.getElementById('loginInput').value.trim();
-            const passwordInput = document.getElementById('passwordInput').value.trim();
+        function switchTab(tabName) {
+            console.log('Mudando para aba:', tabName);
             
-            if (!loginInput || !passwordInput) {
+            // Atualizar abas
+            document.querySelectorAll('.login-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Mostrar formulário correspondente
+            document.getElementById('loginFormContainer').classList.add('d-none');
+            document.getElementById('registerFormContainer').classList.add('d-none');
+            document.getElementById('recoverFormContainer').classList.add('d-none');
+            
+            if (tabName === 'login') {
+                document.getElementById('loginFormContainer').classList.remove('d-none');
+                document.getElementById('loginEmail').focus();
+            } else if (tabName === 'register') {
+                document.getElementById('registerFormContainer').classList.remove('d-none');
+                document.getElementById('registerNome').focus();
+            } else if (tabName === 'recover') {
+                document.getElementById('recoverFormContainer').classList.remove('d-none');
+                document.getElementById('recoverEmail').focus();
+            }
+        }
+
+        // ========== FUNÇÕES SUPABASE ==========
+        async function loginUser(email, password) {
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email.trim().toLowerCase(),
+                    password: password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                if (data.user) {
+                    // Verificar se usuário existe na tabela usuarios
+                    const { data: userData, error: userError } = await supabase
+                        .from('usuarios')
+                        .select('*')
+                        .eq('id', data.user.id)
+                        .single();
+
+                    if (userError) {
+                        console.warn('Usuário não encontrado na tabela usuarios, criando...');
+                        
+                        // Criar registro na tabela usuarios
+                        const nome = data.user.email.split('@')[0];
+                        const { error: insertError } = await supabase
+                            .from('usuarios')
+                            .insert([{
+                                id: data.user.id,
+                                nome: nome,
+                                email: data.user.email,
+                                cargo: 'Funcionário',
+                                empresa: 'Record Guaíba',
+                                ativo: true,
+                                data_criacao: new Date().toISOString(),
+                                ultimo_acesso: new Date().toISOString()
+                            }]);
+
+                        if (insertError) {
+                            console.error('Erro ao criar usuário:', insertError);
+                            // Continuar mesmo com erro na tabela usuarios
+                        }
+
+                        return {
+                            id: data.user.id,
+                            email: data.user.email,
+                            nome: nome,
+                            cargo: 'Funcionário',
+                            empresa: 'Record Guaíba',
+                            ativo: true,
+                            data_criacao: new Date().toISOString()
+                        };
+                    }
+
+                    // Atualizar último acesso
+                    await supabase
+                        .from('usuarios')
+                        .update({ ultimo_acesso: new Date().toISOString() })
+                        .eq('id', data.user.id);
+
+                    return {
+                        id: data.user.id,
+                        email: data.user.email,
+                        nome: userData.nome || data.user.email.split('@')[0],
+                        cargo: userData.cargo || 'Funcionário',
+                        empresa: userData.empresa || 'Record Guaíba',
+                        ativo: userData.ativo !== undefined ? userData.ativo : true,
+                        data_criacao: userData.data_criacao || new Date().toISOString()
+                    };
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Erro no login:', error);
+                throw error;
+            }
+        }
+
+        async function registerUser(nome, email, cargo, password) {
+            try {
+                // Normalizar email
+                const normalizedEmail = email.trim().toLowerCase();
+                
+                // Criar usuário no Auth
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: normalizedEmail,
+                    password: password,
+                    options: {
+                        data: {
+                            nome: nome,
+                            cargo: cargo
+                        },
+                        emailRedirectTo: window.location.origin
+                    }
+                });
+
+                if (authError) {
+                    throw authError;
+                }
+
+                if (authData.user) {
+                    // Criar registro na tabela usuarios
+                    const { error: userError } = await supabase
+                        .from('usuarios')
+                        .insert([{
+                            id: authData.user.id,
+                            nome: nome,
+                            email: normalizedEmail,
+                            cargo: cargo,
+                            empresa: 'Record Guaíba',
+                            ativo: true,
+                            data_criacao: new Date().toISOString(),
+                            ultimo_acesso: new Date().toISOString()
+                        }]);
+
+                    if (userError) {
+                        console.error('Erro ao criar usuário na tabela:', userError);
+                        // Não lançar erro aqui para permitir que o usuário seja criado no Auth
+                    }
+
+                    return {
+                        id: authData.user.id,
+                        email: normalizedEmail,
+                        nome: nome,
+                        cargo: cargo,
+                        empresa: 'Record Guaíba',
+                        ativo: true,
+                        data_criacao: new Date().toISOString()
+                    };
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Erro no cadastro:', error);
+                throw error;
+            }
+        }
+
+        async function recoverPassword(email) {
+            try {
+                const normalizedEmail = email.trim().toLowerCase();
+                
+                const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+                    redirectTo: window.location.origin + '/index.html'
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Erro ao enviar email de recuperação:', error);
+                throw error;
+            }
+        }
+
+        async function checkExistingSession() {
+            try {
+                const { data, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    console.error('Erro ao verificar sessão:', error);
+                    return null;
+                }
+
+                if (data.session) {
+                    const { data: userData, error: userError } = await supabase
+                        .from('usuarios')
+                        .select('*')
+                        .eq('id', data.session.user.id)
+                        .maybeSingle();
+
+                    if (userError) {
+                        console.warn('Erro ao buscar dados do usuário:', userError);
+                        return {
+                            id: data.session.user.id,
+                            email: data.session.user.email,
+                            nome: data.session.user.email.split('@')[0],
+                            cargo: 'Funcionário',
+                            empresa: 'Record Guaíba',
+                            ativo: true
+                        };
+                    }
+
+                    // Atualizar último acesso
+                    if (userData) {
+                        await supabase
+                            .from('usuarios')
+                            .update({ ultimo_acesso: new Date().toISOString() })
+                            .eq('id', data.session.user.id);
+                    }
+
+                    return {
+                        id: data.session.user.id,
+                        email: data.session.user.email,
+                        nome: userData?.nome || data.session.user.email.split('@')[0],
+                        cargo: userData?.cargo || 'Funcionário',
+                        empresa: userData?.empresa || 'Record Guaíba',
+                        ativo: userData?.ativo !== undefined ? userData.ativo : true
+                    };
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Erro ao verificar sessão existente:', error);
+                return null;
+            }
+        }
+
+        // ========== FUNÇÕES DO FORMULÁRIO ==========
+        async function handleLogin(event) {
+            if (event) event.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            if (!email || !password) {
                 showNotification('Preencha todos os campos!', 'warning');
+                document.getElementById('loginEmail').focus();
                 return;
             }
-            
-            const stopLoading = showLoading('loginBtn', 'Autenticando...');
-            
+
+            if (!validateEmail(email)) {
+                showNotification('Digite um email válido!', 'warning');
+                document.getElementById('loginEmail').focus();
+                return;
+            }
+
+            showLoading('loginBtn', true, 'Autenticando...');
+
             try {
-                // Simular delay de rede
-                await new Promise(resolve => setTimeout(resolve, 800));
-                
-                // Verificar credenciais
-                const usuario = usuarios.find(u => 
-                    u.login === loginInput && 
-                    u.senha === passwordInput && 
-                    u.ativo
-                );
+                const usuario = await loginUser(email, password);
                 
                 if (usuario) {
-                    // Salvar usuário no localStorage
+                    // Salvar no localStorage
                     localStorage.setItem('ponto_currentUser', JSON.stringify(usuario));
                     
-                    // Inicializar banco de dados para o sistema principal
-                    initDatabase();
+                    if (rememberMe) {
+                        localStorage.setItem('ponto_remember_email', email);
+                    } else {
+                        localStorage.removeItem('ponto_remember_email');
+                    }
                     
-                    // Redirecionar para a página principal
                     showNotification(`Bem-vindo, ${usuario.nome}! Redirecionando...`, 'success', 2000);
                     
                     setTimeout(() => {
                         window.location.href = 'controle_intervalo.html';
                     }, 2000);
                 } else {
-                    stopLoading();
-                    showNotification('Login ou senha incorretos!', 'error');
+                    showLoading('loginBtn', false);
+                    showNotification('Erro ao fazer login. Tente novamente.', 'error');
                 }
             } catch (error) {
-                stopLoading();
+                showLoading('loginBtn', false);
                 console.error('Erro no login:', error);
-                showNotification('Erro no login. Tente novamente.', 'error');
+                
+                let errorMessage = 'Erro ao fazer login. ';
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMessage = 'Email ou senha incorretos!';
+                } else if (error.message.includes('Email not confirmed')) {
+                    errorMessage = 'Confirme seu email antes de fazer login! Verifique sua caixa de entrada.';
+                } else if (error.message.includes('User not found')) {
+                    errorMessage = 'Usuário não encontrado. Crie uma conta primeiro.';
+                } else if (error.message.includes('rate limit')) {
+                    errorMessage = 'Muitas tentativas de login. Tente novamente em alguns minutos.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showNotification(errorMessage, 'error');
             }
         }
 
-        // Inicializar eventos
-        function init() {
-            const loginBtn = document.getElementById('loginBtn');
-            const passwordInput = document.getElementById('passwordInput');
+        async function handleRegister(event) {
+            if (event) event.preventDefault();
             
-            // Evento de clique no botão de login
-            if (loginBtn) {
-                loginBtn.addEventListener('click', login);
+            const nome = document.getElementById('registerNome').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const cargo = document.getElementById('registerCargo').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const termsAccepted = document.getElementById('termsAccept').checked;
+
+            // Validações
+            if (!nome || !email || !cargo || !password || !confirmPassword) {
+                showNotification('Preencha todos os campos!', 'warning');
+                if (!nome) document.getElementById('registerNome').focus();
+                else if (!email) document.getElementById('registerEmail').focus();
+                else if (!cargo) document.getElementById('registerCargo').focus();
+                else if (!password) document.getElementById('registerPassword').focus();
+                else document.getElementById('registerConfirmPassword').focus();
+                return;
             }
-            
-            // Evento de Enter no campo de senha
-            if (passwordInput) {
-                passwordInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        login();
-                    }
-                });
+
+            if (!validateEmail(email)) {
+                showNotification('Digite um email válido!', 'warning');
+                document.getElementById('registerEmail').focus();
+                return;
             }
+
+            if (!termsAccepted) {
+                showNotification('Você precisa aceitar os termos de uso!', 'warning');
+                return;
+            }
+
+            if (password.length < 6) {
+                showNotification('A senha deve ter pelo menos 6 caracteres!', 'warning');
+                document.getElementById('registerPassword').focus();
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showNotification('As senhas não coincidem!', 'warning');
+                document.getElementById('registerConfirmPassword').focus();
+                return;
+            }
+
+            showLoading('registerBtn', true, 'Criando conta...');
+
+            try {
+                const usuario = await registerUser(nome, email, cargo, password);
+                
+                if (usuario) {
+                    showNotification(`Conta criada com sucesso! Bem-vindo(a), ${usuario.nome}. Verifique seu email para confirmar o cadastro.`, 'success', 5000);
+                    
+                    // Limpar formulário
+                    document.getElementById('registerNome').value = '';
+                    document.getElementById('registerEmail').value = '';
+                    document.getElementById('registerCargo').value = '';
+                    document.getElementById('registerPassword').value = '';
+                    document.getElementById('registerConfirmPassword').value = '';
+                    document.getElementById('termsAccept').checked = false;
+                    
+                    showLoading('registerBtn', false);
+                    
+                    // Voltar para login após 3 segundos
+                    setTimeout(() => {
+                        switchTab('login');
+                        document.getElementById('loginEmail').value = email;
+                        document.getElementById('loginPassword').focus();
+                    }, 3000);
+                } else {
+                    showLoading('registerBtn', false);
+                    showNotification('Erro ao criar conta. Tente novamente.', 'error');
+                }
+            } catch (error) {
+                showLoading('registerBtn', false);
+                console.error('Erro no cadastro:', error);
+                
+                let errorMessage = 'Erro ao criar conta. ';
+                if (error.message.includes('already registered') || error.message.includes('User already registered')) {
+                    errorMessage = 'Este email já está cadastrado! Faça login ou use outro email.';
+                } else if (error.message.includes('weak password')) {
+                    errorMessage = 'A senha é muito fraca. Use uma senha mais forte.';
+                } else if (error.message.includes('invalid email')) {
+                    errorMessage = 'Email inválido! Digite um email válido.';
+                } else if (error.message.includes('rate limit')) {
+                    errorMessage = 'Muitas tentativas de cadastro. Tente novamente em alguns minutos.';
+                } else if (error.message.includes('duplicate key')) {
+                    errorMessage = 'Este email já está em uso. Tente fazer login.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showNotification(errorMessage, 'error');
+            }
+        }
+
+        async function handleRecoverPassword(event) {
+            if (event) event.preventDefault();
             
-            // Verificar se há usuário logado (caso tenha voltado)
-            const currentUser = localStorage.getItem('ponto_currentUser');
-            if (currentUser) {
-                // Se já estiver logado, redirecionar direto
-                const user = JSON.parse(currentUser);
-                if (user && user.ativo) {
-                    showNotification(`Bem-vindo de volta, ${user.nome}! Redirecionando...`, 'info', 2000);
+            const email = document.getElementById('recoverEmail').value.trim();
+
+            if (!email) {
+                showNotification('Digite seu email!', 'warning');
+                document.getElementById('recoverEmail').focus();
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                showNotification('Digite um email válido!', 'warning');
+                document.getElementById('recoverEmail').focus();
+                return;
+            }
+
+            showLoading('recoverBtn', true, 'Enviando email...');
+
+            try {
+                const success = await recoverPassword(email);
+                
+                if (success) {
+                    showNotification(`Email de recuperação enviado para ${email}. Verifique sua caixa de entrada e spam.`, 'success', 6000);
+                    document.getElementById('recoverEmail').value = '';
+                    showLoading('recoverBtn', false);
+                    
+                    // Voltar para login após 4 segundos
+                    setTimeout(() => {
+                        switchTab('login');
+                        document.getElementById('loginEmail').value = email;
+                        document.getElementById('loginPassword').focus();
+                    }, 4000);
+                } else {
+                    showLoading('recoverBtn', false);
+                    showNotification('Erro ao enviar email de recuperação.', 'error');
+                }
+            } catch (error) {
+                showLoading('recoverBtn', false);
+                console.error('Erro na recuperação:', error);
+                
+                let errorMessage = 'Erro ao enviar email de recuperação. ';
+                if (error.message.includes('rate limit')) {
+                    errorMessage = 'Muitas tentativas. Tente novamente em alguns minutos.';
+                } else if (error.message.includes('not found')) {
+                    errorMessage = 'Email não encontrado. Verifique se digitou corretamente.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showNotification(errorMessage, 'error');
+            }
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function showTerms(event) {
+            if (event) event.preventDefault();
+            showNotification('Termos de uso: Este sistema é para uso interno da Record Guaíba. Seus dados serão usados apenas para controle de intervalo.', 'info', 8000);
+        }
+
+        function showPrivacy(event) {
+            if (event) event.preventDefault();
+            showNotification('Política de privacidade: Seus dados são protegidos e usados apenas para controle de intervalo. Não compartilhamos seus dados com terceiros.', 'info', 8000);
+        }
+
+        // ========== INICIALIZAÇÃO ==========
+        async function init() {
+            try {
+                console.log('Inicializando página de login...');
+                
+                // Verificar se há sessão ativa
+                const existingUser = await checkExistingSession();
+                
+                if (existingUser) {
+                    localStorage.setItem('ponto_currentUser', JSON.stringify(existingUser));
+                    showNotification(`Bem-vindo de volta, ${existingUser.nome}! Redirecionando...`, 'info', 2000);
                     setTimeout(() => {
                         window.location.href = 'controle_intervalo.html';
                     }, 2000);
+                    return;
                 }
+
+                // Preencher email lembrado
+                const rememberedEmail = localStorage.getItem('ponto_remember_email');
+                if (rememberedEmail) {
+                    document.getElementById('loginEmail').value = rememberedEmail;
+                    document.getElementById('rememberMe').checked = true;
+                }
+
+                // Configurar eventos das abas
+                document.querySelectorAll('.login-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        switchTab(tab.dataset.tab);
+                    });
+                });
+
+                // Evento de login
+                document.getElementById('loginBtn').addEventListener('click', handleLogin);
+                
+                // Evento de Enter no login
+                document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        handleLogin(e);
+                    }
+                });
+
+                // Evento de cadastro
+                document.getElementById('registerBtn').addEventListener('click', handleRegister);
+                
+                // Evento de recuperação de senha
+                document.getElementById('recoverBtn').addEventListener('click', handleRecoverPassword);
+                
+                // Eventos de voltar para login
+                document.getElementById('backToLoginFromRegisterBtn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab('login');
+                });
+                
+                document.getElementById('backToLoginFromRecoverBtn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab('login');
+                });
+
+                // Link "Esqueci minha senha"
+                document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab('recover');
+                });
+
+                // Links de termos e privacidade
+                document.getElementById('termsLink').addEventListener('click', showTerms);
+                document.getElementById('privacyLink').addEventListener('click', showPrivacy);
+
+                // Evento de Enter no formulário de cadastro
+                document.getElementById('registerConfirmPassword').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        handleRegister(e);
+                    }
+                });
+
+                // Evento de Enter no formulário de recuperação
+                document.getElementById('recoverEmail').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        handleRecoverPassword(e);
+                    }
+                });
+
+                // Focar no campo de email
+                setTimeout(() => {
+                    if (document.getElementById('loginEmail').value) {
+                        document.getElementById('loginPassword').focus();
+                    } else {
+                        document.getElementById('loginEmail').focus();
+                    }
+                }, 100);
+                
+                console.log('Página de login inicializada com sucesso');
+                
+            } catch (error) {
+                console.error('Erro ao inicializar página de login:', error);
+                showNotification('Erro ao inicializar sistema. Recarregue a página.', 'error');
             }
-            
-            console.log('Página de login inicializada');
         }
 
-        document.addEventListener('DOMContentLoaded', init);
+        // Iniciar quando o DOM estiver carregado
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     </script>
 </body>
 </html>
