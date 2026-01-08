@@ -3,36 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Ponto - Record Guaíba</title>
+    <title>Controle de Intervalo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.28/dist/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
             --vermelho:  #4361ee;
-            --preto: #000000;
+            --preto: #2d3748;
             --branco: #FFFFFF;
-            --cinza-claro: #F5F5F5;
-            --cinza-escuro: #333333;
-            --cinza-medio: #666666;
-            --verde: #28a745;
-            --amarelo: #ffc107;
-            --azul: #007bff;
-            --vermelho-suave: rgba(220, 53, 69, 0.1);
+            --light-bg: #f8f9fc;
+            --cinza-claro: #f8f9fc;
+            --cinza-escuro: #2d3748;
+            --cinza-medio: #6c757d;
+            --verde: #27ae60;
+            --amarelo: #f39c12;
+            --azul: #3498db;
+            --vermelho-suave: rgba(231, 76, 60, 0.1);
+            --light-card: #FFFFFF;
+            --light-border: #e3e6f0;
+            --transition-speed: 0.3s;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
         body {
-            background-color: var(--cinza-claro);
+            background-color: var(--light-bg);
             color: var(--cinza-escuro);
             line-height: 1.6;
             min-height: 100vh;
@@ -47,7 +53,7 @@
 
         /* Header */
         .header {
-            background: linear-gradient(90deg, var(--vermelho), var(--preto));
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
             color: var(--branco);
             padding: 1rem 0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -91,18 +97,25 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--vermelho);
+            color: var(--primary-color);
             font-weight: bold;
         }
 
         /* Cards */
         .card {
-            background-color: var(--branco);
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background-color: var(--light-card);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            border-left: 5px solid var(--vermelho);
+            border: none;
+            transition: var(--transition-speed);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
         }
 
         .card-header {
@@ -111,7 +124,9 @@
             align-items: center;
             margin-bottom: 1.5rem;
             padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--cinza-claro);
+            border-bottom: 1px solid var(--light-border);
+            background-color: var(--light-card);
+            border-radius: 12px 12px 0 0 !important;
         }
 
         .card-title {
@@ -126,7 +141,7 @@
             align-items: center;
             justify-content: center;
             padding: 0.75rem 1.5rem;
-            border-radius: 5px;
+            border-radius: 8px;
             border: none;
             font-weight: 600;
             cursor: pointer;
@@ -134,25 +149,30 @@
             text-align: center;
             text-decoration: none;
             gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
 
         .btn-primary {
-            background-color: var(--vermelho);
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
             color: var(--branco);
+            border: none;
         }
 
         .btn-primary:hover {
-            background-color: #4361ee;
+            background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
         .btn-secondary {
-            background-color: var(--preto);
+            background-color: #6c757d;
             color: var(--branco);
         }
 
         .btn-secondary:hover {
-            background-color: #333;
+            background-color: #5a6268;
+            transform: translateY(-2px);
         }
 
         .btn-success {
@@ -161,8 +181,9 @@
         }
 
         .btn-success:hover {
-            background-color: #218838;
+            background-color: #219653;
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
         }
 
         .btn-warning {
@@ -171,16 +192,18 @@
         }
 
         .btn-warning:hover {
-            background-color: #e0a800;
+            background-color: #e67e22;
+            transform: translateY(-2px);
         }
 
         .btn-danger {
-            background-color: #dc3545;
+            background-color: #e74c3c;
             color: var(--branco);
         }
 
         .btn-danger:hover {
-            background-color: #c82333;
+            background-color: #c0392b;
+            transform: translateY(-2px);
         }
 
         .btn-info {
@@ -189,7 +212,8 @@
         }
 
         .btn-info:hover {
-            background-color: #0056b3;
+            background-color: #2980b9;
+            transform: translateY(-2px);
         }
 
         .btn-block {
@@ -211,25 +235,27 @@
         .form-label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--cinza-escuro);
             text-align: left;
+            font-size: 0.9rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.75rem 1rem;
             border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
             text-align: left;
+            background-color: var(--light-card);
         }
 
         .form-control:focus {
             outline: none;
-            border-color: var(--vermelho);
-            box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
 
         textarea.form-control {
@@ -243,7 +269,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, var(--vermelho) 0%, var(--preto) 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             padding: 20px;
         }
 
@@ -258,7 +284,7 @@
         }
 
         .not-authenticated-title {
-            color: var(--vermelho);
+            color: var(--primary-color);
             margin-bottom: 1rem;
             font-size: 1.5rem;
             font-weight: 600;
@@ -294,12 +320,12 @@
 
         .ponto-hora.registrado {
             border-color: var(--verde);
-            background-color: rgba(40, 167, 69, 0.1);
+            background-color: rgba(39, 174, 96, 0.1);
         }
 
         .ponto-hora.atrasado {
-            border-color: var(--vermelho);
-            background-color: var(--vermelho-suave);
+            border-color: #e74c3c;
+            background-color: rgba(231, 76, 60, 0.1);
             animation: pulse 2s infinite;
         }
 
@@ -317,17 +343,17 @@
         }
 
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
         }
 
         /* Selfie Container */
         .selfie-container {
-            border: 2px solid var(--preto);
+            border: 2px solid var(--light-border);
             border-radius: 8px;
             padding: 1rem;
-            background-color: var(--branco);
+            background-color: var(--light-card);
             margin: 1rem 0;
             text-align: center;
         }
@@ -366,10 +392,10 @@
 
         /* Assinatura Container */
         .assinatura-container {
-            border: 2px solid var(--preto);
+            border: 2px solid var(--light-border);
             border-radius: 8px;
             padding: 1rem;
-            background-color: var(--branco);
+            background-color: var(--light-card);
             margin: 1rem 0;
             text-align: center;
         }
@@ -445,7 +471,7 @@
             height: 400px;
             position: relative;
             overflow: hidden;
-            border-radius: 10px;
+            border-radius: 12px;
             background-color: #000;
         }
 
@@ -497,7 +523,7 @@
 
         .camera-button:hover {
             transform: scale(1.1);
-            border-color: var(--vermelho);
+            border-color: var(--primary-color);
         }
 
         .camera-button i {
@@ -532,51 +558,58 @@
 
         .table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             margin: 1rem 0;
         }
 
         .table th {
             background-color: var(--cinza-claro);
             color: var(--cinza-escuro);
-            padding: 0.75rem;
+            padding: 12px 15px;
             text-align: left;
             font-weight: 600;
-            border-bottom: 2px solid #ddd;
-            font-size: 0.875rem;
+            border-top: 1px solid #dee2e6;
+            font-size: 0.9rem;
+            text-align: center;
+            vertical-align: middle;
         }
 
         .table td {
-            padding: 0.75rem;
+            padding: 12px 15px;
             border-bottom: 1px solid #ddd;
-            font-size: 0.875rem;
+            font-size: 0.9rem;
+            vertical-align: middle;
+            text-align: center;
         }
 
         .table tr:hover {
-            background-color: rgba(255, 0, 0, 0.05);
+            background-color: rgba(67, 97, 238, 0.05);
         }
 
         .badge {
             display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            min-width: 80px;
         }
 
         .badge-success {
-            background-color: rgba(40, 167, 69, 0.2);
+            background-color: rgba(39, 174, 96, 0.1);
             color: var(--verde);
         }
 
         .badge-warning {
-            background-color: rgba(255, 193, 7, 0.2);
-            color: #856404;
+            background-color: rgba(243, 156, 18, 0.1);
+            color: #f39c12;
         }
 
         .badge-danger {
-            background-color: rgba(220, 53, 69, 0.2);
-            color: #dc3545;
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
         }
 
         /* Navegação */
@@ -606,11 +639,11 @@
         }
 
         .nav-tab:hover {
-            color: var(--vermelho);
+            color: var(--primary-color);
         }
 
         .nav-tab.active {
-            color: var(--vermelho);
+            color: var(--primary-color);
         }
 
         .nav-tab.active::after {
@@ -620,7 +653,7 @@
             left: 0;
             width: 100%;
             height: 2px;
-            background-color: var(--vermelho);
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
         }
 
         /* Status */
@@ -635,7 +668,7 @@
         }
 
         .status-online {
-            background-color: rgba(40, 167, 69, 0.1);
+            background-color: rgba(39, 174, 96, 0.1);
             color: var(--verde);
         }
 
@@ -662,10 +695,10 @@
         /* Notificações */
         .notification {
             position: fixed;
-            top: 20px;
+            top: 90px;
             right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 5px;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
             color: var(--branco);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             z-index: 1200;
@@ -673,10 +706,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            animation: slideIn 0.3s ease-out;
+            animation: slideInRight 0.3s ease;
+            border-left: 4px solid transparent;
         }
 
-        @keyframes slideIn {
+        @keyframes slideInRight {
             from {
                 transform: translateX(100%);
                 opacity: 0;
@@ -688,20 +722,27 @@
         }
 
         .notification-success {
-            background-color: var(--verde);
+            background-color: #f0f9f0;
+            color: #0f5132;
+            border-left-color: var(--verde);
         }
 
         .notification-error {
-            background-color: #dc3545;
+            background-color: #fdf3f3;
+            color: #842029;
+            border-left-color: #e74c3c;
         }
 
         .notification-warning {
-            background-color: var(--amarelo);
-            color: var(--preto);
+            background-color: #fffef0;
+            color: #664d03;
+            border-left-color: var(--amarelo);
         }
 
         .notification-info {
-            background-color: var(--azul);
+            background-color: #f0f9ff;
+            color: #055160;
+            border-left-color: var(--azul);
         }
 
         .close-notification {
@@ -711,6 +752,14 @@
             cursor: pointer;
             margin-left: 10px;
             font-size: 1.2rem;
+            opacity: 0.7;
+            transition: var(--transition-speed);
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* Utilitários */
@@ -792,7 +841,7 @@
 
         .modal-justificativa-content {
             background: white;
-            border-radius: 15px;
+            border-radius: 12px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
             max-width: 500px;
             width: 100%;
@@ -813,10 +862,10 @@
         }
 
         .modal-justificativa-header {
-            background: linear-gradient(90deg, var(--vermelho), var(--preto));
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
             color: white;
             padding: 1.5rem;
-            border-radius: 15px 15px 0 0;
+            border-radius: 12px 12px 0 0;
             text-align: center;
         }
 
@@ -827,7 +876,7 @@
         .modal-justificativa-footer {
             padding: 1.5rem;
             background-color: var(--cinza-claro);
-            border-radius: 0 0 15px 15px;
+            border-radius: 0 0 12px 12px;
             display: flex;
             gap: 1rem;
             justify-content: flex-end;
@@ -835,14 +884,14 @@
 
         .alert-atraso {
             background-color: var(--vermelho-suave);
-            border-left: 4px solid var(--vermelho);
+            border-left: 4px solid #e74c3c;
             padding: 1rem;
-            border-radius: 5px;
+            border-radius: 8px;
             margin-bottom: 1.5rem;
         }
 
         .alert-atraso h4 {
-            color: var(--vermelho);
+            color: #e74c3c;
             margin-bottom: 0.5rem;
         }
 
@@ -955,8 +1004,8 @@
         .time-display {
             font-size: 0.9rem;
             font-weight: 600;
-            color: var(--vermelho);
-            background: rgba(255, 0, 0, 0.1);
+            color: var(--primary-color);
+            background: rgba(67, 97, 238, 0.1);
             padding: 0.5rem 1rem;
             border-radius: 5px;
             display: inline-block;
@@ -964,15 +1013,15 @@
 
         /* Instruction Box */
         .instruction-box {
-            background-color: rgba(255, 0, 0, 0.05);
-            border-left: 4px solid var(--vermelho);
+            background-color: rgba(67, 97, 238, 0.05);
+            border-left: 4px solid var(--primary-color);
             padding: 1rem;
-            border-radius: 5px;
+            border-radius: 8px;
             margin-bottom: 1rem;
         }
 
         .instruction-box h4 {
-            color: var(--vermelho);
+            color: var(--primary-color);
             margin-bottom: 0.5rem;
             font-size: 1rem;
         }
@@ -987,7 +1036,7 @@
         .stat-value {
             font-size: 1.8rem;
             font-weight: 700;
-            color: var(--vermelho);
+            color: var(--primary-color);
             margin-bottom: 0.25rem;
         }
 
@@ -1014,11 +1063,13 @@
         .modal-content {
             background: white;
             padding: 1.5rem;
-            border-radius: 10px;
+            border-radius: 12px;
             max-width: 500px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+            border: none;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
         }
 
         /* Camera Guide */
@@ -1064,11 +1115,13 @@
         .profile-modal-content {
             background: white;
             padding: 2rem;
-            border-radius: 15px;
+            border-radius: 12px;
             max-width: 500px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+            border: none;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
         }
 
         .profile-header {
@@ -1079,7 +1132,7 @@
         .profile-avatar {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, var(--vermelho), var(--preto));
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -1107,7 +1160,7 @@
         .profile-stat-value {
             font-size: 1.5rem;
             font-weight: bold;
-            color: var(--vermelho);
+            color: var(--primary-color);
         }
 
         .profile-stat-label {
@@ -1129,7 +1182,7 @@
             padding: 0.75rem;
             background: none;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             color: var(--cinza-medio);
@@ -1137,7 +1190,7 @@
         }
 
         .tab-button.active {
-            background: var(--vermelho);
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
             color: white;
         }
 
@@ -1166,12 +1219,51 @@
         }
 
         .sync-status.online {
-            background: rgba(40, 167, 69, 0.1);
+            background: rgba(39, 174, 96, 0.1);
             color: var(--verde);
         }
 
         .sync-status.offline {
             background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            z-index: 5;
+        }
+        
+        .search-box input {
+            padding-left: 40px;
+        }
+
+        .real-time-clock {
+            text-align: right;
+            line-height: 1.2;
+            margin-right: 1rem;
+        }
+
+        .real-time-clock div:first-child {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .real-time-clock div:last-child {
+            font-size: 0.7rem;
             color: #6c757d;
         }
     </style>
@@ -1181,7 +1273,7 @@
     <div id="notAuthenticated" class="not-authenticated-container d-none">
         <div class="not-authenticated-card">
             <div class="login-logo">
-                <i class="fas fa-tv"></i>
+                <i class="fas fa-tv" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
             </div>
             <h2 class="not-authenticated-title">Acesso Não Autorizado</h2>
             <p style="margin-bottom: 1.5rem; color: var(--cinza-medio);">
@@ -1191,9 +1283,9 @@
                 <i class="fas fa-sign-in-alt"></i> Ir para Página de Login
             </button>
             <div class="login-support mt-3">
-                <p>
+                <p style="font-size: 0.9rem; color: var(--cinza-medio);">
                     Para suporte técnico: 
-                    <a href="mailto:agawlinski@recordguaiba.tv.br">
+                    <a href="mailto:agawlinski@recordguaiba.tv.br" style="color: var(--primary-color); text-decoration: none;">
                         agawlinski@recordguaiba.tv.br
                     </a>
                 </p>
@@ -1208,12 +1300,15 @@
             <div class="container header-content">
                 <div class="logo">
                     <div class="logo-icon">
-                        <i class="fas fa-tv"></i>
+                        <i class="fas fa-clock"></i>
                     </div>
                     <h1>Controle de Intervalo</h1>
                 </div>
                 
                 <div class="user-info">
+                    <div class="real-time-clock" id="headerClock">
+                        <!-- Relógio em tempo real será inserido aqui -->
+                    </div>
                     <div class="user-avatar" id="userAvatar">F</div>
                     <div>
                         <div id="userName">Funcionário</div>
@@ -1246,6 +1341,9 @@
 
         <!-- Conteúdo Principal -->
         <div class="container">
+            <!-- Alertas -->
+            <div id="alertContainer" class="alert-container"></div>
+
             <!-- Registrar Ponto -->
             <div id="registrarPontoPage" class="page-content">
                 <div class="card">
@@ -1283,15 +1381,15 @@
                         <div class="form-group">
                             <label class="form-label">Tipo de Registro</label>
                             <div class="d-flex gap-2">
-                                <label class="flex-fill text-center p-3" style="border: 2px solid var(--preto); border-radius: 8px; cursor: pointer;">
+                                <label class="flex-fill text-center p-3" style="border: 2px solid var(--light-border); border-radius: 8px; cursor: pointer;">
                                     <input type="radio" name="tipoPonto" value="saida_intervalo" checked style="display: none;">
                                     <div>
-                                        <i class="fas fa-sign-out-alt" style="font-size: 2rem; color: var(--vermelho); display: block; margin-bottom: 0.5rem;"></i>
+                                        <i class="fas fa-sign-out-alt" style="font-size: 2rem; color: var(--primary-color); display: block; margin-bottom: 0.5rem;"></i>
                                         <strong>Saída Intervalo</strong>
                                     </div>
                                 </label>
                                 
-                                <label class="flex-fill text-center p-3" style="border: 2px solid var(--preto); border-radius: 8px; cursor: pointer;">
+                                <label class="flex-fill text-center p-3" style="border: 2px solid var(--light-border); border-radius: 8px; cursor: pointer;">
                                     <input type="radio" name="tipoPonto" value="retorno_intervalo" style="display: none;">
                                     <div>
                                         <i class="fas fa-sign-in-alt" style="font-size: 2rem; color: var(--verde); display: block; margin-bottom: 0.5rem;"></i>
@@ -1303,7 +1401,7 @@
                         
                         <!-- Selfie Container -->
                         <div class="selfie-container" id="selfieContainer">
-                            <h4 style="margin-bottom: 1rem; color: var(--vermelho);">
+                            <h4 style="margin-bottom: 1rem; color: var(--primary-color);">
                                 <i class="fas fa-camera"></i> Selfie Obrigatória
                                 <span style="font-size: 0.8rem; color: var(--cinza-medio);">(exceto com justificativa)</span>
                             </h4>
@@ -1342,7 +1440,7 @@
                                 
                                 <!-- Container de Assinatura -->
                                 <div class="assinatura-container">
-                                    <h5 style="margin-bottom: 1rem; color: var(--vermelho);">
+                                    <h5 style="margin-bottom: 1rem; color: var(--primary-color);">
                                         <i class="fas fa-signature"></i> Assinatura Digital
                                     </h5>
                                     
@@ -1418,28 +1516,38 @@
                         </button>
                     </div>
                     
-                    <div class="table-responsive">
-                        <table class="table" id="registrosTable">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Saída</th>
-                                    <th>Retorno</th>
-                                    <th>Status</th>
-                                    <th>Tipo</th>
-                                    <th>Email</th>
-                                    <th>PDF</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="registrosTableBody">
-                                <!-- Os registros serão inseridos aqui via JavaScript -->
-                            </tbody>
-                        </table>
+                    <div class="card-header">
+                        <h5 class="mb-0">Lista de Registros</h5>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" class="form-control" id="searchRegistros" placeholder="Buscar registros...">
+                        </div>
                     </div>
-                    <div id="registrosPagination" class="text-center mt-4 mb-5"></div>
                     
-                    <div class="mt-5 mb-4">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="registrosTable">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Saída</th>
+                                        <th>Retorno</th>
+                                        <th>Status</th>
+                                        <th>Tipo</th>
+                                        <th>Email</th>
+                                        <th>PDF</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="registrosTableBody">
+                                    <!-- Os registros serão inseridos aqui via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="registrosPagination" class="text-center mt-4 mb-5"></div>
+                    </div>
+                    
+                    <div class="card-body">
                         <h4 class="card-title mb-4" style="padding-bottom: 0.5rem; border-bottom: 2px solid var(--cinza-claro);">
                             <i class="fas fa-chart-bar"></i> Estatísticas
                         </h4>
@@ -1448,15 +1556,15 @@
                                 <div class="stat-value mb-2" id="totalRegistros">0</div>
                                 <div class="stat-label" style="font-size: 0.9rem; font-weight: 500;">Total Registros</div>
                             </div>
-                            <div class="p-3" style="background: rgba(40, 167, 69, 0.1); border-radius: 10px; min-width: 120px;">
+                            <div class="p-3" style="background: rgba(39, 174, 96, 0.1); border-radius: 10px; min-width: 120px;">
                                 <div class="stat-value mb-2" id="registrosCompletos">0</div>
                                 <div class="stat-label" style="font-size: 0.9rem; font-weight: 500;">Completos</div>
                             </div>
-                            <div class="p-3" style="background: rgba(0, 123, 255, 0.1); border-radius: 10px; min-width: 120px;">
+                            <div class="p-3" style="background: rgba(52, 152, 219, 0.1); border-radius: 10px; min-width: 120px;">
                                 <div class="stat-value mb-2" id="emailsEnviados">0</div>
                                 <div class="stat-label" style="font-size: 0.9rem; font-weight: 500;">Emails Enviados</div>
                             </div>
-                            <div class="p-3" style="background: rgba(220, 53, 69, 0.1); border-radius: 10px; min-width: 120px;">
+                            <div class="p-3" style="background: rgba(231, 76, 60, 0.1); border-radius: 10px; min-width: 120px;">
                                 <div class="stat-value mb-2" id="registrosAtrasados">0</div>
                                 <div class="stat-label" style="font-size: 0.9rem; font-weight: 500;">Atrasados</div>
                             </div>
@@ -1548,7 +1656,7 @@
                 
                 <!-- Assinatura para registro atrasado -->
                 <div class="assinatura-container mt-3">
-                    <h5 style="margin-bottom: 1rem; color: var(--vermelho);">
+                    <h5 style="margin-bottom: 1rem; color: var(--primary-color);">
                         <i class="fas fa-signature"></i> Assinatura Digital (Obrigatória)
                     </h5>
                     
@@ -2085,6 +2193,52 @@
             }
         }
 
+        function showAlert(message, type = 'info', duration = 5000) {
+            const alertContainer = document.getElementById('alertContainer');
+            if (!alertContainer) return;
+            
+            const alertId = 'alert-' + Date.now();
+            
+            const alertTypes = {
+                'success': { icon: 'fas fa-check-circle', class: 'alert-success' },
+                'error': { icon: 'fas fa-exclamation-circle', class: 'alert-error' },
+                'warning': { icon: 'fas fa-exclamation-triangle', class: 'alert-warning' },
+                'info': { icon: 'fas fa-info-circle', class: 'alert-info' }
+            };
+            
+            const alertConfig = alertTypes[type] || alertTypes.info;
+            
+            const alertHTML = `
+                <div id="${alertId}" class="alert ${alertConfig.class}">
+                    <i class="${alertConfig.icon} alert-icon"></i>
+                    <div class="alert-content">${message}</div>
+                    <button type="button" class="alert-close" onclick="closeAlert('${alertId}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    closeAlert(alertId);
+                }, duration);
+            }
+        }
+
+        function closeAlert(alertId) {
+            const alert = document.getElementById(alertId);
+            if (alert) {
+                alert.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.parentNode.removeChild(alert);
+                    }
+                }, 300);
+            }
+        }
+
         function showLoading(buttonId, text = 'Processando...') {
             const button = document.getElementById(buttonId);
             if (button) {
@@ -2228,7 +2382,7 @@
             const statusElement = document.getElementById('cameraStatus');
             if (statusElement) {
                 statusElement.textContent = message;
-                statusElement.style.color = message.includes('ativa') ? 'var(--verde)' : 'var(--vermelho)';
+                statusElement.style.color = message.includes('ativa') ? 'var(--verde)' : '#e74c3c';
             }
         }
 
@@ -2338,7 +2492,7 @@
                 
                 // Corrigido: usando addEventListener correto para SignaturePad
                 canvas.addEventListener('mousedown', () => {
-                    canvas.style.borderColor = 'var(--vermelho)';
+                    canvas.style.borderColor = 'var(--primary-color)';
                 });
                 
                 canvas.addEventListener('mouseup', () => {
@@ -2394,7 +2548,7 @@
                 });
                 
                 canvas.addEventListener('mousedown', () => {
-                    canvas.style.borderColor = 'var(--vermelho)';
+                    canvas.style.borderColor = 'var(--primary-color)';
                 });
                 
                 canvas.addEventListener('mouseup', () => {
@@ -2695,7 +2849,7 @@
                             statusElement.style.color = 'var(--amarelo)';
                         } else {
                             statusElement.textContent = 'Pendente';
-                            statusElement.style.color = 'var(--vermelho)';
+                            statusElement.style.color = 'var(--primary-color)';
                         }
                     }
                 } else {
@@ -2715,7 +2869,7 @@
                     
                     if (statusElement) {
                         statusElement.textContent = 'Pendente';
-                        statusElement.style.color = 'var(--vermelho)';
+                        statusElement.style.color = 'var(--primary-color)';
                     }
                 }
                 
@@ -4296,6 +4450,35 @@
                 updateDateTime();
                 setInterval(updateDateTime, 1000);
                 
+                // Initialize real-time clock in header
+                function updateClock() {
+                    const now = new Date();
+                    const timeString = now.toLocaleTimeString('pt-BR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                    const dateString = now.toLocaleDateString('pt-BR', {
+                        weekday: 'short',
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                    
+                    const clockElement = document.getElementById('headerClock');
+                    if (clockElement) {
+                        clockElement.innerHTML = `
+                            <div style="text-align: right; line-height: 1.2;">
+                                <div style="font-size: 0.9rem; font-weight: 500;">${timeString}</div>
+                                <div style="font-size: 0.7rem; color: #6c757d;">${dateString}</div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                updateClock();
+                setInterval(updateClock, 1000);
+                
                 setTimeout(() => {
                     initSignaturePad();
                 }, 300);
@@ -4337,11 +4520,11 @@
                         if (radio) {
                             radio.checked = true;
                             document.querySelectorAll('.flex-fill').forEach(l => {
-                                l.style.borderColor = 'var(--preto)';
+                                l.style.borderColor = 'var(--light-border)';
                                 l.style.backgroundColor = 'var(--branco)';
                             });
-                            this.style.borderColor = 'var(--vermelho)';
-                            this.style.backgroundColor = 'rgba(255, 0, 0, 0.05)';
+                            this.style.borderColor = 'var(--primary-color)';
+                            this.style.backgroundColor = 'rgba(67, 97, 238, 0.05)';
                         }
                     });
                 });
@@ -4464,6 +4647,33 @@
                     exportarPDFBtn.addEventListener('click', exportarRelatorioCompletoPDF);
                 }
                 
+                // Add search functionality
+                const searchRegistros = document.getElementById('searchRegistros');
+                if (searchRegistros) {
+                    searchRegistros.addEventListener('input', function() {
+                        const searchTerm = this.value.toLowerCase();
+                        filterTable('registrosTable', searchTerm);
+                    });
+                }
+                
+                function filterTable(tableId, searchTerm) {
+                    const table = document.getElementById(tableId);
+                    if (!table) return;
+                    
+                    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+                    
+                    for (let i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        const text = row.textContent.toLowerCase();
+                        
+                        if (text.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    }
+                }
+                
                 const hoje = new Date().toISOString().split('T')[0];
                 const trintaDiasAtras = new Date();
                 trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
@@ -4498,6 +4708,8 @@
         window.abrirModalGerenciarPerfil = abrirModalGerenciarPerfil;
         window.fecharModalPerfil = fecharModalPerfil;
         window.salvarAlteracoesPerfil = salvarAlteracoesPerfil;
+        window.closeAlert = closeAlert;
+        window.showAlert = showAlert;
         
     </script>
 </body>
