@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Record - Login</title>
+    <title>Record Guaíba - Login</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -345,16 +345,6 @@
             margin-bottom: 15px;
         }
 
-        .super-admin-info {
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            text-align: center;
-            font-size: 0.85rem;
-        }
-
         /* Media Queries para responsividade */
         @media (max-width: 480px) {
             .login-container {
@@ -468,7 +458,10 @@
                     
                     <div class="form-group">
                         <label for="registerEmail" class="form-label">E-mail</label>
-                        <input type="email" class="form-control" id="registerEmail" placeholder="seu@recordguaiba.tv.br" required>
+                        <input type="email" class="form-control" id="registerEmail" placeholder="seu@email.com" required>
+                        <small class="text-muted" style="font-size: 0.8rem; margin-top: 5px; display: block;">
+                            <i class="fas fa-info-circle me-1"></i> Use um e-mail real para receber o link de confirmação
+                        </small>
                     </div>
                     
                     <div class="form-group">
@@ -492,7 +485,7 @@
                     <div class="form-check mb-3">
                         <input type="checkbox" class="form-check-input" id="termsAccept" required>
                         <label class="form-check-label" for="termsAccept" style="font-size: 0.9rem;">
-                            Aceito os <a href="#" id="termsLink">termos de uso</a> e <a href="#" id="privacyLink">política de privacidade</a>
+                            Eu aceito criar uma conta no sistema de controle de intervalo da Record Guaíba
                         </label>
                     </div>
                     
@@ -510,8 +503,12 @@
             </div>
             
             <div class="login-footer">
+                <p>
                     <i class="fas fa-headset me-1"></i> Suporte: 
                     <a href="mailto:ti@recordguaiba.tv.br">ti@recordguaiba.tv.br</a>
+                </p>
+                <p style="font-size: 0.75rem; margin-top: 5px; color: #999;">
+                    Sistema de Controle de Intervalo - Record Guaíba TV
                 </p>
             </div>
         </div>
@@ -537,7 +534,7 @@
                     
                     <div class="contact-info">
                         <p><strong>E-mail de suporte:</strong></p>
-                        <p><a href="mailto:ti@recordguiaba.tv.br"><i class="fas fa-envelope me-2"></i>ti@recordguiaba.tv.br</a></p>
+                        <p><a href="mailto:ti@recordguaiba.tv.br"><i class="fas fa-envelope me-2"></i>ti@recordguaiba.tv.br</a></p>
                         
                         <p class="mt-3"><strong>Informações para contato:</strong></p>
                         <p>Envie um e-mail para o endereço acima informando:</p>
@@ -550,7 +547,7 @@
                     
                     <div class="d-flex justify-content-between mt-4">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                        <a href="mailto:ti@recordguiaba.tv.br?subject=Solicitação de Troca de Senha&body=Prezados,%0D%0A%0D%0AGostaria de solicitar a troca de minha senha no sistema.%0D%0A%0D%0ANome completo: %0D%0AE-mail de acesso: %0D%0A%0D%0AAtenciosamente," class="btn btn-modal">
+                        <a href="mailto:ti@recordguaiba.tv.br?subject=Solicitação de Troca de Senha&body=Prezados,%0D%0A%0D%0AGostaria de solicitar a troca de minha senha no sistema.%0D%0A%0D%0ANome completo: %0D%0AE-mail de acesso: %0D%0A%0D%0AAtenciosamente," class="btn btn-modal">
                             <i class="fas fa-paper-plane me-2"></i> Enviar E-mail
                         </a>
                     </div>
@@ -684,39 +681,11 @@
                 return re.test(email);
             }
             
-            // Funções Supabase
+            // FUNÇÃO DE LOGIN CORRIGIDA
             async function loginUser(email, password) {
                 try {
                     console.log('Tentando login com:', email);
                     
-                    // Verificar se é o super admin
-                    if (email === SUPER_ADMIN_EMAIL) {
-                        if (password !== SUPER_ADMIN_PASSWORD) {
-                            throw new Error('Senha do super admin incorreta');
-                        }
-                        
-                        // Para super admin, criar um usuário simulado
-                        const usuario = {
-                            id: 'super-admin-id',
-                            email: SUPER_ADMIN_EMAIL,
-                            nome: 'Super Administrador',
-                            cargo: 'Super Admin',
-                            empresa: 'Record Guaíba',
-                            ativo: true,
-                            data_criacao: new Date().toISOString(),
-                            is_super_admin: true
-                        };
-                        
-                        // Salvar sessão manualmente para super admin
-                        sessionStorage.setItem('supabase.auth.token', JSON.stringify({
-                            access_token: 'super-admin-token',
-                            refresh_token: 'super-admin-refresh',
-                            user: usuario
-                        }));
-                        
-                        return usuario;
-                    }
-
                     // Login normal com Supabase
                     const { data, error } = await supabase.auth.signInWithPassword({
                         email: email.trim().toLowerCase(),
@@ -734,46 +703,67 @@
                         // Verificar se o email foi confirmado
                         const emailConfirmed = data.user.email_confirmed_at || data.user.confirmed_at;
                         if (!emailConfirmed) {
-                            throw new Error('Email não confirmado. Verifique sua caixa de entrada.');
+                            throw new Error('Email não confirmado. Verifique sua caixa de entrada e clique no link de confirmação.');
                         }
 
                         // Buscar dados do usuário na tabela usuarios
                         const { data: userData, error: userError } = await supabase
                             .from('usuarios')
                             .select('*')
-                            .eq('id', data.user.id)
-                            .single();
+                            .eq('email', data.user.email)
+                            .maybeSingle();
 
-                        if (userError) {
-                            console.warn('Usuário não encontrado na tabela usuarios, criando...');
+                        let usuarioRetorno;
+                        
+                        if (userError || !userData) {
+                            console.warn('Usuário não encontrado na tabela, criando...');
                             
-                            const nome = data.user.email.split('@')[0];
-                            const { error: insertError } = await supabase
+                            // Criar usuário se não existir
+                            const nome = data.user.user_metadata?.nome || data.user.email.split('@')[0];
+                            const cargo = data.user.user_metadata?.cargo || 'Funcionário';
+                            
+                            const { data: newUser, error: insertError } = await supabase
                                 .from('usuarios')
-                                .insert([{
-                                    id: data.user.id,
+                                .insert({
                                     nome: nome,
                                     email: data.user.email,
-                                    cargo: 'Funcionário',
+                                    cargo: cargo,
                                     empresa: 'Record Guaíba',
-                                    ativo: true,
-                                    data_criacao: new Date().toISOString(),
-                                    ultimo_acesso: new Date().toISOString()
-                                }]);
+                                    ativo: true
+                                })
+                                .select()
+                                .single();
 
                             if (insertError) {
                                 console.error('Erro ao criar usuário:', insertError);
+                                // Usar dados básicos mesmo com erro
+                                usuarioRetorno = {
+                                    id: data.user.id,
+                                    email: data.user.email,
+                                    nome: nome,
+                                    cargo: cargo,
+                                    empresa: 'Record Guaíba',
+                                    ativo: true
+                                };
+                            } else {
+                                usuarioRetorno = {
+                                    id: newUser.id || data.user.id,
+                                    email: newUser.email || data.user.email,
+                                    nome: newUser.nome || nome,
+                                    cargo: newUser.cargo || cargo,
+                                    empresa: newUser.empresa || 'Record Guaíba',
+                                    ativo: newUser.ativo !== undefined ? newUser.ativo : true
+                                };
                             }
-
-                            return {
-                                id: data.user.id,
-                                email: data.user.email,
-                                nome: nome,
-                                cargo: 'Funcionário',
-                                empresa: 'Record Guaíba',
-                                ativo: true,
-                                data_criacao: new Date().toISOString(),
-                                is_super_admin: false
+                        } else {
+                            // Usuário já existe na tabela
+                            usuarioRetorno = {
+                                id: userData.id || data.user.id,
+                                email: userData.email || data.user.email,
+                                nome: userData.nome || data.user.email.split('@')[0],
+                                cargo: userData.cargo || 'Funcionário',
+                                empresa: userData.empresa || 'Record Guaíba',
+                                ativo: userData.ativo !== undefined ? userData.ativo : true
                             };
                         }
 
@@ -781,18 +771,9 @@
                         await supabase
                             .from('usuarios')
                             .update({ ultimo_acesso: new Date().toISOString() })
-                            .eq('id', data.user.id);
+                            .eq('email', data.user.email);
 
-                        return {
-                            id: data.user.id,
-                            email: data.user.email,
-                            nome: userData.nome || data.user.email.split('@')[0],
-                            cargo: userData.cargo || 'Funcionário',
-                            empresa: userData.empresa || 'Record Guaíba',
-                            ativo: userData.ativo !== undefined ? userData.ativo : true,
-                            data_criacao: userData.data_criacao || new Date().toISOString(),
-                            is_super_admin: userData.is_super_admin || false
-                        };
+                        return usuarioRetorno;
                     }
                     
                     return null;
@@ -802,24 +783,30 @@
                 }
             }
             
+            // FUNÇÃO DE REGISTRO CORRIGIDA
             async function registerUser(nome, email, cargo, password) {
                 try {
                     const normalizedEmail = email.trim().toLowerCase();
                     
                     console.log('Registrando usuário:', normalizedEmail);
                     
-                    // Verificar se já existe usuário com este email
-                    const { data: existingUser } = await supabase
+                    // 1. Verificar formato do email
+                    if (!validateEmail(normalizedEmail)) {
+                        throw new Error('Digite um email válido!');
+                    }
+                    
+                    // 2. Verificar se já existe usuário com este email
+                    const { data: existingUser, error: checkError } = await supabase
                         .from('usuarios')
                         .select('id')
                         .eq('email', normalizedEmail)
                         .maybeSingle();
 
                     if (existingUser) {
-                        throw new Error('Este email já está cadastrado!');
+                        throw new Error('Este email já está cadastrado! Faça login ou use outro email.');
                     }
-
-                    // Criar usuário no Supabase Auth
+                    
+                    // 3. Criar usuário no Supabase Auth
                     const { data: authData, error: authError } = await supabase.auth.signUp({
                         email: normalizedEmail,
                         password: password,
@@ -828,7 +815,7 @@
                                 nome: nome,
                                 cargo: cargo
                             },
-                            emailRedirectTo: window.location.origin
+                            emailRedirectTo: window.location.origin + '/INTERVALO.html'
                         }
                     });
 
@@ -840,68 +827,54 @@
                     console.log('Usuário criado no auth:', authData);
 
                     if (authData.user) {
-                        // Criar usuário na tabela usuarios
-                        const { error: userError } = await supabase
+                        // 4. Esperar um pouco para o trigger funcionar
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        
+                        // 5. Tentar buscar usuário na tabela
+                        const { data: userData, error: userError } = await supabase
                             .from('usuarios')
-                            .insert([{
-                                id: authData.user.id,
-                                nome: nome,
-                                email: normalizedEmail,
-                                cargo: cargo,
-                                empresa: 'Record Guaíba',
-                                ativo: true,
-                                data_criacao: new Date().toISOString(),
-                                ultimo_acesso: new Date().toISOString()
-                            }]);
+                            .select('*')
+                            .eq('email', normalizedEmail)
+                            .maybeSingle();
 
-                        if (userError) {
-                            console.error('Erro ao criar usuário na tabela:', userError);
-                            // Tentar novamente sem id
-                            const { error: retryError } = await supabase
+                        if (userError || !userData) {
+                            console.warn('Usuário não encontrado na tabela, inserindo manualmente...');
+                            
+                            // Inserir manualmente se o trigger falhou
+                            const { data: newUser, error: insertError } = await supabase
                                 .from('usuarios')
-                                .insert([{
+                                .insert({
                                     nome: nome,
                                     email: normalizedEmail,
                                     cargo: cargo,
                                     empresa: 'Record Guaíba',
-                                    ativo: true,
-                                    data_criacao: new Date().toISOString()
-                                }]);
+                                    ativo: true
+                                })
+                                .select()
+                                .single();
 
-                            if (retryError) {
-                                console.error('Erro ao criar usuário na segunda tentativa:', retryError);
+                            if (insertError) {
+                                console.error('Erro ao inserir usuário manualmente:', insertError);
+                                // Continuar mesmo com erro - o trigger pode inserir depois
                             }
                         }
 
                         return {
-                            id: authData.user.id,
+                            success: true,
+                            needsVerification: !authData.session,
                             email: normalizedEmail,
                             nome: nome,
-                            cargo: cargo,
-                            empresa: 'Record Guaíba',
-                            ativo: true,
-                            data_criacao: new Date().toISOString(),
-                            is_super_admin: false
-                        };
-                    } else if (authData.session) {
-                        // Usuário já tinha conta e fez login automaticamente
-                        return {
-                            id: authData.user.id,
-                            email: normalizedEmail,
-                            nome: nome,
-                            cargo: cargo,
-                            empresa: 'Record Guaíba',
-                            ativo: true,
-                            data_criacao: new Date().toISOString(),
-                            is_super_admin: false
+                            message: 'Conta criada com sucesso!'
                         };
                     }
                     
-                    // Se não tem user nem session, é porque precisa confirmar email
+                    // Se chegou aqui, precisa verificar email
                     return {
+                        success: true,
+                        needsVerification: true,
                         email: normalizedEmail,
                         nome: nome,
-                        needsVerification: true
+                        message: 'Conta criada! Verifique seu email para confirmar.'
                     };
                 } catch (error) {
                     console.error('Erro no cadastro:', error);
@@ -935,7 +908,7 @@
                     const usuario = await loginUser(email, password);
                     
                     if (usuario) {
-                        // Salvar dados do usuário
+                        // Salvar dados do usuário no localStorage
                         localStorage.setItem('ponto_currentUser', JSON.stringify(usuario));
                         
                         // Salvar email se "lembrar-me" estiver marcado
@@ -943,11 +916,6 @@
                             localStorage.setItem('ponto_remember_email', email);
                         } else {
                             localStorage.removeItem('ponto_remember_email');
-                        }
-                        
-                        // Salvar se é super admin
-                        if (usuario.is_super_admin) {
-                            localStorage.setItem('ponto_is_super_admin', 'true');
                         }
                         
                         showAlert(`Bem-vindo, ${usuario.nome}! Redirecionando...`, 'success');
@@ -969,7 +937,6 @@
                     
                     if (error.message.includes('Invalid login credentials') || 
                         error.message.includes('invalid_grant') ||
-                        error.message.includes('Senha do super admin incorreta') ||
                         error.message.includes('invalid password')) {
                         errorMessage = 'E-mail ou senha incorretos!';
                     } else if (error.message.includes('Email not confirmed') || 
@@ -1021,19 +988,20 @@
                     return;
                 }
 
+                if (nome.length < 3) {
+                    showAlert('Nome deve ter pelo menos 3 caracteres!', 'warning');
+                    document.getElementById('registerNome').focus();
+                    return;
+                }
+
                 if (!validateEmail(email)) {
                     showAlert('Digite um e-mail válido!', 'warning');
                     document.getElementById('registerEmail').focus();
                     return;
                 }
 
-                if (email === SUPER_ADMIN_EMAIL) {
-                    showAlert('Este e-mail não pode ser usado para cadastro.', 'error');
-                    return;
-                }
-
                 if (!termsAccepted) {
-                    showAlert('Você precisa aceitar os termos de uso!', 'warning');
+                    showAlert('Você precisa aceitar os termos para criar uma conta!', 'warning');
                     return;
                 }
 
@@ -1056,37 +1024,39 @@
                     
                     setButtonState(registerButton, registerButtonText, registerButtonSpinner, false);
                     
-                    if (resultado.needsVerification) {
-                        // Email precisa ser verificado
-                        verificationMessage.style.display = 'block';
-                        
-                        showAlert(`Conta criada com sucesso! Verifique seu e-mail (${email}) para confirmar o cadastro. Após confirmar, faça login normalmente.`, 'success');
-                        
-                        // Limpar formulário
-                        document.getElementById('registerNome').value = '';
-                        document.getElementById('registerEmail').value = '';
-                        document.getElementById('registerCargo').value = '';
-                        document.getElementById('registerPassword').value = '';
-                        document.getElementById('registerConfirmPassword').value = '';
-                        document.getElementById('termsAccept').checked = false;
-                        
-                        // Voltar para login após 5 segundos
-                        setTimeout(() => {
-                            switchTab('login');
-                            document.getElementById('loginEmail').value = email;
-                            document.getElementById('loginPassword').focus();
-                        }, 5000);
-                    } else if (resultado.id) {
-                        // Registro bem-sucedido e usuário já autenticado
-                        showAlert(`Conta criada com sucesso! Bem-vindo, ${resultado.nome}! Redirecionando...`, 'success');
-                        
-                        // Salvar dados do usuário
-                        localStorage.setItem('ponto_currentUser', JSON.stringify(resultado));
-                        
-                        // Redirecionar para a página principal
-                        setTimeout(() => {
-                            window.location.href = 'c';
-                        }, 2000);
+                    if (resultado.success) {
+                        if (resultado.needsVerification) {
+                            // Email precisa ser verificado
+                            verificationMessage.style.display = 'block';
+                            
+                            showAlert(
+                                `Conta criada com sucesso! Verifique seu e-mail (${email}) para confirmar o cadastro. Após confirmar, faça login normalmente.`, 
+                                'success'
+                            );
+                            
+                            // Limpar formulário
+                            document.getElementById('registerNome').value = '';
+                            document.getElementById('registerEmail').value = '';
+                            document.getElementById('registerCargo').value = '';
+                            document.getElementById('registerPassword').value = '';
+                            document.getElementById('registerConfirmPassword').value = '';
+                            document.getElementById('termsAccept').checked = false;
+                            
+                            // Voltar para login após 5 segundos
+                            setTimeout(() => {
+                                switchTab('login');
+                                document.getElementById('loginEmail').value = email;
+                                document.getElementById('loginPassword').focus();
+                            }, 5000);
+                        } else {
+                            // Registro bem-sucedido e usuário já autenticado
+                            showAlert(`Conta criada com sucesso! Bem-vindo, ${nome}! Redirecionando...`, 'success');
+                            
+                            // Redirecionar para a página principal
+                            setTimeout(() => {
+                                window.location.href = 'INTERVALO.html';
+                            }, 2000);
+                        }
                     } else {
                         showAlert('Erro ao criar conta. Tente novamente.', 'error');
                     }
@@ -1100,18 +1070,25 @@
                         error.message.includes('já está cadastrado')) {
                         errorMessage = 'Este e-mail já está cadastrado! Faça login ou use outro e-mail.';
                     } else if (error.message.includes('weak password')) {
-                        errorMessage = 'A senha é muito fraca. Use uma senha mais forte (mínimo 6 caracteres).';
+                        errorMessage = 'A senha é muito fraca. Use uma senha mais forte (mínimo 6 caracteres, com letras e números).';
                     } else if (error.message.includes('invalid email')) {
                         errorMessage = 'E-mail inválido! Digite um e-mail válido.';
                     } else if (error.message.includes('rate limit')) {
                         errorMessage = 'Muitas tentativas de cadastro. Tente novamente em alguns minutos.';
                     } else if (error.message.includes('Network Error') || error.message.includes('Failed to fetch')) {
                         errorMessage = 'Erro de conexão. Verifique sua internet.';
+                    } else if (error.message.includes('password')) {
+                        errorMessage = 'Erro na senha. Certifique-se de que tenha pelo menos 6 caracteres.';
                     } else {
                         errorMessage += error.message;
                     }
                     
                     showAlert(errorMessage, 'error');
+                    
+                    // Manter os dados preenchidos para correção
+                    document.getElementById('registerPassword').value = '';
+                    document.getElementById('registerConfirmPassword').value = '';
+                    document.getElementById('registerPassword').focus();
                 }
             });
             
@@ -1131,18 +1108,13 @@
             if (rememberedEmail) {
                 document.getElementById('loginEmail').value = rememberedEmail;
                 document.getElementById('rememberMe').checked = true;
+                document.getElementById('loginPassword').focus();
+            } else {
+                // Focar no campo de email
+                setTimeout(() => {
+                    document.getElementById('loginEmail').focus();
+                }, 100);
             }
-            
-            // Links de termos e privacidade
-            document.getElementById('termsLink').addEventListener('click', (e) => {
-                e.preventDefault();
-                showAlert('Termos de uso: Este sistema é para uso interno da Record Guaíba. Seus dados serão usados apenas para controle de intervalo.', 'info');
-            });
-            
-            document.getElementById('privacyLink').addEventListener('click', (e) => {
-                e.preventDefault();
-                showAlert('Política de privacidade: Seus dados são protegidos e usados apenas para controle de intervalo. Não compartilhamos seus dados com terceiros.', 'info');
-            });
             
             // Evento quando o modal é aberto
             const forgotPasswordModal = document.getElementById('forgotPasswordModal');
@@ -1174,11 +1146,11 @@
                     if (sessionData.session) {
                         console.log('Sessão ativa detectada:', sessionData.session.user.email);
                         
-                        // Buscar dados do usuário na tabela usuarios
+                        // Buscar dados do usuário
                         const { data: userData, error: userError } = await supabase
                             .from('usuarios')
                             .select('*')
-                            .eq('id', sessionData.session.user.id)
+                            .eq('email', sessionData.session.user.email)
                             .maybeSingle();
 
                         if (!userError && userData) {
@@ -1188,16 +1160,10 @@
                                 nome: userData.nome || sessionData.session.user.email.split('@')[0],
                                 cargo: userData.cargo || 'Funcionário',
                                 empresa: userData.empresa || 'Record Guaíba',
-                                ativo: userData.ativo !== undefined ? userData.ativo : true,
-                                data_criacao: userData.data_criacao || new Date().toISOString(),
-                                is_super_admin: userData.is_super_admin || false
+                                ativo: userData.ativo !== undefined ? userData.ativo : true
                             };
                             
                             localStorage.setItem('ponto_currentUser', JSON.stringify(usuario));
-                            
-                            if (usuario.is_super_admin) {
-                                localStorage.setItem('ponto_is_super_admin', 'true');
-                            }
                             
                             showAlert(`Sessão ativa detectada. Redirecionando...`, 'success');
                             
@@ -1215,84 +1181,13 @@
                 }
             }
             
-            // Verificar e criar super admin
-            async function checkAndCreateSuperAdmin() {
-                try {
-                    // Verificar se o super admin já existe na tabela usuarios
-                    const { data: existingAdmin, error: checkError } = await supabase
-                        .from('usuarios')
-                        .select('*')
-                        .eq('email', SUPER_ADMIN_EMAIL)
-                        .maybeSingle();
-
-                    if (checkError && checkError.code !== 'PGRST116') {
-                        console.warn('Erro ao verificar super admin:', checkError);
-                    }
-
-                    if (!existingAdmin) {
-                        console.log('Criando super admin na tabela usuarios...');
-                        
-                        // Criar super admin na tabela usuarios
-                        const { error: insertError } = await supabase
-                            .from('usuarios')
-                            .insert([{
-                                id: 'super-admin-id',
-                                nome: 'Super Administrador',
-                                email: SUPER_ADMIN_EMAIL,
-                                cargo: 'Super Admin',
-                                empresa: 'Record Guaíba',
-                                ativo: true,
-                                is_super_admin: true,
-                                data_criacao: new Date().toISOString(),
-                                ultimo_acesso: new Date().toISOString()
-                            }]);
-
-                        if (insertError) {
-                            console.error('Erro ao criar super admin:', insertError);
-                            // Tentar sem o ID específico
-                            const { error: retryError } = await supabase
-                                .from('usuarios')
-                                .insert([{
-                                    nome: 'Super Administrador',
-                                    email: SUPER_ADMIN_EMAIL,
-                                    cargo: 'Super Admin',
-                                    empresa: 'Record Guaíba',
-                                    ativo: true,
-                                    is_super_admin: true,
-                                    data_criacao: new Date().toISOString()
-                                }]);
-                                
-                            if (retryError) {
-                                console.error('Erro na segunda tentativa de criar super admin:', retryError);
-                            } else {
-                                console.log('Super admin criado na tabela usuarios');
-                            }
-                        } else {
-                            console.log('Super admin criado na tabela usuarios');
-                        }
-                    } else {
-                        console.log('Super admin já existe na tabela');
-                    }
-                } catch (error) {
-                    console.error('Erro ao verificar/criar super admin:', error);
-                }
-            }
-            
             // Inicialização
             async function init() {
-                // Verificar e criar super admin
-                await checkAndCreateSuperAdmin();
-                
                 // Verificar se já está autenticado
                 const hasSession = await checkExistingSession();
                 if (hasSession) {
                     return;
                 }
-                
-                // Focar no campo de email
-                setTimeout(() => {
-                    document.getElementById('loginEmail').focus();
-                }, 100);
             }
             
             init();
