@@ -1478,24 +1478,28 @@
         // ========== VERIFICAÇÃO DE AUTENTICAÇÃO ==========
         function checkAuthentication() {
             try {
-                const currentUserData = localStorage.getItem('ponto_currentUser');
+                // Verificar se o usuário está logado (como no index.html)
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                const userEmail = localStorage.getItem('userEmail');
+                const userId = localStorage.getItem('userId');
                 
-                if (!currentUserData) {
+                if (!isLoggedIn || isLoggedIn !== 'true' || !userEmail) {
                     // Não autenticado - mostrar tela de não autenticado
                     document.getElementById('notAuthenticated').classList.remove('d-none');
                     document.getElementById('mainSystem').classList.add('d-none');
                     return null;
                 }
                 
-                const user = JSON.parse(currentUserData);
-                
-                if (!user || !user.ativo) {
-                    // Usuário inválido ou inativo
-                    localStorage.removeItem('ponto_currentUser');
-                    document.getElementById('notAuthenticated').classList.remove('d-none');
-                    document.getElementById('mainSystem').classList.add('d-none');
-                    return null;
-                }
+                // Criar objeto de usuário baseado no login
+                const user = {
+                    id: userId || '1',
+                    nome: userEmail.split('@')[0].replace('.', ' '),
+                    empresa: 'Record Guaíba',
+                    login: userEmail,
+                    email: userEmail,
+                    cargo: 'Funcionário',
+                    ativo: true
+                };
                 
                 // Autenticado - mostrar sistema
                 document.getElementById('notAuthenticated').classList.add('d-none');
@@ -1504,7 +1508,9 @@
                 return user;
             } catch (error) {
                 console.error('Erro na verificação de autenticação:', error);
-                localStorage.removeItem('ponto_currentUser');
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userId');
                 document.getElementById('notAuthenticated').classList.remove('d-none');
                 document.getElementById('mainSystem').classList.add('d-none');
                 return null;
@@ -1513,27 +1519,36 @@
 
         // ========== BANCO DE DADOS (LocalStorage) ==========
         function initDatabase() {
-            if (!localStorage.getItem('ponto_record_usuarios')) {
-                // Se não existir, usar os dados do login
-                const usuarios = JSON.parse(localStorage.getItem('ponto_record_usuarios_login') || '[]');
-                if (usuarios.length > 0) {
-                    localStorage.setItem('ponto_record_usuarios', JSON.stringify(usuarios));
-                } else {
-                    // Dados padrão de fallback
-                    const usuariosPadrao = [
-                        {
-                            id: 1,
-                            nome: 'Funcionário Teste',
-                            empresa: 'Record Guaíba',
-                            login: 'funcionario',
-                            senha: 'senha123',
-                            email: 'agawlinski@recordguaiba.tv.br',
-                            cargo: 'Analista',
-                            ativo: true
-                        }
-                    ];
-                    localStorage.setItem('ponto_record_usuarios', JSON.stringify(usuariosPadrao));
-                }
+            // Inicializar com dados do usuário atual
+            const userEmail = localStorage.getItem('userEmail');
+            if (userEmail) {
+                // Criar um usuário padrão baseado no email
+                const usuarios = [{
+                    id: localStorage.getItem('userId') || '1',
+                    nome: userEmail.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                    empresa: 'Record Guaíba',
+                    login: userEmail,
+                    senha: 'senha123', // Senha padrão
+                    email: userEmail,
+                    cargo: 'Funcionário',
+                    ativo: true
+                }];
+                localStorage.setItem('ponto_record_usuarios', JSON.stringify(usuarios));
+            } else {
+                // Dados padrão de fallback
+                const usuariosPadrao = [
+                    {
+                        id: 1,
+                        nome: 'Funcionário Teste',
+                        empresa: 'Record Guaíba',
+                        login: 'funcionario@teste.com',
+                        senha: 'senha123',
+                        email: 'funcionario@teste.com',
+                        cargo: 'Analista',
+                        ativo: true
+                    }
+                ];
+                localStorage.setItem('ponto_record_usuarios', JSON.stringify(usuariosPadrao));
             }
             
             if (!localStorage.getItem('ponto_record_registros')) {
@@ -3765,7 +3780,9 @@
                         stopCamera();
                         
                         // Limpar dados de autenticação
-                        localStorage.removeItem('ponto_currentUser');
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('userEmail');
+                        localStorage.removeItem('userId');
                         
                         // Redirecionar para página de login
                         window.location.href = 'index.html';
