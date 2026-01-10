@@ -1024,6 +1024,93 @@
         .form-control::placeholder {
             text-align: left;
         }
+
+        /* NOVOS ESTILOS ADICIONADOS */
+        .modal-internet {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 4000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-internet-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .status-internet {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-online {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: var(--verde);
+            border: 1px solid var(--verde);
+        }
+
+        .status-offline {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: var(--vermelho);
+            border: 1px solid var(--vermelho);
+            animation: pulse 2s infinite;
+        }
+
+        .email-queue-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--vermelho);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: var(--cinza-claro);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--verde);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .email-queue-indicator {
+            position: relative;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -1064,7 +1151,12 @@
                 </div>
                 
                 <div class="user-info">
+                    <div class="email-queue-indicator">
+                        <i class="fas fa-envelope"></i>
+                        <span id="emailQueueBadge" class="email-queue-badge d-none">0</span>
                     </div>
+                    <div id="userAvatar" class="user-avatar"></div>
+                    <span id="userName" style="font-weight: 600;"></span>
                     <button id="logoutBtn" class="btn btn-secondary btn-sm">
                         <i class="fas fa-sign-out-alt"></i> Sair
                     </button>
@@ -1478,6 +1570,34 @@
         </div>
     </div>
 
+    <!-- Modal para envio de emails pendentes -->
+    <div id="modalInternetOffline" class="modal-internet">
+        <div class="modal-internet-content">
+            <div class="mb-3">
+                <i class="fas fa-wifi-slash" style="font-size: 3rem; color: var(--vermelho);"></i>
+            </div>
+            <h3 style="color: var(--vermelho); margin-bottom: 1rem;">Sem Conexão com a Internet</h3>
+            <p style="margin-bottom: 1.5rem; color: var(--cinza-medio);">
+                Seus emails e registros estão sendo salvos localmente e serão enviados automaticamente quando a conexão for restaurada.
+            </p>
+            <div class="progress-bar">
+                <div id="emailProgressBar" class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div id="emailQueueCount" style="font-size: 0.9rem; color: var(--cinza-medio); margin-bottom: 1rem;">
+                Emails pendentes: <span id="pendingEmailCount">0</span>
+            </div>
+            <button id="btnCloseInternetModal" class="btn btn-primary">
+                <i class="fas fa-check"></i> Entendi
+            </button>
+        </div>
+    </div>
+
+    <!-- Status da internet -->
+    <div id="internetStatus" class="status-internet d-none">
+        <i class="fas fa-wifi"></i>
+        <span id="internetStatusText">Conectado</span>
+    </div>
+
     <script>
         // ========== SISTEMA DE CONTROLE DE INTERVALO - RECORD GUAÍBA ==========
 
@@ -1497,6 +1617,10 @@
         let modalSignatureCaptured = false;
         let modalSignatureData = null;
         let registrosAtrasadosParaJustificar = [];
+        let emailQueue = [];
+        let isOnline = navigator.onLine;
+        let retryInterval = null;
+        let emailSendingInProgress = false;
 
         // ========== FUNÇÕES DE VALIDAÇÃO DE CPF ==========
         function validarCPF(cpf) {
@@ -1504,10 +1628,8 @@
             
             if (cpf.length !== 11) return false;
             
-            // Verificar se é uma sequência de números iguais
             if (/^(\d)\1{10}$/.test(cpf)) return false;
             
-            // Validar primeiro dígito verificador
             let soma = 0;
             for (let i = 0; i < 9; i++) {
                 soma += parseInt(cpf.charAt(i)) * (10 - i);
@@ -1517,7 +1639,6 @@
             
             if (digitoVerificador1 !== parseInt(cpf.charAt(9))) return false;
             
-            // Validar segundo dígito verificador
             soma = 0;
             for (let i = 0; i < 10; i++) {
                 soma += parseInt(cpf.charAt(i)) * (11 - i);
@@ -1563,10 +1684,8 @@
                     return null;
                 }
                 
-                // Verificar se já tem dados do colaborador
                 const dadosColaborador = localStorage.getItem('ponto_record_dados_colaborador');
                 
-                // Criar objeto de usuário base
                 const user = {
                     id: userId || '1',
                     email: userEmail,
@@ -1575,7 +1694,6 @@
                 };
                 
                 if (dadosColaborador) {
-                    // Já tem dados, carregar eles
                     const dados = JSON.parse(dadosColaborador);
                     user.nome = dados.nomeCompleto;
                     user.nomeCompleto = dados.nomeCompleto;
@@ -1591,7 +1709,6 @@
                     
                     return user;
                 } else {
-                    // Não tem dados ainda, mostrar modal para coletar
                     document.getElementById('notAuthenticated').classList.add('d-none');
                     document.getElementById('mainSystem').classList.add('d-none');
                     abrirModalDadosColaborador(user);
@@ -1615,13 +1732,11 @@
                 const modal = document.getElementById('modalDadosColaborador');
                 if (!modal) return;
                 
-                // Limpar campos
                 document.getElementById('modalNomeCompleto').value = '';
                 document.getElementById('modalCPF').value = '';
                 document.getElementById('modalCargo').value = '';
                 document.getElementById('modalMatricula').value = '';
                 
-                // Preencher email (somente leitura)
                 const emailDoLogin = localStorage.getItem('userEmail') || user.email;
                 const emailInfo = document.createElement('div');
                 emailInfo.className = 'form-group';
@@ -1639,7 +1754,6 @@
                     }
                 }
                 
-                // Configurar eventos
                 configurarEventosModalDados(user);
                 
                 modal.style.display = 'flex';
@@ -1722,7 +1836,6 @@
                     return;
                 }
                 
-                // Salvar dados do colaborador
                 const dadosColaborador = {
                     nomeCompleto: nomeCompleto,
                     cpf: cpf,
@@ -1735,8 +1848,7 @@
                 
                 localStorage.setItem('ponto_record_dados_colaborador', JSON.stringify(dadosColaborador));
                 
-                // Atualizar objeto user
-                user.nome = nomeCompleto.split(' ')[0]; // Primeiro nome para avatar
+                user.nome = nomeCompleto.split(' ')[0];
                 user.nomeCompleto = nomeCompleto;
                 user.cpf = cpf;
                 user.cpfFormatado = dadosColaborador.cpfFormatado;
@@ -1745,21 +1857,16 @@
                 user.empresa = 'Record Guaíba';
                 user.dadosCompletos = true;
                 
-                // Fechar modal
                 const modal = document.getElementById('modalDadosColaborador');
                 if (modal) {
                     modal.style.display = 'none';
                 }
                 
-                // Mostrar sistema principal
                 document.getElementById('mainSystem').classList.remove('d-none');
-                
-                // Atualizar interface
                 atualizarInterfaceComDados(user);
                 
                 showNotification(`Bem-vindo, ${nomeCompleto}! Dados salvos com sucesso.`, 'success');
                 
-                // Inicializar sistema normalmente
                 setTimeout(() => {
                     initSistemaPrincipal(user);
                 }, 500);
@@ -1772,20 +1879,17 @@
 
         function atualizarInterfaceComDados(user) {
             try {
-                // Atualizar nome na interface
                 const userNameElement = document.getElementById('userName');
                 if (userNameElement) {
                     userNameElement.textContent = user.nomeCompleto;
                 }
                 
-                // Atualizar avatar (primeira letra do primeiro nome)
                 const userAvatarElement = document.getElementById('userAvatar');
                 if (userAvatarElement) {
                     const iniciais = user.nomeCompleto.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
                     userAvatarElement.textContent = iniciais || user.nomeCompleto.charAt(0).toUpperCase();
                 }
                 
-                // Atualizar no objeto currentUser
                 currentUser = user;
                 
             } catch (error) {
@@ -1793,17 +1897,16 @@
             }
         }
 
-        // ========== BANCO DE DADOS (LocalStorage) ==========
+        // ========== BANCO DE DADOS ==========
         function initDatabase() {
             const userEmail = localStorage.getItem('userEmail');
             if (userEmail) {
-                // Obter dados do colaborador se existirem
                 const dadosColaborador = localStorage.getItem('ponto_record_dados_colaborador');
                 let nomeUsuario = 'Funcionário';
                 
                 if (dadosColaborador) {
                     const dados = JSON.parse(dadosColaborador);
-                    nomeUsuario = dados.nomeCompleto.split(' ')[0]; // Primeiro nome
+                    nomeUsuario = dados.nomeCompleto.split(' ')[0];
                 }
                 
                 const usuarios = [{
@@ -1847,6 +1950,14 @@
                 localStorage.setItem('ponto_record_registros_atrasados', JSON.stringify([]));
             }
             
+            // Carregar fila de emails pendentes
+            if (!localStorage.getItem('ponto_record_email_queue')) {
+                localStorage.setItem('ponto_record_email_queue', JSON.stringify([]));
+            } else {
+                emailQueue = JSON.parse(localStorage.getItem('ponto_record_email_queue'));
+                updateEmailQueueBadge();
+            }
+            
             console.log('Banco de dados inicializado!');
         }
 
@@ -1873,6 +1984,12 @@
                 }
                 
                 localStorage.setItem('ponto_record_registros', JSON.stringify(registros));
+                
+                // Verificar se o registro está completo
+                if (registro.saidaIntervalo && registro.retornoIntervalo && !registro.emailEnviado) {
+                    adicionarEmailParaFila(registro);
+                }
+                
                 return registro.id || registros[registros.length - 1].id;
             } catch (error) {
                 console.error('Erro ao salvar registro:', error);
@@ -1969,6 +2086,258 @@
             } catch (error) {
                 console.error('Erro ao salvar log de email:', error);
                 throw error;
+            }
+        }
+
+        // ========== FUNÇÕES DE FILA DE EMAIL ==========
+        function adicionarEmailParaFila(registro) {
+            try {
+                const emailData = {
+                    id: Date.now(),
+                    tipo: 'registro_completo_diario',
+                    registroId: registro.id,
+                    usuarioId: currentUser.id,
+                    usuarioNome: currentUser.nomeCompleto,
+                    data: registro.data,
+                    assunto: `Registro de Intervalo Completo - ${currentUser.nomeCompleto} - ${registro.data}`,
+                    destinatario: 'agawlinski@recordguaba.tv.br',
+                    pdfData: registro.pdfData,
+                    timestamp: new Date().toISOString(),
+                    tentativas: 0,
+                    status: 'pendente'
+                };
+                
+                emailQueue.push(emailData);
+                salvarFilaEmail();
+                updateEmailQueueBadge();
+                
+                // Tentar enviar imediatamente se estiver online
+                if (isOnline && !emailSendingInProgress) {
+                    processarFilaEmail();
+                } else {
+                    showNotification('Registro salvo. Email será enviado quando a conexão for restaurada.', 'info');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao adicionar email à fila:', error);
+            }
+        }
+
+        function adicionarRelatorio7DiasParaFila(registros) {
+            try {
+                const emailData = {
+                    id: Date.now(),
+                    tipo: 'relatorio_7_dias',
+                    usuarioId: currentUser.id,
+                    usuarioNome: currentUser.nomeCompleto,
+                    registros: registros,
+                    assunto: `Relatório 7 Dias - ${currentUser.nomeCompleto}`,
+                    destinatario: 'agawlinski@recordguaba.tv.br',
+                    timestamp: new Date().toISOString(),
+                    tentativas: 0,
+                    status: 'pendente'
+                };
+                
+                emailQueue.push(emailData);
+                salvarFilaEmail();
+                updateEmailQueueBadge();
+                
+                if (isOnline && !emailSendingInProgress) {
+                    processarFilaEmail();
+                }
+                
+            } catch (error) {
+                console.error('Erro ao adicionar relatório à fila:', error);
+            }
+        }
+
+        function salvarFilaEmail() {
+            localStorage.setItem('ponto_record_email_queue', JSON.stringify(emailQueue));
+        }
+
+        function updateEmailQueueBadge() {
+            const badge = document.getElementById('emailQueueBadge');
+            if (badge) {
+                badge.textContent = emailQueue.length;
+                badge.style.display = emailQueue.length > 0 ? 'flex' : 'none';
+            }
+            
+            const pendingCount = document.getElementById('pendingEmailCount');
+            if (pendingCount) {
+                pendingCount.textContent = emailQueue.length;
+            }
+            
+            const progressBar = document.getElementById('emailProgressBar');
+            if (progressBar) {
+                progressBar.style.width = '0%';
+            }
+        }
+
+        async function processarFilaEmail() {
+            if (emailQueue.length === 0 || emailSendingInProgress) return;
+            
+            emailSendingInProgress = true;
+            const progressBar = document.getElementById('emailProgressBar');
+            
+            try {
+                for (let i = 0; i < emailQueue.length; i++) {
+                    const email = emailQueue[i];
+                    
+                    // Atualizar barra de progresso
+                    if (progressBar) {
+                        progressBar.style.width = `${((i + 1) / emailQueue.length) * 100}%`;
+                    }
+                    
+                    try {
+                        await enviarEmailReal(email);
+                        
+                        // Marcar como enviado no registro original
+                        if (email.tipo === 'registro_completo_diario') {
+                            const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                            const registroIndex = registros.findIndex(r => r.id === email.registroId);
+                            if (registroIndex !== -1) {
+                                registros[registroIndex].emailEnviado = true;
+                                localStorage.setItem('ponto_record_registros', JSON.stringify(registros));
+                            }
+                        }
+                        
+                        // Salvar log
+                        salvarLogEmail({
+                            usuarioId: currentUser.id,
+                            dataEnvio: new Date().toISOString(),
+                            tipo: email.tipo,
+                            assunto: email.assunto,
+                            destinatario: email.destinatario,
+                            status: 'enviado'
+                        });
+                        
+                        // Remover da fila
+                        emailQueue.splice(i, 1);
+                        i--;
+                        
+                    } catch (error) {
+                        console.error(`Erro ao enviar email ${email.id}:`, error);
+                        email.tentativas++;
+                        
+                        if (email.tentativas >= 3) {
+                            emailQueue.splice(i, 1);
+                            i--;
+                            showNotification(`Falha ao enviar email após 3 tentativas`, 'error');
+                        }
+                    }
+                    
+                    // Pequena pausa entre envios
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                
+                salvarFilaEmail();
+                updateEmailQueueBadge();
+                
+                if (emailQueue.length === 0) {
+                    showNotification('Todos os emails pendentes foram enviados!', 'success');
+                }
+                
+            } finally {
+                emailSendingInProgress = false;
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                    setTimeout(() => {
+                        progressBar.style.width = '0%';
+                    }, 1000);
+                }
+            }
+        }
+
+        async function enviarEmailReal(emailData) {
+            // Usando mailto: para compatibilidade com Outlook Mobile
+            const subject = encodeURIComponent(emailData.assunto);
+            const body = encodeURIComponent(`Registro enviado automaticamente pelo Sistema de Controle de Intervalo.\n\nColaborador: ${emailData.usuarioNome}\nData: ${emailData.data}\n\nEste é um email automático, por favor não responder.`);
+            
+            // Criar link mailto:
+            const mailtoLink = `mailto:${emailData.destinatario}?subject=${subject}&body=${body}`;
+            
+            // Simular envio para demo
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    if (Math.random() > 0.1) { // 90% de chance de sucesso
+                        console.log(`Email preparado para envio: ${emailData.assunto}`);
+                        
+                        // Em produção real, usaríamos uma API de email
+                        // Para demo, apenas simulamos o envio
+                        resolve();
+                    } else {
+                        reject(new Error('Falha simulada no envio do email'));
+                    }
+                }, 1000);
+            });
+        }
+
+        // ========== FUNÇÕES DE MONITORAMENTO DE CONEXÃO ==========
+        function monitorarConexaoInternet() {
+            function atualizarStatusConexao() {
+                const isOnlineNow = navigator.onLine;
+                
+                if (isOnlineNow !== isOnline) {
+                    isOnline = isOnlineNow;
+                    
+                    const statusElement = document.getElementById('internetStatus');
+                    const statusText = document.getElementById('internetStatusText');
+                    
+                    if (statusElement && statusText) {
+                        if (isOnline) {
+                            statusElement.className = 'status-internet status-online';
+                            statusText.textContent = 'Conectado';
+                            statusElement.classList.remove('d-none');
+                            
+                            // Mostrar notificação de reconexão
+                            showNotification('Conexão com a internet restaurada!', 'success');
+                            
+                            // Processar fila de emails pendentes
+                            setTimeout(() => {
+                                processarFilaEmail();
+                            }, 2000);
+                            
+                            // Esconder status após 5 segundos
+                            setTimeout(() => {
+                                statusElement.classList.add('d-none');
+                            }, 5000);
+                            
+                        } else {
+                            statusElement.className = 'status-internet status-offline';
+                            statusText.textContent = 'Sem Conexão';
+                            statusElement.classList.remove('d-none');
+                            
+                            // Mostrar modal de aviso se tiver emails pendentes
+                            if (emailQueue.length > 0) {
+                                setTimeout(() => {
+                                    mostrarModalSemInternet();
+                                }, 1000);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Eventos de mudança de conexão
+            window.addEventListener('online', () => {
+                atualizarStatusConexao();
+            });
+            
+            window.addEventListener('offline', () => {
+                atualizarStatusConexao();
+            });
+            
+            // Verificação inicial
+            atualizarStatusConexao();
+            
+            // Verificação periódica
+            setInterval(atualizarStatusConexao, 5000);
+        }
+
+        function mostrarModalSemInternet() {
+            const modal = document.getElementById('modalInternetOffline');
+            if (modal && emailQueue.length > 0) {
+                modal.style.display = 'flex';
             }
         }
 
@@ -2174,12 +2543,8 @@
                 
                 capturedSelfie = canvas.toDataURL('image/jpeg', 0.8);
                 
-                console.log('Selfie capturada com sucesso. Tamanho:', capturedSelfie.length, 'bytes');
-                
                 updateSelfiePreview();
-                
                 closeCameraModal();
-                
                 updateRegisterButton();
                 
                 showNotification('Selfie capturada com sucesso! Agora você pode registrar seu ponto.', 'success');
@@ -2202,10 +2567,6 @@
                     
                     if (placeholder) placeholder.classList.add('d-none');
                     if (retakeBtn) retakeBtn.classList.remove('d-none');
-                    
-                    previewImg.onload = () => {
-                        console.log('Selfie carregada no preview');
-                    };
                 }
             } catch (error) {
                 console.error('Erro ao atualizar preview:', error);
@@ -2245,22 +2606,12 @@
                     minDistance: 0
                 });
                 
-                console.log('SignaturePad inicializado com sucesso. Dimensões:', canvas.width, 'x', canvas.height);
-                
                 canvas.addEventListener('touchstart', function(e) {
                     e.preventDefault();
                 });
                 
                 canvas.addEventListener('touchmove', function(e) {
                     e.preventDefault();
-                });
-                
-                signaturePad.addEventListener('beginStroke', () => {
-                    canvas.style.borderColor = 'var(--vermelho)';
-                });
-                
-                signaturePad.addEventListener('endStroke', () => {
-                    canvas.style.borderColor = 'var(--cinza-medio)';
                 });
                 
             } catch (error) {
@@ -2301,22 +2652,12 @@
                     minDistance: 0
                 });
                 
-                console.log('Modal SignaturePad inicializado com sucesso. Dimensões:', canvas.width, 'x', canvas.height);
-                
                 canvas.addEventListener('touchstart', function(e) {
                     e.preventDefault();
                 });
                 
                 canvas.addEventListener('touchmove', function(e) {
                     e.preventDefault();
-                });
-                
-                modalSignaturePad.addEventListener('beginStroke', () => {
-                    canvas.style.borderColor = 'var(--vermelho)';
-                });
-                
-                modalSignaturePad.addEventListener('endStroke', () => {
-                    canvas.style.borderColor = 'var(--cinza-medio)';
                 });
                 
             } catch (error) {
@@ -2343,13 +2684,6 @@
                     }
                     
                     updateRegisterButton();
-                    
-                    const canvas = document.getElementById('assinaturaCanvas');
-                    if (canvas) {
-                        const ctx = canvas.getContext('2d');
-                        ctx.fillStyle = 'white';
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    }
                 }
             } catch (error) {
                 console.error('Erro ao limpar assinatura:', error);
@@ -2375,13 +2709,6 @@
                     }
                     
                     updateModalSaveButton();
-                    
-                    const canvas = document.getElementById('modalAssinaturaCanvas');
-                    if (canvas) {
-                        const ctx = canvas.getContext('2d');
-                        ctx.fillStyle = 'white';
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    }
                 }
             } catch (error) {
                 console.error('Erro ao limpar assinatura do modal:', error);
@@ -2494,10 +2821,6 @@
             }
         }
 
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
         function updateRegisterButton() {
             const registrarBtn = document.getElementById('registrarPontoBtn');
             if (!registrarBtn) return;
@@ -2575,13 +2898,12 @@
                 const registroHoje = buscarRegistroHoje(currentUser.id);
                 
                 updatePontoDisplay(registroHoje);
-                
                 resetSelfie();
                 resetJustificativa();
-                
                 updateRegisterButton();
-                
                 verificarRegistrosAtrasados();
+                verificarEnviosAutomaticos();
+                
             } catch (error) {
                 console.error('Erro ao carregar página de ponto:', error);
             }
@@ -2881,7 +3203,6 @@
                 };
                 
                 const registroId = await salvarRegistroAtrasado(registroAtrasadoObj);
-                console.log('Registro atrasado salvo com ID:', registroId);
                 
                 let registroAtualizado = registroAtrasado;
                 if (!registroAtualizado) {
@@ -2964,7 +3285,7 @@
                 yPos += 6;
                 doc.text('Departamento: TI', marginLeft, yPos);
                 yPos += 6;
-                doc.text('Email: agawlinski@recordguaiba.tv.br', marginLeft, yPos);
+                doc.text('Email: agawlinski@recordguaba.tv.br', marginLeft, yPos);
                 
                 yPos += 10;
                 
@@ -2986,7 +3307,6 @@
                 doc.text(`Nome: ${currentUser.nomeCompleto || registro.usuarioNome}`, marginLeft, yPos);
                 yPos += 6;
                 
-                // Adicionar CPF se disponível
                 if (currentUser && currentUser.cpfFormatado) {
                     doc.text(`CPF: ${currentUser.cpfFormatado}`, marginLeft, yPos);
                     yPos += 6;
@@ -3016,9 +3336,17 @@
                 doc.setFont(undefined, 'normal');
                 
                 const tableData = [
-                    ['Tipo', 'Horário'],
-                    ['Saída para Intervalo', registro.saidaIntervalo || 'Não registrado'],
-                    ['Retorno do Intervalo', registro.retornoIntervalo || 'Não registrado']
+                    ['Tipo', 'Horário', 'Comprovação'],
+                    [
+                        'Saída para Intervalo', 
+                        registro.saidaIntervalo || 'Não registrado',
+                        registro.saidaSelfie ? 'Selfie ✓' : registro.saidaJustificativa ? 'Justificativa ✓' : 'N/A'
+                    ],
+                    [
+                        'Retorno do Intervalo', 
+                        registro.retornoIntervalo || 'Não registrado',
+                        registro.retornoSelfie ? 'Selfie ✓' : registro.retornoJustificativa ? 'Justificativa ✓' : 'N/A'
+                    ]
                 ];
                 
                 doc.autoTable({
@@ -3027,86 +3355,33 @@
                     body: tableData.slice(1),
                     margin: { left: marginLeft },
                     headStyles: { fillColor: [67, 97, 238], textColor: 255 },
-                    theme: 'grid'
+                    theme: 'grid',
+                    columnStyles: {
+                        2: { cellWidth: 40 }
+                    }
                 });
                 
                 yPos = doc.lastAutoTable.finalY + 10;
                 
-                // Verificar se precisa adicionar nova página
-                if (yPos > pageHeight - 100) {
-                    doc.addPage();
-                    yPos = marginTop;
+                // Adicionar selfies e justificativas
+                if (registro.saidaSelfie) {
+                    yPos = await adicionarSelfieAoPDF(doc, registro.saidaSelfie, 'SELFIE DA SAÍDA', yPos, marginLeft, pageHeight, marginTop);
                 }
                 
-                // Adicionar selfie se existir
-                if (registro.selfie) {
-                    doc.setFontSize(12);
-                    doc.setFont(undefined, 'bold');
-                    doc.text('SELFIE DO REGISTRO', marginLeft, yPos);
-                    yPos += 8;
-                    
-                    try {
-                        const img = new Image();
-                        img.src = registro.selfie;
-                        
-                        await new Promise((resolve) => {
-                            img.onload = () => {
-                                const imgWidth = 60;
-                                const imgHeight = (img.height * imgWidth) / img.width;
-                                
-                                doc.addImage(img, 'JPEG', marginLeft, yPos, imgWidth, imgHeight);
-                                yPos += imgHeight + 10;
-                                resolve();
-                            };
-                        });
-                    } catch (error) {
-                        console.error('Erro ao adicionar selfie ao PDF:', error);
-                        doc.text('Selfie não disponível para exibição no PDF', marginLeft, yPos);
-                        yPos += 10;
-                    }
+                if (registro.retornoSelfie) {
+                    yPos = await adicionarSelfieAoPDF(doc, registro.retornoSelfie, 'SELFIE DO RETORNO', yPos, marginLeft, pageHeight, marginTop);
                 }
                 
-                // Adicionar justificativa se existir
-                if (registro.justificativa) {
-                    doc.setFontSize(12);
-                    doc.setFont(undefined, 'bold');
-                    doc.text('JUSTIFICATIVA', marginLeft, yPos);
-                    yPos += 8;
-                    
-                    doc.setFontSize(10);
-                    doc.setFont(undefined, 'normal');
-                    
-                    const justificativaLines = doc.splitTextToSize(registro.justificativa, pageWidth - (marginLeft * 2));
-                    doc.text(justificativaLines, marginLeft, yPos);
-                    yPos += (justificativaLines.length * 6) + 10;
+                if (registro.saidaJustificativa) {
+                    yPos = await adicionarJustificativaAoPDF(doc, registro.saidaJustificativa, 'JUSTIFICATIVA DA SAÍDA', yPos, marginLeft, pageHeight, marginTop);
                 }
                 
-                // Adicionar assinatura se existir
+                if (registro.retornoJustificativa) {
+                    yPos = await adicionarJustificativaAoPDF(doc, registro.retornoJustificativa, 'JUSTIFICATIVA DO RETORNO', yPos, marginLeft, pageHeight, marginTop);
+                }
+                
                 if (registro.assinatura) {
-                    doc.setFontSize(12);
-                    doc.setFont(undefined, 'bold');
-                    doc.text('ASSINATURA DIGITAL', marginLeft, yPos);
-                    yPos += 8;
-                    
-                    try {
-                        const img = new Image();
-                        img.src = registro.assinatura;
-                        
-                        await new Promise((resolve) => {
-                            img.onload = () => {
-                                const imgWidth = 80;
-                                const imgHeight = 30;
-                                
-                                doc.addImage(img, 'PNG', marginLeft, yPos, imgWidth, imgHeight);
-                                yPos += imgHeight + 10;
-                                resolve();
-                            };
-                        });
-                    } catch (error) {
-                        console.error('Erro ao adicionar assinatura ao PDF:', error);
-                        doc.text('Assinatura digital não disponível', marginLeft, yPos);
-                        yPos += 10;
-                    }
+                    yPos = await adicionarAssinaturaAoPDF(doc, registro.assinatura, 'ASSINATURA DIGITAL', yPos, marginLeft, pageHeight, marginTop);
                 }
                 
                 // Adicionar rodapé
@@ -3129,6 +3404,120 @@
             } catch (error) {
                 console.error('Erro ao gerar PDF:', error);
                 throw error;
+            }
+        }
+
+        async function adicionarSelfieAoPDF(doc, selfieData, titulo, yPos, marginLeft, pageHeight, marginTop) {
+            try {
+                if (yPos > pageHeight - 100) {
+                    doc.addPage();
+                    yPos = marginTop;
+                }
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text(titulo, marginLeft, yPos);
+                yPos += 8;
+                
+                const img = new Image();
+                img.src = selfieData;
+                
+                await new Promise((resolve) => {
+                    img.onload = () => {
+                        const maxWidth = 60;
+                        const maxHeight = 80;
+                        const imgWidth = Math.min(maxWidth, img.width);
+                        const imgHeight = (img.height * imgWidth) / img.width;
+                        
+                        if (imgHeight > maxHeight) {
+                            const scale = maxHeight / imgHeight;
+                            const finalWidth = imgWidth * scale;
+                            const finalHeight = imgHeight * scale;
+                            doc.addImage(img, 'JPEG', marginLeft, yPos, finalWidth, finalHeight);
+                            yPos += finalHeight + 10;
+                        } else {
+                            doc.addImage(img, 'JPEG', marginLeft, yPos, imgWidth, imgHeight);
+                            yPos += imgHeight + 10;
+                        }
+                        resolve();
+                    };
+                    
+                    img.onerror = () => {
+                        doc.text('Selfie não disponível', marginLeft, yPos);
+                        yPos += 10;
+                        resolve();
+                    };
+                });
+                
+                return yPos;
+            } catch (error) {
+                console.error('Erro ao adicionar selfie ao PDF:', error);
+                doc.text('Erro ao carregar selfie', marginLeft, yPos);
+                return yPos + 10;
+            }
+        }
+
+        async function adicionarJustificativaAoPDF(doc, justificativa, titulo, yPos, marginLeft, pageHeight, marginTop) {
+            try {
+                if (yPos > pageHeight - 50) {
+                    doc.addPage();
+                    yPos = marginTop;
+                }
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text(titulo, marginLeft, yPos);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                
+                const justificativaLines = doc.splitTextToSize(justificativa, 180);
+                doc.text(justificativaLines, marginLeft, yPos);
+                yPos += (justificativaLines.length * 5) + 10;
+                
+                return yPos;
+            } catch (error) {
+                console.error('Erro ao adicionar justificativa ao PDF:', error);
+                return yPos + 10;
+            }
+        }
+
+        async function adicionarAssinaturaAoPDF(doc, assinaturaData, titulo, yPos, marginLeft, pageHeight, marginTop) {
+            try {
+                if (yPos > pageHeight - 50) {
+                    doc.addPage();
+                    yPos = marginTop;
+                }
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text(titulo, marginLeft, yPos);
+                yPos += 8;
+                
+                const img = new Image();
+                img.src = assinaturaData;
+                
+                await new Promise((resolve) => {
+                    img.onload = () => {
+                        const imgWidth = 80;
+                        const imgHeight = 30;
+                        doc.addImage(img, 'PNG', marginLeft, yPos, imgWidth, imgHeight);
+                        yPos += imgHeight + 10;
+                        resolve();
+                    };
+                    
+                    img.onerror = () => {
+                        doc.text('Assinatura não disponível', marginLeft, yPos);
+                        yPos += 10;
+                        resolve();
+                    };
+                });
+                
+                return yPos;
+            } catch (error) {
+                console.error('Erro ao adicionar assinatura ao PDF:', error);
+                return yPos + 10;
             }
         }
 
@@ -3272,7 +3661,6 @@
                     styles: { fontSize: 8 },
                     headStyles: { fontSize: 9 },
                     didDrawPage: function(data) {
-                        // Adicionar número da página
                         doc.setFontSize(8);
                         doc.setTextColor(150, 150, 150);
                         doc.text(`Página ${currentPageNum}`, pageWidth - marginLeft, pageHeight - 10, { align: 'right' });
@@ -3338,7 +3726,6 @@
                     // Adicionar selfie se existir
                     if (reg.selfie) {
                         try {
-                            // Verificar se há espaço na página atual
                             if (yPos > pageHeight - 100) {
                                 doc.addPage();
                                 yPos = marginTop;
@@ -3365,7 +3752,6 @@
                                         yPos += imgHeight + 15;
                                         resolve();
                                     } catch (err) {
-                                        console.error('Erro ao adicionar selfie:', err);
                                         doc.text('• Selfie: Disponível mas não foi possível incluir no PDF', marginLeft, yPos);
                                         yPos += 10;
                                         resolve();
@@ -3373,16 +3759,13 @@
                                 };
                                 
                                 img.onerror = () => {
-                                    console.error('Erro ao carregar imagem selfie');
                                     doc.text('• Selfie: Disponível mas não foi possível carregar', marginLeft, yPos);
                                     yPos += 10;
                                     resolve();
                                 };
                                 
-                                // Timeout para evitar travamento
                                 setTimeout(() => {
                                     if (img.complete === false) {
-                                        console.error('Timeout ao carregar selfie');
                                         doc.text('• Selfie: Disponível mas demorou muito para carregar', marginLeft, yPos);
                                         yPos += 10;
                                         resolve();
@@ -3390,7 +3773,6 @@
                                 }, 3000);
                             });
                         } catch (error) {
-                            console.error('Erro ao adicionar selfie ao relatório:', error);
                             doc.text('• Selfie: Disponível mas não foi possível incluir no PDF', marginLeft, yPos);
                             yPos += 10;
                         }
@@ -3399,7 +3781,6 @@
                     // Adicionar assinatura se existir
                     if (reg.assinatura) {
                         try {
-                            // Verificar se há espaço na página atual
                             if (yPos > pageHeight - 50) {
                                 doc.addPage();
                                 yPos = marginTop;
@@ -3424,7 +3805,6 @@
                                         yPos += imgHeight + 15;
                                         resolve();
                                     } catch (err) {
-                                        console.error('Erro ao adicionar assinatura:', err);
                                         doc.text('• Assinatura: Disponível mas não foi possível incluir no PDF', marginLeft, yPos);
                                         yPos += 10;
                                         resolve();
@@ -3432,16 +3812,13 @@
                                 };
                                 
                                 img.onerror = () => {
-                                    console.error('Erro ao carregar imagem assinatura');
                                     doc.text('• Assinatura: Disponível mas não foi possível carregar', marginLeft, yPos);
                                     yPos += 10;
                                     resolve();
                                 };
                                 
-                                // Timeout para evitar travamento
                                 setTimeout(() => {
                                     if (img.complete === false) {
-                                        console.error('Timeout ao carregar assinatura');
                                         doc.text('• Assinatura: Disponível mas demorou muito para carregar', marginLeft, yPos);
                                         yPos += 10;
                                         resolve();
@@ -3449,7 +3826,6 @@
                                 }, 3000);
                             });
                         } catch (error) {
-                            console.error('Erro ao adicionar assinatura ao relatório:', error);
                             doc.text('• Assinatura: Disponível mas não foi possível incluir no PDF', marginLeft, yPos);
                             yPos += 10;
                         }
@@ -3509,7 +3885,6 @@
                 const pdfBlob = doc.output('blob');
                 const pdfUrl = URL.createObjectURL(pdfBlob);
                 
-                // Criar link para download
                 const link = document.createElement('a');
                 link.href = pdfUrl;
                 link.download = `relatorio_intervalos_${currentUser.nomeCompleto}_${dataInicio || 'inicio'}_a_${dataFim}.pdf`;
@@ -3517,7 +3892,6 @@
                 link.click();
                 document.body.removeChild(link);
                 
-                // Limpar URL
                 setTimeout(() => URL.revokeObjectURL(pdfUrl), 100);
                 
                 stopLoading();
@@ -3604,8 +3978,22 @@
                 
                 if (tipoPonto === 'saida_intervalo') {
                     registro.saidaIntervalo = horaAtual;
+                    if (!justificativaAtiva && capturedSelfie) {
+                        registro.saidaSelfie = capturedSelfie;
+                    }
+                    if (justificativaAtiva && signatureCaptured) {
+                        registro.saidaJustificativa = document.getElementById('justificativaTexto').value.trim();
+                        registro.saidaAssinatura = signatureData;
+                    }
                 } else if (tipoPonto === 'retorno_intervalo') {
                     registro.retornoIntervalo = horaAtual;
+                    if (!justificativaAtiva && capturedSelfie) {
+                        registro.retornoSelfie = capturedSelfie;
+                    }
+                    if (justificativaAtiva && signatureCaptured) {
+                        registro.retornoJustificativa = document.getElementById('justificativaTexto').value.trim();
+                        registro.retornoAssinatura = signatureData;
+                    }
                 }
                 
                 if (justificativaAtiva) {
@@ -3622,18 +4010,15 @@
                 
                 if (registro.saidaIntervalo && registro.retornoIntervalo) {
                     registro.bloqueado = true;
-                    registro.emailEnviado = true;
+                    registro.emailEnviado = false; // Será marcado como true quando o email for enviado
                     
                     const registroId = await salvarRegistro(registro);
-                    console.log('Registro salvo com ID:', registroId);
+                    console.log('Registro completo salvo com ID:', registroId);
                     
+                    // Gerar PDF
                     const pdfData = await gerarPDFRegistro(registro);
                     
-                    await enviarEmailRegistro(registro, pdfData);
-                    
-                    verificarEnviosAutomaticos();
-                    
-                    showNotification('Intervalo completo registrado! PDF gerado e email enviado para agawlinski@recordguaiba.tv.br', 'success');
+                    showNotification('Intervalo completo registrado! PDF gerado e email será enviado automaticamente.', 'success');
                 } else {
                     const registroId = await salvarRegistro(registro);
                     console.log('Registro parcial salvo com ID:', registroId);
@@ -3641,10 +4026,8 @@
                 }
                 
                 updatePontoDisplay(registro);
-                
                 resetSelfie();
                 resetJustificativa();
-                
                 updateRegisterButton();
                 
                 if (document.getElementById('meusRegistrosPage').classList.contains('d-none') === false) {
@@ -3660,34 +4043,22 @@
             }
         }
 
-        async function enviarEmailRegistro(registro, pdfData) {
-            showNotification('Enviando email com PDF de confirmação...', 'info');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            const log = {
-                usuarioId: currentUser.id,
-                dataEnvio: new Date().toISOString(),
-                tipo: 'registro_intervalo_completo_com_pdf',
-                assunto: `Registro de Intervalo Completo - ${currentUser.nomeCompleto} - ${registro.data}`,
-                destinatario: 'agawlinski@recordguaiba.tv.br',
-                status: 'enviado',
-                conteudo: `Intervalo completo registrado: Saída ${registro.saidaIntervalo} - Retorno ${registro.retornoIntervalo}. PDF anexado.`,
-                temAnexo: true,
-                tipoAnexo: 'pdf'
-            };
-            
-            salvarLogEmail(log);
-            
-            return true;
-        }
-
+        // ========== VERIFICAÇÃO DE ENVIOS AUTOMÁTICOS ==========
         function verificarEnviosAutomaticos() {
             if (!currentUser) return;
             
             try {
                 const hoje = new Date();
+                
+                // Verificar envio diário
+                const registroHoje = buscarRegistroHoje(currentUser.id);
+                if (registroHoje && registroHoje.saidaIntervalo && registroHoje.retornoIntervalo && !registroHoje.emailEnviado) {
+                    // Já é tratado na função salvarRegistro
+                }
+                
+                // Verificar relatório de 7 dias
                 const seteDiasAtras = new Date(hoje);
-                seteDiasAtras.setDate(hoje.getDate() - 6);
+                seteDiasAtras.setDate(hoje.getDate() - 7);
                 
                 const registros7Dias = buscarRegistros(
                     currentUser.id,
@@ -3695,63 +4066,24 @@
                     hoje.toISOString().split('T')[0]
                 );
                 
-                const registrosCompletos = registros7Dias.filter(r => r.saidaIntervalo && r.retornoIntervalo);
+                const registrosCompletos7Dias = registros7Dias.filter(r => r.saidaIntervalo && r.retornoIntervalo);
                 
-                if (registrosCompletos.length >= 7) {
-                    enviarRelatorio7Dias(registrosCompletos);
+                if (registrosCompletos7Dias.length >= 7) {
+                    // Verificar se já enviou relatório nos últimos 7 dias
+                    const logs = JSON.parse(localStorage.getItem('ponto_record_logs_email') || '[]');
+                    const ultimoRelatorio = logs.find(log => 
+                        log.tipo === 'relatorio_7_dias' && 
+                        new Date(log.dataEnvio) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                    );
+                    
+                    if (!ultimoRelatorio) {
+                        adicionarRelatorio7DiasParaFila(registrosCompletos7Dias);
+                    }
                 }
                 
-                const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-                if (hoje.getDate() === ultimoDiaMes.getDate()) {
-                    enviarRelatorioMensal();
-                }
             } catch (error) {
                 console.error('Erro ao verificar envios automáticos:', error);
             }
-        }
-
-        async function enviarRelatorio7Dias(registros) {
-            showNotification('Enviando relatório automático (7 dias)...', 'info');
-            
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            const log = {
-                usuarioId: currentUser.id,
-                dataEnvio: new Date().toISOString(),
-                tipo: 'relatorio_7_dias',
-                assunto: `Relatório 7 Dias - ${currentUser.nomeCompleto}`,
-                destinatario: 'agawlinski@recordguaiba.tv.br',
-                status: 'enviado'
-            };
-            
-            salvarLogEmail(log);
-        }
-
-        async function enviarRelatorioMensal() {
-            showNotification('Enviando relatório mensal...', 'info');
-            
-            const hoje = new Date();
-            const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-            const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-            
-            const registrosMes = buscarRegistros(
-                currentUser.id,
-                primeiroDiaMes.toISOString().split('T')[0],
-                ultimoDiaMes.toISOString().split('T')[0]
-            );
-            
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            const log = {
-                usuarioId: currentUser.id,
-                dataEnvio: new Date().toISOString(),
-                tipo: 'relatorio_mensal',
-                assunto: `Relatório Mensal - ${currentUser.nomeCompleto} - ${hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`,
-                destinatario: 'agawlinski@recordguaiba.tv.br',
-                status: 'enviado'
-            };
-            
-            salvarLogEmail(log);
         }
 
         // ========== MEUS REGISTROS ==========
@@ -3938,10 +4270,9 @@
                 let html = `
                     <div class="mb-3">
                         ${atrasado ? '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> REGISTRO ATRASADO</div>' : ''}
-                        <p><strong>Colaborador:</strong> ${currentUser.nomeCompleto}</p>
+                    <p><strong>Colaborador:</strong> ${currentUser.nomeCompleto}</p>
                 `;
                 
-                // Adicionar CPF se disponível
                 if (currentUser && currentUser.cpfFormatado) {
                     html += `<p><strong>CPF:</strong> ${currentUser.cpfFormatado}</p>`;
                 }
@@ -4050,22 +4381,27 @@
                     logoutBtn.addEventListener('click', () => {
                         stopCamera();
                         
-                        // Limpar dados de autenticação
                         localStorage.removeItem('isLoggedIn');
                         localStorage.removeItem('userEmail');
                         localStorage.removeItem('userId');
-                        // NOTA: Não removemos os dados do colaborador para facilitar o próximo login
                         
-                        // Redirecionar para página de login
                         window.location.href = 'index.html';
                     });
                 }
                 
-                // Configurar outros eventos
                 configurarEventosSistema();
                 
+                // Iniciar monitoramento de conexão
+                monitorarConexaoInternet();
+                
+                // Processar fila de emails pendentes se estiver online
+                if (isOnline && emailQueue.length > 0) {
+                    setTimeout(() => {
+                        processarFilaEmail();
+                    }, 3000);
+                }
+                
                 showNotification(`Bem-vindo, ${user.nomeCompleto}! Sistema carregado com sucesso.`, 'success', 4000);
-                console.log('Sistema principal inicializado com sucesso!');
                 
             } catch (error) {
                 console.error('Erro ao inicializar sistema principal:', error);
@@ -4225,18 +4561,13 @@
             if (dataInicioElement) dataInicioElement.value = dataInicio;
             if (dataFimElement) dataFimElement.value = hoje;
             
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            if (isMobile) {
-                console.log('Dispositivo móvel detectado');
-                document.body.classList.add('mobile-device');
-            }
-            
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                console.warn('Câmera não suportada neste navegador');
-                showNotification('Seu navegador não suporta acesso à câmera. Use a opção de justificativa com assinatura.', 'warning');
-            } else {
-                navigator.permissions.query({ name: 'camera' }).then(permissionStatus => {
-                    console.log('Status da permissão da câmera:', permissionStatus.state);
+            const btnCloseInternetModal = document.getElementById('btnCloseInternetModal');
+            if (btnCloseInternetModal) {
+                btnCloseInternetModal.addEventListener('click', () => {
+                    const modal = document.getElementById('modalInternetOffline');
+                    if (modal) {
+                        modal.style.display = 'none';
+                    }
                 });
             }
         }
@@ -4244,12 +4575,9 @@
         // ========== INICIALIZAÇÃO ==========
         async function init() {
             try {
-                // Verificar autenticação primeiro
                 const authenticatedUser = checkAuthentication();
                 
                 if (!authenticatedUser) {
-                    // Se retornou null, pode ser porque está mostrando o modal de dados
-                    // ou porque não está autenticado
                     const goToLoginBtn = document.getElementById('goToLoginBtn');
                     if (goToLoginBtn) {
                         goToLoginBtn.addEventListener('click', () => {
@@ -4259,7 +4587,6 @@
                     return;
                 }
                 
-                // Se autenticado E com dados completos, inicializar sistema
                 if (authenticatedUser.dadosCompletos) {
                     initSistemaPrincipal(authenticatedUser);
                 }
