@@ -44,7 +44,6 @@
             padding: 0 15px;
         }
 
-        /* Header */
         .header {
             background: linear-gradient(90deg, var(--vermelho), var(--preto));
             color: var(--branco);
@@ -94,7 +93,6 @@
             font-weight: bold;
         }
 
-        /* Cards */
         .card {
             background-color: var(--branco);
             border-radius: 10px;
@@ -119,7 +117,6 @@
             color: var(--preto);
         }
 
-        /* Botões */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -192,7 +189,6 @@
             font-size: 0.875rem;
         }
 
-        /* Formulários */
         .form-group {
             margin-bottom: 1.25rem;
             text-align: left;
@@ -227,7 +223,6 @@
             resize: vertical;
         }
 
-        /* Tela de não autenticado */
         .not-authenticated-container {
             display: flex;
             justify-content: center;
@@ -254,7 +249,6 @@
             font-weight: 600;
         }
 
-        /* Registro de Ponto */
         .ponto-container {
             display: flex;
             flex-direction: column;
@@ -312,7 +306,6 @@
             100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
         }
 
-        /* Selfie Container */
         .selfie-container {
             border: 2px solid var(--preto);
             border-radius: 8px;
@@ -354,7 +347,6 @@
             margin-top: 1rem;
         }
 
-        /* Assinatura Container */
         .assinatura-container {
             border: 2px solid var(--preto);
             border-radius: 8px;
@@ -413,7 +405,6 @@
             color: var(--cinza-medio);
         }
 
-        /* Câmera Modal */
         .camera-modal {
             position: fixed;
             top: 0;
@@ -514,7 +505,6 @@
             transform: scale(1.1);
         }
 
-        /* Tabelas */
         .table-responsive {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -569,7 +559,6 @@
             color: #dc3545;
         }
 
-        /* Navegação */
         .nav-tabs {
             display: flex;
             border-bottom: 2px solid var(--cinza-claro);
@@ -613,7 +602,6 @@
             background-color: var(--vermelho);
         }
 
-        /* Status */
         .status-indicator {
             display: inline-flex;
             align-items: center;
@@ -634,7 +622,6 @@
             color: #6c757d;
         }
 
-        /* Loading */
         .loading {
             display: inline-block;
             width: 20px;
@@ -649,7 +636,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Notificações */
         .notification {
             position: fixed;
             top: 20px;
@@ -703,7 +689,6 @@
             font-size: 1.2rem;
         }
 
-        /* Utilitários */
         .text-center {
             text-align: center;
         }
@@ -764,7 +749,6 @@
             flex: 1 1 0;
         }
 
-        /* Modal de Justificativa Atrasada */
         .modal-justificativa-atrasada {
             position: fixed;
             top: 0;
@@ -836,7 +820,6 @@
             margin-bottom: 0.5rem;
         }
 
-        /* Mobile Optimizations */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -931,7 +914,6 @@
             }
         }
 
-        /* Animações */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -941,7 +923,6 @@
             animation: fadeIn 0.5s ease-in;
         }
 
-        /* Time Display */
         .time-display {
             font-size: 0.9rem;
             font-weight: 600;
@@ -952,7 +933,6 @@
             display: inline-block;
         }
 
-        /* Instruction Box */
         .instruction-box {
             background-color: rgba(255, 0, 0, 0.05);
             border-left: 4px solid var(--vermelho);
@@ -973,7 +953,6 @@
             margin-bottom: 0.25rem;
         }
 
-        /* Stat values */
         .stat-value {
             font-size: 1.8rem;
             font-weight: 700;
@@ -986,7 +965,6 @@
             color: var(--cinza-medio);
         }
 
-        /* Modal de Visualização */
         .modal-backdrop {
             position: fixed;
             top: 0;
@@ -1011,7 +989,6 @@
             overflow-y: auto;
         }
 
-        /* Camera Guide */
         .camera-guide {
             position: absolute;
             top: 50%;
@@ -1031,7 +1008,6 @@
             }
         }
         
-        /* Assinatura styles */
         .signature-clear-button {
             margin-top: 10px;
             background-color: #f8f9fa;
@@ -1045,7 +1021,6 @@
             background-color: #e9ecef;
         }
         
-        /* Placeholder alignment */
         .form-control::placeholder {
             text-align: left;
         }
@@ -1122,14 +1097,14 @@
             <div id="registrarPontoPage" class="page-content">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Registro de Intervalo</h2>
+                        <div id="userName">Funcionário Teste</div>
                         <div id="pontoDateTime" class="time-display"></div>
                     </div>
                     
                     <div class="instruction-box">
                         <h4><i class="fas fa-info-circle"></i> Instruções Importantes:</h4>
                         <p>1. Selfie é obrigatória para todos os registros</p>
-                        <p>6. <strong>ATENÇÃO:</strong> Registros pendentes por mais de 1 dia exigirão justificativa</p>
+                        <p>2. <strong>ATENÇÃO:</strong> Registros pendentes por mais de 1 dia exigirão justificativa</p>
                     </div>
                     
                     <div class="ponto-container">
@@ -1175,7 +1150,7 @@
                         <div class="selfie-container" id="selfieContainer">
                             <h4 style="margin-bottom: 1rem; color: var(--vermelho);">
                                 <i class="fas fa-camera"></i> Selfie Obrigatória
-                                <span style="font-size: 0.8rem; color: var(--cinza-medio);">(exceto com justificativa)</span>
+                                <span style="font-size: 0.8rem; color: var(--cinza-medio);"></span>
                             </h4>
                             
                             <div class="selfie-preview" id="selfiePreview">
@@ -1195,7 +1170,6 @@
                             </div>
                             
                             <p class="mt-3" style="font-size: 0.9rem; color: var(--cinza-medio);">
-                                Clique em "Tirar Selfie" para capturar sua foto
                             </p>
                             
                             <div id="cameraStatus" class="mt-2" style="font-size: 0.8rem; color: var(--cinza-medio);"></div>
@@ -1205,7 +1179,7 @@
                         <div class="form-group">
                             <label class="form-label" style="cursor: pointer;">
                                 <input type="checkbox" id="requerJustificativa" style="margin-right: 8px;">
-                                <i class="fas fa-comment-alt"></i> Adicionar justificativa (opcional - dispensa selfie)
+                                <i class="fas fa-comment-alt"></i> Adicionar justificativa
                             </label>
                             <div id="justificativaContainer" class="d-none">
                                 <textarea id="justificativaTexto" class="form-control mb-3" placeholder="Descreva a justificativa para o registro sem selfie..." rows="3"></textarea>
@@ -1241,14 +1215,9 @@
                         </div>
                         
                         <button id="registrarPontoBtn" class="btn btn-success btn-block" disabled>
-                            <i class="fas fa-clock"></i> Registrar Ponto (Selfie obrigatória ou justificativa)
+                            <i class="fas fa-clock"></i> Registrar Ponto
                         </button>
                         
-                        <div class="mt-3 text-center">
-                            <small style="color: var(--cinza-medio);">
-                                Sistema de Controle de Intervalo - Record Guaíba
-                            </small>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1358,7 +1327,6 @@
         </div>
         <div class="mt-3" style="color: white; text-align: center;">
             <p>Posicione seu rosto dentro do círculo e toque no botão da câmera</p>
-            <p style="font-size: 0.9rem; opacity: 0.8;">A selfie será automaticamente espelhada</p>
         </div>
     </div>
 
@@ -1455,6 +1423,70 @@
         </div>
     </div>
 
+    <!-- Modal para coletar dados do colaborador após login -->
+    <div id="modalDadosColaborador" class="modal-justificativa-atrasada" style="display: none;">
+        <div class="modal-justificativa-content">
+            <div class="modal-justificativa-header">
+                <h3><i class="fas fa-user-circle"></i> Dados do Colaborador</h3>
+                <p>Complete suas informações para continuar</p>
+            </div>
+            
+            <div class="modal-justificativa-body">
+                <div class="instruction-box" style="background-color: rgba(67, 97, 238, 0.1);">
+                    <h4><i class="fas fa-info-circle"></i> Importante:</h4>
+                    <p>Estes dados serão usados em todos os registros, comprovantes e relatórios.</p>
+                    <p>Verifique se as informações estão corretas antes de salvar.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Nome Completo *</label>
+                    <input type="text" id="modalNomeCompleto" class="form-control" 
+                           placeholder="Digite seu nome completo" required>
+                    <small class="text-muted">Como deve aparecer nos documentos oficiais</small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">CPF *</label>
+                    <input type="text" id="modalCPF" class="form-control" 
+                           placeholder="000.000.000-00" maxlength="14" required>
+                    <small class="text-muted">Formato: 000.000.000-00</small>
+                    <div id="cpfError" class="text-danger mt-1" style="font-size: 0.8rem; display: none;">
+                        <i class="fas fa-exclamation-circle"></i> CPF inválido
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Cargo</label>
+                    <input type="text" id="modalCargo" class="form-control" 
+                           placeholder="Ex: Analista, Técnico, etc.">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Matrícula (opcional)</label>
+                    <input type="text" id="modalMatricula" class="form-control" 
+                           placeholder="Número de matrícula">
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <h5><i class="fas fa-shield-alt"></i> Segurança dos Dados</h5>
+                    <p style="font-size: 0.85rem; margin-bottom: 0;">
+                        Seus dados são armazenados apenas localmente no seu navegador e não são compartilhados com terceiros.
+                        Eles são necessários para a geração dos documentos oficiais.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="modal-justificativa-footer">
+                <button id="modalCancelarDadosBtn" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button id="modalSalvarDadosBtn" class="btn btn-primary" disabled>
+                    <i class="fas fa-save"></i> Salvar e Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ========== SISTEMA DE CONTROLE DE INTERVALO - RECORD GUAÍBA ==========
 
@@ -1475,37 +1507,106 @@
         let modalSignatureData = null;
         let registrosAtrasadosParaJustificar = [];
 
-        // ========== VERIFICAÇÃO DE AUTENTICAÇÃO ==========
+        // ========== FUNÇÕES DE VALIDAÇÃO DE CPF ==========
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            
+            if (cpf.length !== 11) return false;
+            
+            // Verificar se é uma sequência de números iguais
+            if (/^(\d)\1{10}$/.test(cpf)) return false;
+            
+            // Validar primeiro dígito verificador
+            let soma = 0;
+            for (let i = 0; i < 9; i++) {
+                soma += parseInt(cpf.charAt(i)) * (10 - i);
+            }
+            let resto = soma % 11;
+            let digitoVerificador1 = resto < 2 ? 0 : 11 - resto;
+            
+            if (digitoVerificador1 !== parseInt(cpf.charAt(9))) return false;
+            
+            // Validar segundo dígito verificador
+            soma = 0;
+            for (let i = 0; i < 10; i++) {
+                soma += parseInt(cpf.charAt(i)) * (11 - i);
+            }
+            resto = soma % 11;
+            let digitoVerificador2 = resto < 2 ? 0 : 11 - resto;
+            
+            if (digitoVerificador2 !== parseInt(cpf.charAt(10))) return false;
+            
+            return true;
+        }
+
+        function formatarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        }
+
+        function mascararCPF(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 3 && value.length <= 6) {
+                value = value.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+            } else if (value.length > 6 && value.length <= 9) {
+                value = value.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+            } else if (value.length > 9) {
+                value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+            }
+            
+            input.value = value;
+            return value;
+        }
+
+        // ========== VERIFICAÇÃO DE AUTENTICAÇÃO E DADOS ==========
         function checkAuthentication() {
             try {
-                // Verificar se o usuário está logado (como no index.html)
                 const isLoggedIn = localStorage.getItem('isLoggedIn');
                 const userEmail = localStorage.getItem('userEmail');
                 const userId = localStorage.getItem('userId');
                 
                 if (!isLoggedIn || isLoggedIn !== 'true' || !userEmail) {
-                    // Não autenticado - mostrar tela de não autenticado
                     document.getElementById('notAuthenticated').classList.remove('d-none');
                     document.getElementById('mainSystem').classList.add('d-none');
                     return null;
                 }
                 
-                // Criar objeto de usuário baseado no login
+                // Verificar se já tem dados do colaborador
+                const dadosColaborador = localStorage.getItem('ponto_record_dados_colaborador');
+                
+                // Criar objeto de usuário base
                 const user = {
                     id: userId || '1',
-                    nome: userEmail.split('@')[0].replace('.', ' '),
-                    empresa: 'Record Guaíba',
-                    login: userEmail,
                     email: userEmail,
-                    cargo: 'Funcionário',
+                    login: userEmail,
                     ativo: true
                 };
                 
-                // Autenticado - mostrar sistema
-                document.getElementById('notAuthenticated').classList.add('d-none');
-                document.getElementById('mainSystem').classList.remove('d-none');
+                if (dadosColaborador) {
+                    // Já tem dados, carregar eles
+                    const dados = JSON.parse(dadosColaborador);
+                    user.nome = dados.nomeCompleto;
+                    user.nomeCompleto = dados.nomeCompleto;
+                    user.cpf = dados.cpf;
+                    user.cpfFormatado = formatarCPF(dados.cpf);
+                    user.cargo = dados.cargo || 'Funcionário';
+                    user.matricula = dados.matricula;
+                    user.empresa = 'Record Guaíba';
+                    user.dadosCompletos = true;
+                    
+                    document.getElementById('notAuthenticated').classList.add('d-none');
+                    document.getElementById('mainSystem').classList.remove('d-none');
+                    
+                    return user;
+                } else {
+                    // Não tem dados ainda, mostrar modal para coletar
+                    document.getElementById('notAuthenticated').classList.add('d-none');
+                    document.getElementById('mainSystem').classList.add('d-none');
+                    abrirModalDadosColaborador(user);
+                    return null;
+                }
                 
-                return user;
             } catch (error) {
                 console.error('Erro na verificação de autenticação:', error);
                 localStorage.removeItem('isLoggedIn');
@@ -1517,29 +1618,221 @@
             }
         }
 
+        // ========== FUNÇÕES PARA COLETAR DADOS DO COLABORADOR ==========
+        function abrirModalDadosColaborador(user) {
+            try {
+                const modal = document.getElementById('modalDadosColaborador');
+                if (!modal) return;
+                
+                // Limpar campos
+                document.getElementById('modalNomeCompleto').value = '';
+                document.getElementById('modalCPF').value = '';
+                document.getElementById('modalCargo').value = '';
+                document.getElementById('modalMatricula').value = '';
+                
+                // Preencher email (somente leitura)
+                const emailDoLogin = localStorage.getItem('userEmail') || user.email;
+                const emailInfo = document.createElement('div');
+                emailInfo.className = 'form-group';
+                emailInfo.innerHTML = `
+                    <label class="form-label">Email (do login)</label>
+                    <input type="email" class="form-control" value="${emailDoLogin}" readonly>
+                    <small class="text-muted">Este é o email usado para fazer login</small>
+                `;
+                
+                const body = document.querySelector('#modalDadosColaborador .modal-justificativa-body');
+                if (body) {
+                    const primeiroElemento = body.querySelector('.form-group');
+                    if (primeiroElemento) {
+                        body.insertBefore(emailInfo, primeiroElemento);
+                    }
+                }
+                
+                // Configurar eventos
+                configurarEventosModalDados(user);
+                
+                modal.style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Erro ao abrir modal de dados:', error);
+                showNotification('Erro ao abrir formulário de dados', 'error');
+            }
+        }
+
+        function configurarEventosModalDados(user) {
+            const nomeInput = document.getElementById('modalNomeCompleto');
+            const cpfInput = document.getElementById('modalCPF');
+            const salvarBtn = document.getElementById('modalSalvarDadosBtn');
+            const cancelarBtn = document.getElementById('modalCancelarDadosBtn');
+            
+            if (cpfInput) {
+                cpfInput.addEventListener('input', function() {
+                    mascararCPF(this);
+                    validarCamposDados();
+                });
+            }
+            
+            if (nomeInput) {
+                nomeInput.addEventListener('input', validarCamposDados);
+            }
+            
+            if (salvarBtn) {
+                salvarBtn.addEventListener('click', () => {
+                    salvarDadosColaborador(user);
+                });
+            }
+            
+            if (cancelarBtn) {
+                cancelarBtn.addEventListener('click', () => {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userId');
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+
+        function validarCamposDados() {
+            const nome = document.getElementById('modalNomeCompleto').value.trim();
+            const cpf = document.getElementById('modalCPF').value;
+            const salvarBtn = document.getElementById('modalSalvarDadosBtn');
+            const cpfError = document.getElementById('cpfError');
+            
+            if (!salvarBtn) return;
+            
+            const cpfNumeros = cpf.replace(/\D/g, '');
+            const cpfValido = cpfNumeros.length === 11 && validarCPF(cpfNumeros);
+            
+            if (cpfError) {
+                cpfError.style.display = cpf && !cpfValido ? 'block' : 'none';
+            }
+            
+            if (nome.length >= 3 && cpfValido) {
+                salvarBtn.disabled = false;
+            } else {
+                salvarBtn.disabled = true;
+            }
+        }
+
+        function salvarDadosColaborador(user) {
+            try {
+                const nomeCompleto = document.getElementById('modalNomeCompleto').value.trim();
+                const cpf = document.getElementById('modalCPF').value.replace(/\D/g, '');
+                const cargo = document.getElementById('modalCargo').value.trim();
+                const matricula = document.getElementById('modalMatricula').value.trim();
+                
+                if (!nomeCompleto || nomeCompleto.length < 3) {
+                    showNotification('Nome completo deve ter pelo menos 3 caracteres', 'warning');
+                    return;
+                }
+                
+                if (!validarCPF(cpf)) {
+                    showNotification('CPF inválido. Verifique os dígitos.', 'error');
+                    return;
+                }
+                
+                // Salvar dados do colaborador
+                const dadosColaborador = {
+                    nomeCompleto: nomeCompleto,
+                    cpf: cpf,
+                    cpfFormatado: formatarCPF(cpf),
+                    cargo: cargo || 'Funcionário',
+                    matricula: matricula,
+                    email: user.email || localStorage.getItem('userEmail'),
+                    dataCadastro: new Date().toISOString()
+                };
+                
+                localStorage.setItem('ponto_record_dados_colaborador', JSON.stringify(dadosColaborador));
+                
+                // Atualizar objeto user
+                user.nome = nomeCompleto.split(' ')[0]; // Primeiro nome para avatar
+                user.nomeCompleto = nomeCompleto;
+                user.cpf = cpf;
+                user.cpfFormatado = dadosColaborador.cpfFormatado;
+                user.cargo = cargo || 'Funcionário';
+                user.matricula = matricula;
+                user.empresa = 'Record Guaíba';
+                user.dadosCompletos = true;
+                
+                // Fechar modal
+                const modal = document.getElementById('modalDadosColaborador');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+                
+                // Mostrar sistema principal
+                document.getElementById('mainSystem').classList.remove('d-none');
+                
+                // Atualizar interface
+                atualizarInterfaceComDados(user);
+                
+                showNotification(`Bem-vindo, ${nomeCompleto}! Dados salvos com sucesso.`, 'success');
+                
+                // Inicializar sistema normalmente
+                setTimeout(() => {
+                    initSistemaPrincipal(user);
+                }, 500);
+                
+            } catch (error) {
+                console.error('Erro ao salvar dados do colaborador:', error);
+                showNotification('Erro ao salvar dados. Tente novamente.', 'error');
+            }
+        }
+
+        function atualizarInterfaceComDados(user) {
+            try {
+                // Atualizar nome na interface
+                const userNameElement = document.getElementById('userName');
+                if (userNameElement) {
+                    userNameElement.textContent = user.nomeCompleto;
+                }
+                
+                // Atualizar avatar (primeira letra do primeiro nome)
+                const userAvatarElement = document.getElementById('userAvatar');
+                if (userAvatarElement) {
+                    const iniciais = user.nomeCompleto.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                    userAvatarElement.textContent = iniciais || user.nomeCompleto.charAt(0).toUpperCase();
+                }
+                
+                // Atualizar no objeto currentUser
+                currentUser = user;
+                
+            } catch (error) {
+                console.error('Erro ao atualizar interface com dados:', error);
+            }
+        }
+
         // ========== BANCO DE DADOS (LocalStorage) ==========
         function initDatabase() {
-            // Inicializar com dados do usuário atual
             const userEmail = localStorage.getItem('userEmail');
             if (userEmail) {
-                // Criar um usuário padrão baseado no email
+                // Obter dados do colaborador se existirem
+                const dadosColaborador = localStorage.getItem('ponto_record_dados_colaborador');
+                let nomeUsuario = 'Funcionário';
+                
+                if (dadosColaborador) {
+                    const dados = JSON.parse(dadosColaborador);
+                    nomeUsuario = dados.nomeCompleto.split(' ')[0]; // Primeiro nome
+                }
+                
                 const usuarios = [{
                     id: localStorage.getItem('userId') || '1',
-                    nome: userEmail.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                    nome: nomeUsuario,
+                    nomeCompleto: dadosColaborador ? JSON.parse(dadosColaborador).nomeCompleto : nomeUsuario,
                     empresa: 'Record Guaíba',
                     login: userEmail,
-                    senha: 'senha123', // Senha padrão
+                    senha: 'senha123',
                     email: userEmail,
-                    cargo: 'Funcionário',
+                    cargo: dadosColaborador ? JSON.parse(dadosColaborador).cargo || 'Funcionário' : 'Funcionário',
                     ativo: true
                 }];
                 localStorage.setItem('ponto_record_usuarios', JSON.stringify(usuarios));
             } else {
-                // Dados padrão de fallback
                 const usuariosPadrao = [
                     {
                         id: 1,
                         nome: 'Funcionário Teste',
+                        nomeCompleto: 'Funcionário Teste',
                         empresa: 'Record Guaíba',
                         login: 'funcionario@teste.com',
                         senha: 'senha123',
@@ -1577,16 +1870,13 @@
             try {
                 const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
                 
-                // Verificar se já existe registro para este usuário nesta data
                 const index = registros.findIndex(r => 
                     r.usuarioId === registro.usuarioId && r.data === registro.data
                 );
                 
                 if (index >= 0) {
-                    // Atualizar registro existente
                     registros[index] = { ...registros[index], ...registro };
                 } else {
-                    // Adicionar novo registro
                     registro.id = Date.now();
                     registros.push(registro);
                 }
@@ -1603,10 +1893,8 @@
             try {
                 let registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
                 
-                // Filtrar por usuário
                 registros = registros.filter(r => r.usuarioId === usuarioId);
                 
-                // Filtrar por data se fornecido
                 if (dataInicio && dataFim) {
                     registros = registros.filter(reg => {
                         const dataReg = new Date(reg.data);
@@ -1614,7 +1902,6 @@
                     });
                 }
                 
-                // Ordenar por data (mais recente primeiro)
                 registros.sort((a, b) => new Date(b.data) - new Date(a.data));
                 
                 return registros;
@@ -1654,7 +1941,6 @@
                 const ontem = new Date(hoje);
                 ontem.setDate(hoje.getDate() - 1);
                 
-                // Buscar registros dos últimos 30 dias
                 const trintaDiasAtras = new Date(hoje);
                 trintaDiasAtras.setDate(hoje.getDate() - 30);
                 
@@ -1664,12 +1950,10 @@
                     ontem.toISOString().split('T')[0]
                 );
                 
-                // Filtrar registros incompletos (faltando saída ou retorno)
                 const registrosIncompletos = registros.filter(reg => {
                     return !reg.saidaIntervalo || !reg.retornoIntervalo;
                 });
                 
-                // Verificar quais estão atrasados (mais de 1 dia)
                 const registrosAtrasados = registrosIncompletos.filter(reg => {
                     const dataRegistro = new Date(reg.data);
                     const diferencaDias = Math.floor((ontem - dataRegistro) / (1000 * 60 * 60 * 24));
@@ -1717,7 +2001,6 @@
 
         function showNotification(message, type = 'info', duration = 5000) {
             try {
-                // Remover notificações antigas
                 document.querySelectorAll('.notification').forEach(n => n.remove());
                 
                 const notification = document.createElement('div');
@@ -1944,13 +2227,11 @@
                 const canvas = document.getElementById('assinaturaCanvas');
                 if (!canvas) return;
                 
-                // Garantir que o canvas tenha um tamanho adequado
                 const container = canvas.parentElement;
                 if (container) {
                     canvas.width = container.clientWidth;
                     canvas.height = container.clientHeight;
                     
-                    // Reajustar se as dimensões forem muito pequenas
                     if (canvas.width < 200) {
                         canvas.width = 400;
                     }
@@ -1959,7 +2240,6 @@
                     }
                 }
                 
-                // Limpar canvas antes de inicializar
                 const ctx = canvas.getContext('2d');
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = 'white';
@@ -1976,7 +2256,6 @@
                 
                 console.log('SignaturePad inicializado com sucesso. Dimensões:', canvas.width, 'x', canvas.height);
                 
-                // Adicionar eventos para melhor controle
                 canvas.addEventListener('touchstart', function(e) {
                     e.preventDefault();
                 });
@@ -1985,7 +2264,6 @@
                     e.preventDefault();
                 });
                 
-                // Adicionar feedback visual quando o usuário começar a desenhar
                 signaturePad.addEventListener('beginStroke', () => {
                     canvas.style.borderColor = 'var(--vermelho)';
                 });
@@ -2005,13 +2283,11 @@
                 const canvas = document.getElementById('modalAssinaturaCanvas');
                 if (!canvas) return;
                 
-                // Garantir que o canvas tenha um tamanho adequado
                 const container = canvas.parentElement;
                 if (container) {
                     canvas.width = container.clientWidth;
                     canvas.height = container.clientHeight;
                     
-                    // Reajustar se as dimensões forem muito pequenas
                     if (canvas.width < 200) {
                         canvas.width = 400;
                     }
@@ -2020,7 +2296,6 @@
                     }
                 }
                 
-                // Limpar canvas antes de inicializar
                 const ctx = canvas.getContext('2d');
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = 'white';
@@ -2037,7 +2312,6 @@
                 
                 console.log('Modal SignaturePad inicializado com sucesso. Dimensões:', canvas.width, 'x', canvas.height);
                 
-                // Adicionar eventos para melhor controle
                 canvas.addEventListener('touchstart', function(e) {
                     e.preventDefault();
                 });
@@ -2046,7 +2320,6 @@
                     e.preventDefault();
                 });
                 
-                // Adicionar feedback visual quando o usuário começar a desenhar
                 modalSignaturePad.addEventListener('beginStroke', () => {
                     canvas.style.borderColor = 'var(--vermelho)';
                 });
@@ -2080,7 +2353,6 @@
                     
                     updateRegisterButton();
                     
-                    // Limpar visualmente o canvas
                     const canvas = document.getElementById('assinaturaCanvas');
                     if (canvas) {
                         const ctx = canvas.getContext('2d');
@@ -2113,7 +2385,6 @@
                     
                     updateModalSaveButton();
                     
-                    // Limpar visualmente o canvas
                     const canvas = document.getElementById('modalAssinaturaCanvas');
                     if (canvas) {
                         const ctx = canvas.getContext('2d');
@@ -2144,11 +2415,9 @@
                     const img = new Image();
                     
                     img.onload = function() {
-                        // Configurar tamanho do canvas de preview
                         previewCanvas.width = preview.clientWidth;
                         previewCanvas.height = preview.clientHeight;
                         
-                        // Desenhar a imagem mantendo proporção
                         const ratio = Math.min(
                             previewCanvas.width / img.width,
                             previewCanvas.height / img.height
@@ -2199,11 +2468,9 @@
                     const img = new Image();
                     
                     img.onload = function() {
-                        // Configurar tamanho do canvas de preview
                         previewCanvas.width = preview.clientWidth;
                         previewCanvas.height = preview.clientHeight;
                         
-                        // Desenhar a imagem mantendo proporção
                         const ratio = Math.min(
                             previewCanvas.width / img.width,
                             previewCanvas.height / img.height
@@ -2260,7 +2527,7 @@
                     registrarBtn.innerHTML = '<i class="fas fa-clock"></i> Registrar Ponto';
                 } else {
                     registrarBtn.disabled = true;
-                    registrarBtn.innerHTML = '<i class="fas fa-clock"></i> Registrar Ponto (Selfie obrigatória ou justificativa)';
+                    registrarBtn.innerHTML = '<i class="fas fa-clock"></i> Registrar Ponto';
                 }
             }
         }
@@ -2612,7 +2879,7 @@
                 
                 const registroAtrasadoObj = {
                     usuarioId: currentUser.id,
-                    usuarioNome: currentUser.nome,
+                    usuarioNome: currentUser.nomeCompleto,
                     data: registroAtrasado.data,
                     tipoRegistro: tipoAtrasado,
                     horaEstimada: horaEstimada,
@@ -2629,7 +2896,7 @@
                 if (!registroAtualizado) {
                     registroAtualizado = {
                         usuarioId: currentUser.id,
-                        usuarioNome: currentUser.nome,
+                        usuarioNome: currentUser.nomeCompleto,
                         data: registroAtrasadoObj.data,
                         saidaIntervalo: null,
                         retornoIntervalo: null,
@@ -2717,16 +2984,28 @@
                 
                 yPos += 10;
                 
-                // Informações do funcionário
+                // Informações do colaborador (COM CPF)
                 doc.setFontSize(12);
                 doc.setFont(undefined, 'bold');
-                doc.text('DADOS DO FUNCIONÁRIO', marginLeft, yPos);
+                doc.text('DADOS DO COLABORADOR', marginLeft, yPos);
                 yPos += 8;
                 
                 doc.setFontSize(10);
                 doc.setFont(undefined, 'normal');
-                doc.text(`Nome: ${registro.usuarioNome}`, marginLeft, yPos);
+                doc.text(`Nome: ${currentUser.nomeCompleto || registro.usuarioNome}`, marginLeft, yPos);
                 yPos += 6;
+                
+                // Adicionar CPF se disponível
+                if (currentUser && currentUser.cpfFormatado) {
+                    doc.text(`CPF: ${currentUser.cpfFormatado}`, marginLeft, yPos);
+                    yPos += 6;
+                }
+                
+                if (currentUser && currentUser.cargo) {
+                    doc.text(`Cargo: ${currentUser.cargo}`, marginLeft, yPos);
+                    yPos += 6;
+                }
+                
                 doc.text(`Data do Registro: ${formatDate(registro.data)}`, marginLeft, yPos);
                 yPos += 6;
                 doc.text(`Hora do Registro: ${formatDate(registro.dataRegistro, true)}`, marginLeft, yPos);
@@ -2936,12 +3215,23 @@
                 
                 yPos += 10;
                 
-                // Informações do relatório
+                // Informações do colaborador (COM CPF)
                 doc.setFontSize(10);
                 doc.text('Empresa: Record Guaíba', marginLeft, yPos);
                 yPos += 5;
-                doc.text(`Funcionário: ${currentUser.nome}`, marginLeft, yPos);
+                doc.text(`Colaborador: ${currentUser.nomeCompleto}`, marginLeft, yPos);
                 yPos += 5;
+                
+                if (currentUser && currentUser.cpfFormatado) {
+                    doc.text(`CPF: ${currentUser.cpfFormatado}`, marginLeft, yPos);
+                    yPos += 5;
+                }
+                
+                if (currentUser && currentUser.cargo) {
+                    doc.text(`Cargo: ${currentUser.cargo}`, marginLeft, yPos);
+                    yPos += 5;
+                }
+                
                 doc.text(`Período: ${dataInicio ? formatDate(dataInicio) : 'Início'} à ${formatDate(dataFim)}`, marginLeft, yPos);
                 yPos += 5;
                 doc.text(`Total de Registros: ${registros.length}`, marginLeft, yPos);
@@ -3231,7 +3521,7 @@
                 // Criar link para download
                 const link = document.createElement('a');
                 link.href = pdfUrl;
-                link.download = `relatorio_intervalos_${currentUser.nome}_${dataInicio || 'inicio'}_a_${dataFim}.pdf`;
+                link.download = `relatorio_intervalos_${currentUser.nomeCompleto}_${dataInicio || 'inicio'}_a_${dataFim}.pdf`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -3308,7 +3598,7 @@
             try {
                 let registro = registroHoje || {
                     usuarioId: currentUser.id,
-                    usuarioNome: currentUser.nome,
+                    usuarioNome: currentUser.nomeCompleto,
                     data: hoje,
                     saidaIntervalo: null,
                     retornoIntervalo: null,
@@ -3387,7 +3677,7 @@
                 usuarioId: currentUser.id,
                 dataEnvio: new Date().toISOString(),
                 tipo: 'registro_intervalo_completo_com_pdf',
-                assunto: `Registro de Intervalo Completo - ${currentUser.nome} - ${registro.data}`,
+                assunto: `Registro de Intervalo Completo - ${currentUser.nomeCompleto} - ${registro.data}`,
                 destinatario: 'agawlinski@recordguaiba.tv.br',
                 status: 'enviado',
                 conteudo: `Intervalo completo registrado: Saída ${registro.saidaIntervalo} - Retorno ${registro.retornoIntervalo}. PDF anexado.`,
@@ -3438,7 +3728,7 @@
                 usuarioId: currentUser.id,
                 dataEnvio: new Date().toISOString(),
                 tipo: 'relatorio_7_dias',
-                assunto: `Relatório 7 Dias - ${currentUser.nome}`,
+                assunto: `Relatório 7 Dias - ${currentUser.nomeCompleto}`,
                 destinatario: 'agawlinski@recordguaiba.tv.br',
                 status: 'enviado'
             };
@@ -3465,7 +3755,7 @@
                 usuarioId: currentUser.id,
                 dataEnvio: new Date().toISOString(),
                 tipo: 'relatorio_mensal',
-                assunto: `Relatório Mensal - ${currentUser.nome} - ${hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`,
+                assunto: `Relatório Mensal - ${currentUser.nomeCompleto} - ${hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`,
                 destinatario: 'agawlinski@recordguaiba.tv.br',
                 status: 'enviado'
             };
@@ -3657,7 +3947,19 @@
                 let html = `
                     <div class="mb-3">
                         ${atrasado ? '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> REGISTRO ATRASADO</div>' : ''}
-                        <p><strong>Funcionário:</strong> ${registro.usuarioNome}</p>
+                        <p><strong>Colaborador:</strong> ${currentUser.nomeCompleto}</p>
+                `;
+                
+                // Adicionar CPF se disponível
+                if (currentUser && currentUser.cpfFormatado) {
+                    html += `<p><strong>CPF:</strong> ${currentUser.cpfFormatado}</p>`;
+                }
+                
+                if (currentUser && currentUser.cargo) {
+                    html += `<p><strong>Cargo:</strong> ${currentUser.cargo}</p>`;
+                }
+                
+                html += `
                         <p><strong>Data:</strong> ${formatDate(registro.data)}</p>
                         <p><strong>Saída Intervalo:</strong> ${registro.saidaIntervalo || '--:--'}</p>
                         <p><strong>Retorno Intervalo:</strong> ${registro.retornoIntervalo || '--:--'}</p>
@@ -3736,38 +4038,16 @@
             }
         }
 
-        // ========== INICIALIZAÇÃO ==========
-        async function init() {
+        // ========== INICIALIZAÇÃO DO SISTEMA PRINCIPAL ==========
+        function initSistemaPrincipal(user) {
             try {
-                // Verificar autenticação primeiro
-                const authenticatedUser = checkAuthentication();
-                
-                if (!authenticatedUser) {
-                    // Configurar botão para ir para login
-                    const goToLoginBtn = document.getElementById('goToLoginBtn');
-                    if (goToLoginBtn) {
-                        goToLoginBtn.addEventListener('click', () => {
-                            window.location.href = 'index.html';
-                        });
-                    }
-                    return;
-                }
-                
-                // Se autenticado, continuar com a inicialização normal
-                currentUser = authenticatedUser;
+                currentUser = user;
                 
                 initDatabase();
-                
-                // Atualizar interface com dados do usuário
-                const userNameElement = document.getElementById('userName');
-                const userAvatarElement = document.getElementById('userAvatar');
-                if (userNameElement) userNameElement.textContent = currentUser.nome;
-                if (userAvatarElement) userAvatarElement.textContent = currentUser.nome.charAt(0).toUpperCase();
                 
                 updateDateTime();
                 setInterval(updateDateTime, 1000);
                 
-                // Inicializar a assinatura com um pequeno atraso
                 setTimeout(() => {
                     initSignaturePad();
                 }, 300);
@@ -3783,182 +4063,215 @@
                         localStorage.removeItem('isLoggedIn');
                         localStorage.removeItem('userEmail');
                         localStorage.removeItem('userId');
+                        // NOTA: Não removemos os dados do colaborador para facilitar o próximo login
                         
                         // Redirecionar para página de login
                         window.location.href = 'index.html';
                     });
                 }
                 
-                document.querySelectorAll('.nav-tab').forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        const page = tab.getAttribute('data-page') + 'Page';
-                        showPage(page);
-                    });
+                // Configurar outros eventos
+                configurarEventosSistema();
+                
+                showNotification(`Bem-vindo, ${user.nomeCompleto}! Sistema carregado com sucesso.`, 'success', 4000);
+                console.log('Sistema principal inicializado com sucesso!');
+                
+            } catch (error) {
+                console.error('Erro ao inicializar sistema principal:', error);
+                showNotification('Erro ao inicializar sistema. Verifique o console.', 'error');
+            }
+        }
+
+        function configurarEventosSistema() {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const page = tab.getAttribute('data-page') + 'Page';
+                    showPage(page);
                 });
-                
-                document.querySelectorAll('.flex-fill').forEach(label => {
-                    label.addEventListener('click', function() {
-                        const radio = this.querySelector('input[type="radio"]');
-                        if (radio) {
-                            radio.checked = true;
-                            document.querySelectorAll('.flex-fill').forEach(l => {
-                                l.style.borderColor = 'var(--preto)';
-                                l.style.backgroundColor = 'var(--branco)';
-                            });
-                            this.style.borderColor = 'var(--vermelho)';
-                            this.style.backgroundColor = 'rgba(255, 0, 0, 0.05)';
-                        }
-                    });
+            });
+            
+            document.querySelectorAll('.flex-fill').forEach(label => {
+                label.addEventListener('click', function() {
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio) {
+                        radio.checked = true;
+                        document.querySelectorAll('.flex-fill').forEach(l => {
+                            l.style.borderColor = 'var(--preto)';
+                            l.style.backgroundColor = 'var(--branco)';
+                        });
+                        this.style.borderColor = 'var(--vermelho)';
+                        this.style.backgroundColor = 'rgba(255, 0, 0, 0.05)';
+                    }
                 });
-                
-                const takeSelfieBtn = document.getElementById('takeSelfieBtn');
-                if (takeSelfieBtn) {
-                    takeSelfieBtn.addEventListener('click', openCameraModal);
-                }
-                
-                const retakeSelfieBtn = document.getElementById('retakeSelfieBtn');
-                if (retakeSelfieBtn) {
-                    retakeSelfieBtn.addEventListener('click', resetSelfie);
-                }
-                
-                const captureBtn = document.getElementById('captureBtn');
-                if (captureBtn) {
-                    captureBtn.addEventListener('click', captureSelfie);
-                }
-                
-                const switchCameraBtn = document.getElementById('switchCameraBtn');
-                if (switchCameraBtn) {
-                    switchCameraBtn.addEventListener('click', switchCamera);
-                }
-                
-                const closeCameraBtn = document.getElementById('closeCameraBtn');
-                if (closeCameraBtn) {
-                    closeCameraBtn.addEventListener('click', closeCameraModal);
-                }
-                
-                const requerJustificativa = document.getElementById('requerJustificativa');
-                if (requerJustificativa) {
-                    requerJustificativa.addEventListener('change', (e) => {
-                        const justificativaContainer = document.getElementById('justificativaContainer');
-                        const selfieContainer = document.getElementById('selfieContainer');
-                        
-                        if (justificativaContainer) {
-                            if (e.target.checked) {
-                                justificativaContainer.classList.remove('d-none');
-                                
-                                if (selfieContainer) {
-                                    selfieContainer.style.opacity = '0.5';
-                                    selfieContainer.style.pointerEvents = 'none';
-                                }
-                                
-                                // Inicializar a assinatura quando o container é mostrado
-                                setTimeout(() => {
-                                    if (!signaturePad) {
-                                        initSignaturePad();
-                                    } else {
-                                        // Redimensionar se necessário
-                                        const canvas = document.getElementById('assinaturaCanvas');
-                                        if (canvas && canvas.parentElement) {
-                                            canvas.width = canvas.parentElement.clientWidth;
-                                            canvas.height = canvas.parentElement.clientHeight;
-                                            signaturePad.clear();
-                                        }
-                                    }
-                                }, 100);
-                                
-                                const justificativaTexto = document.getElementById('justificativaTexto');
-                                if (justificativaTexto) {
-                                    setTimeout(() => justificativaTexto.focus(), 300);
-                                }
-                            } else {
-                                justificativaContainer.classList.add('d-none');
-                                
-                                if (selfieContainer) {
-                                    selfieContainer.style.opacity = '1';
-                                    selfieContainer.style.pointerEvents = 'auto';
-                                }
-                                
-                                clearSignature();
+            });
+            
+            const takeSelfieBtn = document.getElementById('takeSelfieBtn');
+            if (takeSelfieBtn) {
+                takeSelfieBtn.addEventListener('click', openCameraModal);
+            }
+            
+            const retakeSelfieBtn = document.getElementById('retakeSelfieBtn');
+            if (retakeSelfieBtn) {
+                retakeSelfieBtn.addEventListener('click', resetSelfie);
+            }
+            
+            const captureBtn = document.getElementById('captureBtn');
+            if (captureBtn) {
+                captureBtn.addEventListener('click', captureSelfie);
+            }
+            
+            const switchCameraBtn = document.getElementById('switchCameraBtn');
+            if (switchCameraBtn) {
+                switchCameraBtn.addEventListener('click', switchCamera);
+            }
+            
+            const closeCameraBtn = document.getElementById('closeCameraBtn');
+            if (closeCameraBtn) {
+                closeCameraBtn.addEventListener('click', closeCameraModal);
+            }
+            
+            const requerJustificativa = document.getElementById('requerJustificativa');
+            if (requerJustificativa) {
+                requerJustificativa.addEventListener('change', (e) => {
+                    const justificativaContainer = document.getElementById('justificativaContainer');
+                    const selfieContainer = document.getElementById('selfieContainer');
+                    
+                    if (justificativaContainer) {
+                        if (e.target.checked) {
+                            justificativaContainer.classList.remove('d-none');
+                            
+                            if (selfieContainer) {
+                                selfieContainer.style.opacity = '0.5';
+                                selfieContainer.style.pointerEvents = 'none';
                             }
                             
-                            updateRegisterButton();
+                            setTimeout(() => {
+                                if (!signaturePad) {
+                                    initSignaturePad();
+                                } else {
+                                    const canvas = document.getElementById('assinaturaCanvas');
+                                    if (canvas && canvas.parentElement) {
+                                        canvas.width = canvas.parentElement.clientWidth;
+                                        canvas.height = canvas.parentElement.clientHeight;
+                                        signaturePad.clear();
+                                    }
+                                }
+                            }, 100);
+                            
+                            const justificativaTexto = document.getElementById('justificativaTexto');
+                            if (justificativaTexto) {
+                                setTimeout(() => justificativaTexto.focus(), 300);
+                            }
+                        } else {
+                            justificativaContainer.classList.add('d-none');
+                            
+                            if (selfieContainer) {
+                                selfieContainer.style.opacity = '1';
+                                selfieContainer.style.pointerEvents = 'auto';
+                            }
+                            
+                            clearSignature();
                         }
-                    });
-                }
-                
-                const limparAssinaturaBtn = document.getElementById('limparAssinaturaBtn');
-                if (limparAssinaturaBtn) {
-                    limparAssinaturaBtn.addEventListener('click', clearSignature);
-                }
-                
-                const salvarAssinaturaBtn = document.getElementById('salvarAssinaturaBtn');
-                if (salvarAssinaturaBtn) {
-                    salvarAssinaturaBtn.addEventListener('click', saveSignature);
-                }
-                
-                const registrarPontoBtn = document.getElementById('registrarPontoBtn');
-                if (registrarPontoBtn) {
-                    registrarPontoBtn.addEventListener('click', registrarPonto);
-                }
-                
-                const filtrarRegistrosBtn = document.getElementById('filtrarRegistrosBtn');
-                if (filtrarRegistrosBtn) {
-                    filtrarRegistrosBtn.addEventListener('click', () => {
-                        loadRegistrosTable(1);
-                    });
-                }
-                
-                const limparFiltrosBtn = document.getElementById('limparFiltrosBtn');
-                if (limparFiltrosBtn) {
-                    limparFiltrosBtn.addEventListener('click', () => {
-                        const hoje = new Date().toISOString().split('T')[0];
-                        const trintaDiasAtras = new Date();
-                        trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
-                        const dataInicio = trintaDiasAtras.toISOString().split('T')[0];
                         
-                        const dataInicioElement = document.getElementById('dataInicio');
-                        const dataFimElement = document.getElementById('dataFim');
-                        
-                        if (dataInicioElement) dataInicioElement.value = dataInicio;
-                        if (dataFimElement) dataFimElement.value = hoje;
-                        
-                        loadRegistrosTable(1);
-                    });
+                        updateRegisterButton();
+                    }
+                });
+            }
+            
+            const limparAssinaturaBtn = document.getElementById('limparAssinaturaBtn');
+            if (limparAssinaturaBtn) {
+                limparAssinaturaBtn.addEventListener('click', clearSignature);
+            }
+            
+            const salvarAssinaturaBtn = document.getElementById('salvarAssinaturaBtn');
+            if (salvarAssinaturaBtn) {
+                salvarAssinaturaBtn.addEventListener('click', saveSignature);
+            }
+            
+            const registrarPontoBtn = document.getElementById('registrarPontoBtn');
+            if (registrarPontoBtn) {
+                registrarPontoBtn.addEventListener('click', registrarPonto);
+            }
+            
+            const filtrarRegistrosBtn = document.getElementById('filtrarRegistrosBtn');
+            if (filtrarRegistrosBtn) {
+                filtrarRegistrosBtn.addEventListener('click', () => {
+                    loadRegistrosTable(1);
+                });
+            }
+            
+            const limparFiltrosBtn = document.getElementById('limparFiltrosBtn');
+            if (limparFiltrosBtn) {
+                limparFiltrosBtn.addEventListener('click', () => {
+                    const hoje = new Date().toISOString().split('T')[0];
+                    const trintaDiasAtras = new Date();
+                    trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
+                    const dataInicio = trintaDiasAtras.toISOString().split('T')[0];
+                    
+                    const dataInicioElement = document.getElementById('dataInicio');
+                    const dataFimElement = document.getElementById('dataFim');
+                    
+                    if (dataInicioElement) dataInicioElement.value = dataInicio;
+                    if (dataFimElement) dataFimElement.value = hoje;
+                    
+                    loadRegistrosTable(1);
+                });
+            }
+            
+            const exportarPDFBtn = document.getElementById('exportarPDFBtn');
+            if (exportarPDFBtn) {
+                exportarPDFBtn.addEventListener('click', exportarRelatorioCompletoPDF);
+            }
+            
+            const hoje = new Date().toISOString().split('T')[0];
+            const trintaDiasAtras = new Date();
+            trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
+            const dataInicio = trintaDiasAtras.toISOString().split('T')[0];
+            
+            const dataInicioElement = document.getElementById('dataInicio');
+            const dataFimElement = document.getElementById('dataFim');
+            
+            if (dataInicioElement) dataInicioElement.value = dataInicio;
+            if (dataFimElement) dataFimElement.value = hoje;
+            
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                console.log('Dispositivo móvel detectado');
+                document.body.classList.add('mobile-device');
+            }
+            
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.warn('Câmera não suportada neste navegador');
+                showNotification('Seu navegador não suporta acesso à câmera. Use a opção de justificativa com assinatura.', 'warning');
+            } else {
+                navigator.permissions.query({ name: 'camera' }).then(permissionStatus => {
+                    console.log('Status da permissão da câmera:', permissionStatus.state);
+                });
+            }
+        }
+
+        // ========== INICIALIZAÇÃO ==========
+        async function init() {
+            try {
+                // Verificar autenticação primeiro
+                const authenticatedUser = checkAuthentication();
+                
+                if (!authenticatedUser) {
+                    // Se retornou null, pode ser porque está mostrando o modal de dados
+                    // ou porque não está autenticado
+                    const goToLoginBtn = document.getElementById('goToLoginBtn');
+                    if (goToLoginBtn) {
+                        goToLoginBtn.addEventListener('click', () => {
+                            window.location.href = 'index.html';
+                        });
+                    }
+                    return;
                 }
                 
-                const exportarPDFBtn = document.getElementById('exportarPDFBtn');
-                if (exportarPDFBtn) {
-                    exportarPDFBtn.addEventListener('click', exportarRelatorioCompletoPDF);
+                // Se autenticado E com dados completos, inicializar sistema
+                if (authenticatedUser.dadosCompletos) {
+                    initSistemaPrincipal(authenticatedUser);
                 }
-                
-                const hoje = new Date().toISOString().split('T')[0];
-                const trintaDiasAtras = new Date();
-                trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
-                const dataInicio = trintaDiasAtras.toISOString().split('T')[0];
-                
-                const dataInicioElement = document.getElementById('dataInicio');
-                const dataFimElement = document.getElementById('dataFim');
-                
-                if (dataInicioElement) dataInicioElement.value = dataInicio;
-                if (dataFimElement) dataFimElement.value = hoje;
-                
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                if (isMobile) {
-                    console.log('Dispositivo móvel detectado');
-                    document.body.classList.add('mobile-device');
-                }
-                
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    console.warn('Câmera não suportada neste navegador');
-                    showNotification('Seu navegador não suporta acesso à câmera. Use a opção de justificativa com assinatura.', 'warning');
-                } else {
-                    navigator.permissions.query({ name: 'camera' }).then(permissionStatus => {
-                        console.log('Status da permissão da câmera:', permissionStatus.state);
-                    });
-                }
-                
-                showNotification(`Bem-vindo, ${currentUser.nome}! Sistema carregado com sucesso.`, 'success', 4000);
-                console.log('Sistema principal inicializado com sucesso!');
                 
             } catch (error) {
                 console.error('Erro ao inicializar sistema:', error);
