@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Ponto - Record Guaíba</title>
+    <title>Sistema de Controle de Intervalo - Record Guaíba</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.28/dist/jspdf.plugin.autotable.min.js"></script>
-    <!-- Incluir biblioteca do Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
         :root {
             --vermelho:  #4361ee;
@@ -1027,7 +1026,6 @@
             text-align: left;
         }
 
-        /* NOVOS ESTILOS ADICIONADOS */
         .modal-internet {
             position: fixed;
             top: 0;
@@ -1114,7 +1112,6 @@
             display: inline-block;
         }
 
-        /* Novos estilos para sincronização */
         .sync-badge {
             position: absolute;
             top: -5px;
@@ -1148,10 +1145,10 @@
 </head>
 <body>
     <!-- Tela de não autenticado -->
-    <div id="notAuthenticated" class="not-authenticated-container d-none">
+    <div id="notAuthenticated" class="not-authenticated-container">
         <div class="not-authenticated-card">
             <div class="login-logo">
-                <i class="fas fa-tv"></i>
+                <i class="fas fa-tv fa-3x" style="color: var(--vermelho); margin-bottom: 1rem;"></i>
             </div>
             <h2 class="not-authenticated-title">Acesso Não Autorizado</h2>
             <p style="margin-bottom: 1.5rem; color: var(--cinza-medio);">
@@ -1161,7 +1158,7 @@
                 <i class="fas fa-sign-in-alt"></i> Ir para Página de Login
             </button>
             <div class="login-support mt-3">
-                <p>
+                <p style="font-size: 0.9rem;">
                     Para suporte técnico: 
                     <a href="mailto:agawlinski@recordguaiba.tv.br">
                         agawlinski@recordguaiba.tv.br
@@ -1270,7 +1267,6 @@
                         <div class="selfie-container" id="selfieContainer">
                             <h4 style="margin-bottom: 1rem; color: var(--vermelho);">
                                 <i class="fas fa-camera"></i> Selfie Obrigatória
-                                <span style="font-size: 0.8rem; color: var(--cinza-medio);"></span>
                             </h4>
                             
                             <div class="selfie-preview" id="selfiePreview">
@@ -1288,9 +1284,6 @@
                                     <i class="fas fa-redo"></i> Tirar Outra
                                 </button>
                             </div>
-                            
-                            <p class="mt-3" style="font-size: 0.9rem; color: var(--cinza-medio);">
-                            </p>
                             
                             <div id="cameraStatus" class="mt-2" style="font-size: 0.8rem; color: var(--cinza-medio);"></div>
                         </div>
@@ -1661,10 +1654,17 @@
 
         // ========== CONFIGURAÇÃO DO SUPABASE ==========
         const SUPABASE_URL = 'https://izilgduqnrhdsglfnsuh.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6aWxnZHVxbnJoZHNnbGZuc3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjk1NTksImV4cCI6MjA4MzMwNTU1OX0.mvTGBwZg4vHTCGuwjKNxU-i1NFjr_xINUUDV_4MLP0E'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6aWxnZHVxbnJoZHNnbGZuc3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjk1NTksImV4cCI6MjA4MzMwNTU1OX0.mvTGBwZg4vHTCGuwjKNxU-i1NFjr_xINUUDV_4MLP0E';
         
         // Inicializar cliente Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabase;
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase inicializado com sucesso');
+        } catch (error) {
+            console.error('Erro ao inicializar Supabase:', error);
+            supabase = null;
+        }
 
         // ========== VARIÁVEIS GLOBAIS ==========
         let currentUser = null;
@@ -1745,9 +1745,12 @@
         // ========== VERIFICAÇÃO DE AUTENTICAÇÃO E DADOS ==========
         async function checkAuthentication() {
             try {
+                console.log('Verificando autenticação...');
+                
                 // Primeiro tentar Supabase
                 const supabaseUser = await checkSupabaseAuthentication();
                 if (supabaseUser) {
+                    console.log('Usuário autenticado via Supabase:', supabaseUser.nomeCompleto);
                     return supabaseUser;
                 }
                 
@@ -1757,10 +1760,13 @@
                 const userId = localStorage.getItem('userId');
                 
                 if (!isLoggedIn || isLoggedIn !== 'true' || !userEmail) {
+                    console.log('Usuário não autenticado localmente');
                     document.getElementById('notAuthenticated').classList.remove('d-none');
                     document.getElementById('mainSystem').classList.add('d-none');
                     return null;
                 }
+                
+                console.log('Usuário autenticado localmente:', userEmail);
                 
                 const dadosColaborador = localStorage.getItem('ponto_record_dados_colaborador');
                 
@@ -1785,8 +1791,10 @@
                     document.getElementById('notAuthenticated').classList.add('d-none');
                     document.getElementById('mainSystem').classList.remove('d-none');
                     
+                    console.log('Dados do colaborador carregados:', user.nomeCompleto);
                     return user;
                 } else {
+                    console.log('Dados do colaborador não encontrados, abrindo modal...');
                     document.getElementById('notAuthenticated').classList.add('d-none');
                     document.getElementById('mainSystem').classList.add('d-none');
                     abrirModalDadosColaborador(user);
@@ -1807,6 +1815,7 @@
         // ========== FUNÇÕES PARA COLETAR DADOS DO COLABORADOR ==========
         function abrirModalDadosColaborador(user) {
             try {
+                console.log('Abrindo modal de dados do colaborador para:', user.email);
                 const modal = document.getElementById('modalDadosColaborador');
                 if (!modal) return;
                 
@@ -1835,6 +1844,7 @@
                 configurarEventosModalDados(user);
                 
                 modal.style.display = 'flex';
+                console.log('Modal de dados do colaborador aberto');
                 
             } catch (error) {
                 console.error('Erro ao abrir modal de dados:', error);
@@ -1899,6 +1909,7 @@
 
         async function salvarDadosColaborador(user) {
             try {
+                console.log('Salvando dados do colaborador...');
                 const nomeCompleto = document.getElementById('modalNomeCompleto').value.trim();
                 const cpf = document.getElementById('modalCPF').value.replace(/\D/g, '');
                 const cargo = document.getElementById('modalCargo').value.trim();
@@ -1927,9 +1938,10 @@
                 localStorage.setItem('ponto_record_dados_colaborador', JSON.stringify(dadosColaborador));
                 
                 // Tentar salvar no Supabase se estiver online
-                if (navigator.onLine) {
+                if (navigator.onLine && supabase) {
                     try {
                         await salvarDadosColaboradorSupabase(user, dadosColaborador);
+                        console.log('Dados salvos no Supabase');
                     } catch (supabaseError) {
                         console.error('Erro ao salvar no Supabase, salvando localmente:', supabaseError);
                         // Adicionar à fila de sincronização
@@ -1985,6 +1997,7 @@
 
         function atualizarInterfaceComDados(user) {
             try {
+                console.log('Atualizando interface com dados do usuário:', user.nomeCompleto);
                 const userNameElement = document.getElementById('userName');
                 if (userNameElement) {
                     userNameElement.textContent = user.nomeCompleto;
@@ -2114,6 +2127,10 @@
         async function syncItemToSupabase(item) {
             const { table, operation, data } = item;
             
+            if (!supabase) {
+                throw new Error('Supabase não inicializado');
+            }
+            
             switch (table) {
                 case 'registros_intervalo':
                     return await syncRegistroIntervalo(operation, data);
@@ -2225,11 +2242,17 @@
         // Verificar autenticação e obter dados do colaborador
         async function checkSupabaseAuthentication() {
             try {
+                if (!supabase) {
+                    console.log('Supabase não disponível');
+                    return null;
+                }
+                
                 // Verificar se usuário está autenticado no Supabase
                 const { data: { user }, error: authError } = await supabase.auth.getUser();
                 
                 if (authError || !user) {
                     // Usuário não autenticado, usar autenticação local
+                    console.log('Usuário não autenticado no Supabase');
                     return null;
                 }
                 
@@ -2242,6 +2265,7 @@
                 
                 if (colaboradorError || !colaborador) {
                     // Colaborador não encontrado, usar dados locais
+                    console.log('Colaborador não encontrado no Supabase');
                     return null;
                 }
                 
@@ -2275,6 +2299,7 @@
                 document.getElementById('notAuthenticated').classList.add('d-none');
                 document.getElementById('mainSystem').classList.remove('d-none');
                 
+                console.log('Usuário autenticado via Supabase:', userObj.nomeCompleto);
                 return userObj;
                 
             } catch (error) {
@@ -2287,6 +2312,10 @@
         // Atualizar função salvarDadosColaborador para usar Supabase
         async function salvarDadosColaboradorSupabase(user, dados) {
             try {
+                if (!supabase) {
+                    throw new Error('Supabase não disponível');
+                }
+                
                 const { error } = await supabase
                     .from('colaboradores')
                     .update({
@@ -2323,6 +2352,7 @@
 
         // ========== BANCO DE DADOS ==========
         function initDatabase() {
+            console.log('Inicializando banco de dados...');
             const userEmail = localStorage.getItem('userEmail');
             if (userEmail) {
                 const dadosColaborador = localStorage.getItem('ponto_record_dados_colaborador');
@@ -2397,6 +2427,7 @@
 
         async function salvarRegistro(registro) {
             try {
+                console.log('Salvando registro:', registro.data);
                 const registroId = await salvarRegistroLocal(registro);
                 
                 // Adicionar à fila de sincronização
@@ -2407,7 +2438,7 @@
                 });
                 
                 // Se estiver online, tentar sincronizar imediatamente
-                if (navigator.onLine) {
+                if (navigator.onLine && supabase) {
                     try {
                         await syncRegistroIntervalo('INSERT', {
                             id: registroId,
@@ -2443,10 +2474,12 @@
         async function buscarRegistros(usuarioId, dataInicio, dataFim) {
             try {
                 // Se estiver offline, buscar do localStorage
-                if (!navigator.onLine) {
+                if (!navigator.onLine || !supabase) {
+                    console.log('Buscando registros localmente');
                     return buscarRegistrosLocal(usuarioId, dataInicio, dataFim);
                 }
                 
+                console.log('Buscando registros do Supabase');
                 // Construir query para Supabase
                 let query = supabase
                     .from('registros_intervalo')
@@ -2666,7 +2699,7 @@
                     usuarioNome: currentUser.nomeCompleto,
                     data: registro.data,
                     assunto: `Registro de Intervalo Completo - ${currentUser.nomeCompleto} - ${registro.data}`,
-                    destinatario: 'agawlinski@recordguaba.tv.br',
+                    destinatario: 'agawlinski@recordguaiba.tv.br',
                     pdfData: registro.pdfData,
                     timestamp: new Date().toISOString(),
                     tentativas: 0,
@@ -2698,7 +2731,7 @@
                     usuarioNome: currentUser.nomeCompleto,
                     registros: registros,
                     assunto: `Relatório 7 Dias - ${currentUser.nomeCompleto}`,
-                    destinatario: 'agawlinski@recordguaba.tv.br',
+                    destinatario: 'agawlinski@recordguaiba.tv.br',
                     timestamp: new Date().toISOString(),
                     tentativas: 0,
                     status: 'pendente'
@@ -3867,7 +3900,7 @@
                 yPos += 6;
                 doc.text('Departamento: TI', marginLeft, yPos);
                 yPos += 6;
-                doc.text('Email: agawlinski@recordguaba.tv.br', marginLeft, yPos);
+                doc.text('Email: agawlinski@recordguaiba.tv.br', marginLeft, yPos);
                 
                 yPos += 10;
                 
@@ -5045,6 +5078,7 @@
         // ========== INICIALIZAÇÃO DO SISTEMA PRINCIPAL ==========
         function initSistemaPrincipal(user) {
             try {
+                console.log('Inicializando sistema principal para:', user.nomeCompleto);
                 currentUser = user;
                 
                 initDatabase();
@@ -5271,6 +5305,7 @@
                 });
             }
             
+            // Configurar filtros de data padrão
             const hoje = new Date().toISOString().split('T')[0];
             const trintaDiasAtras = new Date();
             trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
@@ -5286,9 +5321,12 @@
         // ========== INICIALIZAÇÃO ==========
         async function init() {
             try {
+                console.log('Inicializando sistema de controle de intervalo...');
+                
                 const authenticatedUser = await checkAuthentication();
                 
                 if (!authenticatedUser) {
+                    console.log('Nenhum usuário autenticado');
                     const goToLoginBtn = document.getElementById('goToLoginBtn');
                     if (goToLoginBtn) {
                         goToLoginBtn.addEventListener('click', () => {
@@ -5299,6 +5337,7 @@
                 }
                 
                 if (authenticatedUser.dadosCompletos) {
+                    console.log('Usuário com dados completos, inicializando sistema principal');
                     initSistemaPrincipal(authenticatedUser);
                 }
                 
@@ -5308,14 +5347,24 @@
             }
         }
 
+        // Adicionar event listeners quando o DOM estiver carregado
         document.addEventListener('DOMContentLoaded', init);
 
+        // Exportar funções para o escopo global
         window.verDetalhesRegistro = verDetalhesRegistro;
         window.loadRegistrosTable = loadRegistrosTable;
         window.closeVisualizarModal = closeVisualizarModal;
         window.gerarPDFParaDownload = gerarPDFParaDownload;
         window.exportarRelatorioCompletoPDF = exportarRelatorioCompletoPDF;
         window.exportarBackupDados = exportarBackupDados;
+
+        // Configurar input de backup
+        document.getElementById('importBackupInput')?.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                importarBackupDados(e.target.files[0]);
+                e.target.value = ''; // Limpar input
+            }
+        });
         
     </script>
 </body>
