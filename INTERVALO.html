@@ -5318,6 +5318,23 @@
             if (dataFimElement) dataFimElement.value = hoje;
         }
 
+        // ========== CONFIGURAR EVENT LISTENERS PARA LOGIN ==========
+        function configurarEventListenersLogin() {
+            console.log('Configurando event listeners para login...');
+            
+            // Configurar botão "Ir para Página de Login"
+            const goToLoginBtn = document.getElementById('goToLoginBtn');
+            if (goToLoginBtn) {
+                console.log('Botão de login encontrado, configurando evento...');
+                goToLoginBtn.addEventListener('click', () => {
+                    console.log('Botão de login clicado, redirecionando...');
+                    window.location.href = 'index.html';
+                });
+            } else {
+                console.log('Botão de login NÃO encontrado!');
+            }
+        }
+
         // ========== INICIALIZAÇÃO ==========
         async function init() {
             try {
@@ -5327,13 +5344,7 @@
                 
                 if (!authenticatedUser) {
                     console.log('Nenhum usuário autenticado');
-                    const goToLoginBtn = document.getElementById('goToLoginBtn');
-                    if (goToLoginBtn) {
-                        goToLoginBtn.addEventListener('click', () => {
-                            window.location.href = 'index.html';
-                        });
-                    }
-                    return;
+                    return; // Removemos a configuração do botão daqui
                 }
                 
                 if (authenticatedUser.dadosCompletos) {
@@ -5347,8 +5358,16 @@
             }
         }
 
-        // Adicionar event listeners quando o DOM estiver carregado
-        document.addEventListener('DOMContentLoaded', init);
+        // ========== INICIALIZAÇÃO QUANDO O DOM ESTIVER PRONTO ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM completamente carregado e analisado');
+            
+            // Configurar botões de login primeiro (importante!)
+            configurarEventListenersLogin();
+            
+            // Depois inicializar o sistema
+            init();
+        });
 
         // Exportar funções para o escopo global
         window.verDetalhesRegistro = verDetalhesRegistro;
