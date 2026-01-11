@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.28/dist/jspdf.plugin.autotable.min.js"></script>
+    <!-- Incluir biblioteca do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --vermelho:  #4361ee;
@@ -1111,6 +1113,37 @@
             position: relative;
             display: inline-block;
         }
+
+        /* Novos estilos para sincronização */
+        .sync-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--azul);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #syncStatus {
+            bottom: 60px;
+            background-color: rgba(0, 123, 255, 0.2);
+            border-color: var(--azul);
+        }
+        
+        #syncProgress {
+            position: fixed;
+            bottom: 50px;
+            left: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -1157,6 +1190,10 @@
                     </div>
                     <div id="userAvatar" class="user-avatar"></div>
                     <span id="userName" style="font-weight: 600;"></span>
+                    <button id="syncBtn" class="btn btn-info btn-sm" title="Sincronizar dados">
+                        <i class="fas fa-sync-alt"></i>
+                        <span id="syncBadge" class="sync-badge d-none">0</span>
+                    </button>
                     <button id="logoutBtn" class="btn btn-secondary btn-sm">
                         <i class="fas fa-sign-out-alt"></i> Sair
                     </button>
@@ -1310,9 +1347,17 @@
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title">Meus Registros de Intervalo</h2>
-                        <button id="exportarPDFBtn" class="btn btn-danger btn-sm">
-                            <i class="fas fa-file-pdf"></i> Exportar Relatório PDF
-                        </button>
+                        <div class="d-flex gap-2">
+                            <button id="exportarPDFBtn" class="btn btn-danger btn-sm">
+                                <i class="fas fa-file-pdf"></i> Exportar Relatório PDF
+                            </button>
+                            <button id="exportarBackupBtn" class="btn btn-warning btn-sm">
+                                <i class="fas fa-download"></i> Backup
+                            </button>
+                            <button id="importarBackupBtn" class="btn btn-info btn-sm">
+                                <i class="fas fa-upload"></i> Restaurar
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="row mb-3">
@@ -1553,7 +1598,7 @@
                 <div class="alert alert-info mt-3">
                     <h5><i class="fas fa-shield-alt"></i> Segurança dos Dados</h5>
                     <p style="font-size: 0.85rem; margin-bottom: 0;">
-                        Seus dados são armazenados apenas localmente no seu navegador e não são compartilhados com terceiros.
+                        Seus dados são armazenados localmente e sincronizados com segurança no servidor.
                         Eles são necessários para a geração dos documentos oficiais.
                     </p>
                 </div>
@@ -1578,13 +1623,13 @@
             </div>
             <h3 style="color: var(--vermelho); margin-bottom: 1rem;">Sem Conexão com a Internet</h3>
             <p style="margin-bottom: 1.5rem; color: var(--cinza-medio);">
-                Seus emails e registros estão sendo salvos localmente e serão enviados automaticamente quando a conexão for restaurada.
+                Seus registros estão sendo salvos localmente e serão sincronizados automaticamente quando a conexão for restaurada.
             </p>
             <div class="progress-bar">
-                <div id="emailProgressBar" class="progress-fill" style="width: 0%"></div>
+                <div id="syncProgressBar" class="progress-fill" style="width: 0%"></div>
             </div>
-            <div id="emailQueueCount" style="font-size: 0.9rem; color: var(--cinza-medio); margin-bottom: 1rem;">
-                Emails pendentes: <span id="pendingEmailCount">0</span>
+            <div id="syncQueueCount" style="font-size: 0.9rem; color: var(--cinza-medio); margin-bottom: 1rem;">
+                Dados pendentes: <span id="pendingSyncCount">0</span>
             </div>
             <button id="btnCloseInternetModal" class="btn btn-primary">
                 <i class="fas fa-check"></i> Entendi
@@ -1598,8 +1643,28 @@
         <span id="internetStatusText">Conectado</span>
     </div>
 
+    <!-- Status de sincronização -->
+    <div id="syncStatus" class="status-internet d-none">
+        <i class="fas fa-sync-alt"></i>
+        <span id="syncStatusText">Sincronizando...</span>
+    </div>
+
+    <div id="syncProgress" class="progress-bar">
+        <div id="syncProgressBar" class="progress-fill" style="width: 0%"></div>
+    </div>
+
+    <!-- Input oculto para importação de backup -->
+    <input type="file" id="importBackupInput" accept=".json" style="display: none;">
+
     <script>
         // ========== SISTEMA DE CONTROLE DE INTERVALO - RECORD GUAÍBA ==========
+
+        // ========== CONFIGURAÇÃO DO SUPABASE ==========
+        const SUPABASE_URL = 'https://seu-projeto.supabase.co';
+        const SUPABASE_ANON_KEY = 'sua-chave-anon-publica';
+
+        // Inicializar cliente Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ========== VARIÁVEIS GLOBAIS ==========
         let currentUser = null;
@@ -1621,6 +1686,12 @@
         let isOnline = navigator.onLine;
         let retryInterval = null;
         let emailSendingInProgress = false;
+        
+        // ========== VARIÁVEIS DE SINCRONIZAÇÃO ==========
+        let syncInProgress = false;
+        let offlineQueue = [];
+        let syncRetryCount = 0;
+        const MAX_RETRIES = 3;
 
         // ========== FUNÇÕES DE VALIDAÇÃO DE CPF ==========
         function validarCPF(cpf) {
@@ -1672,8 +1743,15 @@
         }
 
         // ========== VERIFICAÇÃO DE AUTENTICAÇÃO E DADOS ==========
-        function checkAuthentication() {
+        async function checkAuthentication() {
             try {
+                // Primeiro tentar Supabase
+                const supabaseUser = await checkSupabaseAuthentication();
+                if (supabaseUser) {
+                    return supabaseUser;
+                }
+                
+                // Fallback para autenticação local
                 const isLoggedIn = localStorage.getItem('isLoggedIn');
                 const userEmail = localStorage.getItem('userEmail');
                 const userId = localStorage.getItem('userId');
@@ -1782,8 +1860,8 @@
             }
             
             if (salvarBtn) {
-                salvarBtn.addEventListener('click', () => {
-                    salvarDadosColaborador(user);
+                salvarBtn.addEventListener('click', async () => {
+                    await salvarDadosColaborador(user);
                 });
             }
             
@@ -1819,7 +1897,7 @@
             }
         }
 
-        function salvarDadosColaborador(user) {
+        async function salvarDadosColaborador(user) {
             try {
                 const nomeCompleto = document.getElementById('modalNomeCompleto').value.trim();
                 const cpf = document.getElementById('modalCPF').value.replace(/\D/g, '');
@@ -1847,6 +1925,34 @@
                 };
                 
                 localStorage.setItem('ponto_record_dados_colaborador', JSON.stringify(dadosColaborador));
+                
+                // Tentar salvar no Supabase se estiver online
+                if (navigator.onLine) {
+                    try {
+                        await salvarDadosColaboradorSupabase(user, dadosColaborador);
+                    } catch (supabaseError) {
+                        console.error('Erro ao salvar no Supabase, salvando localmente:', supabaseError);
+                        // Adicionar à fila de sincronização
+                        addToSyncQueue('colaboradores', 'UPDATE', {
+                            id: user.id,
+                            nomeCompleto: nomeCompleto,
+                            cpf: cpf,
+                            cargo: cargo,
+                            matricula: matricula,
+                            email: user.email
+                        });
+                    }
+                } else {
+                    // Adicionar à fila de sincronização
+                    addToSyncQueue('colaboradores', 'UPDATE', {
+                        id: user.id,
+                        nomeCompleto: nomeCompleto,
+                        cpf: cpf,
+                        cargo: cargo,
+                        matricula: matricula,
+                        email: user.email
+                    });
+                }
                 
                 user.nome = nomeCompleto.split(' ')[0];
                 user.nomeCompleto = nomeCompleto;
@@ -1894,6 +2000,324 @@
                 
             } catch (error) {
                 console.error('Erro ao atualizar interface com dados:', error);
+            }
+        }
+
+        // ========== FUNÇÕES DE SINCRONIZAÇÃO ==========
+
+        // Carregar fila de sincronização do localStorage
+        function loadOfflineQueue() {
+            try {
+                const queue = localStorage.getItem('ponto_record_offline_queue');
+                offlineQueue = queue ? JSON.parse(queue) : [];
+                console.log(`Fila offline carregada: ${offlineQueue.length} itens`);
+                updateSyncBadge();
+            } catch (error) {
+                console.error('Erro ao carregar fila offline:', error);
+                offlineQueue = [];
+            }
+        }
+
+        // Salvar fila de sincronização no localStorage
+        function saveOfflineQueue() {
+            try {
+                localStorage.setItem('ponto_record_offline_queue', JSON.stringify(offlineQueue));
+                updateSyncBadge();
+            } catch (error) {
+                console.error('Erro ao salvar fila offline:', error);
+            }
+        }
+
+        // Adicionar item à fila de sincronização
+        function addToSyncQueue(table, operation, data) {
+            const syncItem = {
+                id: Date.now(),
+                table,
+                operation,
+                data,
+                timestamp: new Date().toISOString(),
+                retries: 0
+            };
+            
+            offlineQueue.push(syncItem);
+            saveOfflineQueue();
+            
+            // Tentar sincronizar imediatamente se estiver online
+            if (navigator.onLine) {
+                setTimeout(() => {
+                    processSyncQueue();
+                }, 1000);
+            }
+            
+            showNotification('Dados salvos localmente. Serão sincronizados quando a conexão for restaurada.', 'info');
+        }
+
+        // Processar fila de sincronização
+        async function processSyncQueue() {
+            if (syncInProgress || offlineQueue.length === 0) return;
+            
+            syncInProgress = true;
+            showSyncStatus('Sincronizando dados...', true);
+            
+            try {
+                for (let i = 0; i < offlineQueue.length; i++) {
+                    const item = offlineQueue[i];
+                    
+                    // Atualizar barra de progresso
+                    const progressBar = document.getElementById('syncProgressBar');
+                    if (progressBar) {
+                        progressBar.style.width = `${((i + 1) / offlineQueue.length) * 100}%`;
+                    }
+                    
+                    try {
+                        await syncItemToSupabase(item);
+                        
+                        // Remover item sincronizado
+                        offlineQueue.splice(i, 1);
+                        i--;
+                        
+                    } catch (error) {
+                        console.error(`Erro ao sincronizar item ${item.id}:`, error);
+                        item.retries++;
+                        
+                        if (item.retries >= MAX_RETRIES) {
+                            offlineQueue.splice(i, 1);
+                            i--;
+                            showNotification(`Falha ao sincronizar após ${MAX_RETRIES} tentativas`, 'error');
+                        }
+                    }
+                    
+                    // Pequena pausa entre sincronizações
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                saveOfflineQueue();
+                
+                if (offlineQueue.length === 0) {
+                    showNotification('Todos os dados foram sincronizados com o servidor!', 'success');
+                }
+                
+            } finally {
+                syncInProgress = false;
+                showSyncStatus('', false);
+                const progressBar = document.getElementById('syncProgressBar');
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                    setTimeout(() => {
+                        progressBar.style.width = '0%';
+                    }, 1000);
+                }
+            }
+        }
+
+        // Sincronizar item individual com Supabase
+        async function syncItemToSupabase(item) {
+            const { table, operation, data } = item;
+            
+            switch (table) {
+                case 'registros_intervalo':
+                    return await syncRegistroIntervalo(operation, data);
+                case 'colaboradores':
+                    return await syncColaborador(operation, data);
+                case 'logs_email':
+                    return await syncLogEmail(operation, data);
+                case 'registros_atrasados':
+                    return await syncRegistroAtrasado(operation, data);
+                default:
+                    throw new Error(`Tabela não suportada: ${table}`);
+            }
+        }
+
+        // ========== FUNÇÕES ESPECÍFICAS DE SINCRONIZAÇÃO ==========
+
+        // Sincronizar registro de intervalo
+        async function syncRegistroIntervalo(operation, registro) {
+            if (operation === 'INSERT' || operation === 'UPDATE') {
+                const { error } = await supabase
+                    .from('registros_intervalo')
+                    .upsert({
+                        id: registro.id || undefined,
+                        colaborador_id: registro.colaborador_id || currentUser.id,
+                        data: registro.data,
+                        saida_intervalo: registro.saidaIntervalo,
+                        retorno_intervalo: registro.retornoIntervalo,
+                        selfie_saida: registro.saidaSelfie,
+                        selfie_retorno: registro.retornoSelfie,
+                        justificativa_saida: registro.saidaJustificativa,
+                        justificativa_retorno: registro.retornoJustificativa,
+                        assinatura_saida: registro.saidaAssinatura,
+                        assinatura_retorno: registro.retornoAssinatura,
+                        tipo_registro: registro.tipoRegistro,
+                        status: registro.status || 'pendente',
+                        email_enviado: registro.emailEnviado || false,
+                        bloqueado: registro.bloqueado || false,
+                        pdf_data: registro.pdfData,
+                        localizacao: registro.localizacao || null,
+                        dispositivo_info: registro.dispositivoInfo || null
+                    });
+                
+                if (error) throw error;
+            }
+        }
+
+        // Sincronizar dados do colaborador
+        async function syncColaborador(operation, colaborador) {
+            if (operation === 'UPDATE') {
+                const { error } = await supabase
+                    .from('colaboradores')
+                    .update({
+                        nome_completo: colaborador.nomeCompleto,
+                        cpf: colaborador.cpf,
+                        cargo: colaborador.cargo,
+                        matricula: colaborador.matricula,
+                        dados_completos: true,
+                        ultimo_login: new Date().toISOString()
+                    })
+                    .eq('email', colaborador.email);
+                
+                if (error) throw error;
+            }
+        }
+
+        // Sincronizar log de email
+        async function syncLogEmail(operation, log) {
+            if (operation === 'INSERT') {
+                const { error } = await supabase
+                    .from('logs_email')
+                    .insert({
+                        colaborador_id: log.usuarioId,
+                        tipo: log.tipo,
+                        assunto: log.assunto,
+                        destinatario: log.destinatario,
+                        conteudo: log.conteudo,
+                        tem_anexo: log.temAnexo || false,
+                        tipo_anexo: log.tipoAnexo,
+                        status: log.status || 'enviado',
+                        registro_id: log.registroId || null,
+                        criado_em: log.dataEnvio || new Date().toISOString()
+                    });
+                
+                if (error) throw error;
+            }
+        }
+
+        // Sincronizar registro atrasado
+        async function syncRegistroAtrasado(operation, registro) {
+            if (operation === 'INSERT') {
+                const { error } = await supabase
+                    .from('registros_atrasados')
+                    .insert({
+                        colaborador_id: registro.usuarioId,
+                        data: registro.data,
+                        tipo_registro: registro.tipoRegistro,
+                        hora_estimada: registro.horaEstimada,
+                        justificativa: registro.justificativa,
+                        assinatura: registro.assinatura,
+                        status: registro.status || 'justificado'
+                    });
+                
+                if (error) throw error;
+            }
+        }
+
+        // ========== FUNÇÕES DE AUTENTICAÇÃO COM SUPABASE ==========
+
+        // Verificar autenticação e obter dados do colaborador
+        async function checkSupabaseAuthentication() {
+            try {
+                // Verificar se usuário está autenticado no Supabase
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                
+                if (authError || !user) {
+                    // Usuário não autenticado, usar autenticação local
+                    return null;
+                }
+                
+                // Buscar dados do colaborador no Supabase
+                const { data: colaborador, error: colaboradorError } = await supabase
+                    .from('colaboradores')
+                    .select('*')
+                    .eq('auth_user_id', user.id)
+                    .single();
+                
+                if (colaboradorError || !colaborador) {
+                    // Colaborador não encontrado, usar dados locais
+                    return null;
+                }
+                
+                // Colaborador encontrado, verificar se dados estão completos
+                if (!colaborador.dados_completos) {
+                    // Dados incompletos, mostrar modal para completar
+                    abrirModalDadosColaborador({
+                        id: colaborador.id,
+                        email: colaborador.email,
+                        nomeCompleto: colaborador.nome_completo
+                    });
+                    return null;
+                }
+                
+                // Tudo OK, retornar usuário
+                const userObj = {
+                    id: colaborador.id,
+                    authUserId: user.id,
+                    nome: colaborador.primeiro_nome || colaborador.nome_completo.split(' ')[0],
+                    nomeCompleto: colaborador.nome_completo,
+                    email: colaborador.email,
+                    cpf: colaborador.cpf,
+                    cpfFormatado: formatarCPF(colaborador.cpf),
+                    cargo: colaborador.cargo || 'Funcionário',
+                    matricula: colaborador.matricula,
+                    empresa: 'Record Guaíba',
+                    dadosCompletos: true,
+                    sincronizado: true
+                };
+                
+                document.getElementById('notAuthenticated').classList.add('d-none');
+                document.getElementById('mainSystem').classList.remove('d-none');
+                
+                return userObj;
+                
+            } catch (error) {
+                console.error('Erro na autenticação Supabase:', error);
+                // Em caso de erro, usar autenticação local
+                return null;
+            }
+        }
+
+        // Atualizar função salvarDadosColaborador para usar Supabase
+        async function salvarDadosColaboradorSupabase(user, dados) {
+            try {
+                const { error } = await supabase
+                    .from('colaboradores')
+                    .update({
+                        nome_completo: dados.nomeCompleto,
+                        primeiro_nome: dados.nomeCompleto.split(' ')[0],
+                        cpf: dados.cpf.replace(/\D/g, ''),
+                        cargo: dados.cargo || 'Funcionário',
+                        matricula: dados.matricula,
+                        dados_completos: true,
+                        atualizado_em: new Date().toISOString()
+                    })
+                    .eq('email', dados.email);
+                
+                if (error) throw error;
+                
+                // Retornar usuário atualizado
+                return {
+                    ...user,
+                    nome: dados.nomeCompleto.split(' ')[0],
+                    nomeCompleto: dados.nomeCompleto,
+                    cpf: dados.cpf.replace(/\D/g, ''),
+                    cpfFormatado: formatarCPF(dados.cpf),
+                    cargo: dados.cargo || 'Funcionário',
+                    matricula: dados.matricula,
+                    dadosCompletos: true,
+                    sincronizado: true
+                };
+                
+            } catch (error) {
+                console.error('Erro ao salvar dados do colaborador:', error);
+                throw error;
             }
         }
 
@@ -1958,6 +2382,9 @@
                 updateEmailQueueBadge();
             }
             
+            // Carregar fila de sincronização
+            loadOfflineQueue();
+            
             console.log('Banco de dados inicializado!');
         }
 
@@ -1968,54 +2395,110 @@
             return usuario || null;
         }
 
-        function salvarRegistro(registro) {
+        async function salvarRegistro(registro) {
             try {
-                const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                const registroId = await salvarRegistroLocal(registro);
                 
-                const index = registros.findIndex(r => 
-                    r.usuarioId === registro.usuarioId && r.data === registro.data
-                );
+                // Adicionar à fila de sincronização
+                addToSyncQueue('registros_intervalo', 'INSERT', {
+                    id: registroId,
+                    ...registro,
+                    colaborador_id: currentUser.id
+                });
                 
-                if (index >= 0) {
-                    registros[index] = { ...registros[index], ...registro };
-                } else {
-                    registro.id = Date.now();
-                    registros.push(registro);
+                // Se estiver online, tentar sincronizar imediatamente
+                if (navigator.onLine) {
+                    try {
+                        await syncRegistroIntervalo('INSERT', {
+                            id: registroId,
+                            ...registro,
+                            colaborador_id: currentUser.id
+                        });
+                        
+                        // Se sincronização for bem-sucedida, atualizar status local
+                        const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                        const index = registros.findIndex(r => r.id === registroId);
+                        if (index !== -1) {
+                            registros[index].sincronizado = true;
+                            localStorage.setItem('ponto_record_registros', JSON.stringify(registros));
+                        }
+                    } catch (syncError) {
+                        console.error('Erro na sincronização imediata:', syncError);
+                        // Continua normalmente, o item já está na fila
+                    }
                 }
-                
-                localStorage.setItem('ponto_record_registros', JSON.stringify(registros));
                 
                 // Verificar se o registro está completo
                 if (registro.saidaIntervalo && registro.retornoIntervalo && !registro.emailEnviado) {
                     adicionarEmailParaFila(registro);
                 }
                 
-                return registro.id || registros[registros.length - 1].id;
+                return registroId;
             } catch (error) {
                 console.error('Erro ao salvar registro:', error);
                 throw error;
             }
         }
 
-        function buscarRegistros(usuarioId, dataInicio, dataFim) {
+        async function buscarRegistros(usuarioId, dataInicio, dataFim) {
             try {
-                let registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
-                
-                registros = registros.filter(r => r.usuarioId === usuarioId);
-                
-                if (dataInicio && dataFim) {
-                    registros = registros.filter(reg => {
-                        const dataReg = new Date(reg.data);
-                        return dataReg >= new Date(dataInicio) && dataReg <= new Date(dataFim);
-                    });
+                // Se estiver offline, buscar do localStorage
+                if (!navigator.onLine) {
+                    return buscarRegistrosLocal(usuarioId, dataInicio, dataFim);
                 }
                 
-                registros.sort((a, b) => new Date(b.data) - new Date(a.data));
+                // Construir query para Supabase
+                let query = supabase
+                    .from('registros_intervalo')
+                    .select('*')
+                    .eq('colaborador_id', usuarioId)
+                    .order('data', { ascending: false });
                 
-                return registros;
+                // Aplicar filtros de data
+                if (dataInicio && dataFim) {
+                    query = query.gte('data', dataInicio).lte('data', dataFim);
+                }
+                
+                const { data: registrosSupabase, error } = await query;
+                
+                if (error) throw error;
+                
+                // Converter formato do Supabase para formato local
+                const registrosConvertidos = registrosSupabase.map(reg => ({
+                    id: reg.id,
+                    usuarioId: reg.colaborador_id,
+                    usuarioNome: currentUser.nomeCompleto,
+                    data: reg.data,
+                    saidaIntervalo: reg.saida_intervalo,
+                    retornoIntervalo: reg.retorno_intervalo,
+                    saidaSelfie: reg.selfie_saida,
+                    retornoSelfie: reg.selfie_retorno,
+                    saidaJustificativa: reg.justificativa_saida,
+                    retornoJustificativa: reg.justificativa_retorno,
+                    saidaAssinatura: reg.assinatura_saida,
+                    retornoAssinatura: reg.assinatura_retorno,
+                    tipoRegistro: reg.tipo_registro,
+                    justificativa: reg.justificativa_saida || reg.justificativa_retorno,
+                    assinatura: reg.assinatura_saida || reg.assinatura_retorno,
+                    selfie: reg.selfie_saida || reg.selfie_retorno,
+                    emailEnviado: reg.email_enviado,
+                    bloqueado: reg.bloqueado,
+                    pdfData: reg.pdf_data,
+                    dataRegistro: reg.criado_em,
+                    sincronizado: true
+                }));
+                
+                // Mesclar com registros locais não sincronizados
+                const registrosLocais = buscarRegistrosLocal(usuarioId, dataInicio, dataFim)
+                    .filter(reg => !reg.sincronizado);
+                
+                return [...registrosConvertidos, ...registrosLocais]
+                    .sort((a, b) => new Date(b.data) - new Date(a.data));
+                
             } catch (error) {
-                console.error('Erro ao buscar registros:', error);
-                return [];
+                console.error('Erro ao buscar registros do Supabase:', error);
+                // Fallback para localStorage
+                return buscarRegistrosLocal(usuarioId, dataInicio, dataFim);
             }
         }
 
@@ -2028,15 +2511,17 @@
             ) || null;
         }
 
-        function salvarRegistroAtrasado(registroAtrasado) {
+        async function salvarRegistroAtrasado(registroAtrasado) {
             try {
-                const registrosAtrasados = JSON.parse(localStorage.getItem('ponto_record_registros_atrasados') || '[]');
-                registroAtrasado.id = Date.now();
-                registroAtrasado.dataCriacao = new Date().toISOString();
-                registrosAtrasados.push(registroAtrasado);
+                const registroId = salvarRegistroAtrasadoLocal(registroAtrasado);
                 
-                localStorage.setItem('ponto_record_registros_atrasados', JSON.stringify(registrosAtrasados));
-                return registroAtrasado.id;
+                // Adicionar à fila de sincronização
+                addToSyncQueue('registros_atrasados', 'INSERT', {
+                    ...registroAtrasado,
+                    id: registroId
+                });
+                
+                return registroId;
             } catch (error) {
                 console.error('Erro ao salvar registro atrasado:', error);
                 throw error;
@@ -2052,7 +2537,7 @@
                 const trintaDiasAtras = new Date(hoje);
                 trintaDiasAtras.setDate(hoje.getDate() - 30);
                 
-                const registros = buscarRegistros(
+                const registros = buscarRegistrosLocal(
                     usuarioId,
                     trintaDiasAtras.toISOString().split('T')[0],
                     ontem.toISOString().split('T')[0]
@@ -2075,7 +2560,88 @@
             }
         }
 
-        function salvarLogEmail(log) {
+        async function salvarLogEmail(log) {
+            try {
+                const logId = salvarLogEmailLocal(log);
+                
+                // Adicionar à fila de sincronização
+                addToSyncQueue('logs_email', 'INSERT', {
+                    ...log,
+                    id: logId
+                });
+                
+                return logId;
+                
+            } catch (error) {
+                console.error('Erro ao salvar log de email:', error);
+                return log.id;
+            }
+        }
+
+        // ========== FUNÇÕES LOCAIS (FALLBACK) ==========
+
+        function salvarRegistroLocal(registro) {
+            try {
+                const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                
+                const index = registros.findIndex(r => 
+                    r.usuarioId === registro.usuarioId && r.data === registro.data
+                );
+                
+                if (index >= 0) {
+                    registros[index] = { ...registros[index], ...registro, sincronizado: false };
+                } else {
+                    registro.id = registro.id || Date.now();
+                    registro.sincronizado = false;
+                    registros.push(registro);
+                }
+                
+                localStorage.setItem('ponto_record_registros', JSON.stringify(registros));
+                return registro.id || registros[registros.length - 1].id;
+            } catch (error) {
+                console.error('Erro ao salvar registro local:', error);
+                throw error;
+            }
+        }
+
+        function buscarRegistrosLocal(usuarioId, dataInicio, dataFim) {
+            try {
+                let registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                
+                registros = registros.filter(r => r.usuarioId === usuarioId);
+                
+                if (dataInicio && dataFim) {
+                    registros = registros.filter(reg => {
+                        const dataReg = new Date(reg.data);
+                        return dataReg >= new Date(dataInicio) && dataReg <= new Date(dataFim);
+                    });
+                }
+                
+                registros.sort((a, b) => new Date(b.data) - new Date(a.data));
+                
+                return registros;
+            } catch (error) {
+                console.error('Erro ao buscar registros local:', error);
+                return [];
+            }
+        }
+
+        function salvarRegistroAtrasadoLocal(registroAtrasado) {
+            try {
+                const registrosAtrasados = JSON.parse(localStorage.getItem('ponto_record_registros_atrasados') || '[]');
+                registroAtrasado.id = Date.now();
+                registroAtrasado.dataCriacao = new Date().toISOString();
+                registrosAtrasados.push(registroAtrasado);
+                
+                localStorage.setItem('ponto_record_registros_atrasados', JSON.stringify(registrosAtrasados));
+                return registroAtrasado.id;
+            } catch (error) {
+                console.error('Erro ao salvar registro atrasado local:', error);
+                throw error;
+            }
+        }
+
+        function salvarLogEmailLocal(log) {
             try {
                 const logs = JSON.parse(localStorage.getItem('ponto_record_logs_email') || '[]');
                 log.id = Date.now();
@@ -2084,7 +2650,7 @@
                 localStorage.setItem('ponto_record_logs_email', JSON.stringify(logs));
                 return log.id;
             } catch (error) {
-                console.error('Erro ao salvar log de email:', error);
+                console.error('Erro ao salvar log de email local:', error);
                 throw error;
             }
         }
@@ -2166,10 +2732,19 @@
             if (pendingCount) {
                 pendingCount.textContent = emailQueue.length;
             }
+        }
+        
+        function updateSyncBadge() {
+            const badge = document.getElementById('syncBadge');
+            if (badge) {
+                const totalPending = offlineQueue.length + emailQueue.length;
+                badge.textContent = totalPending;
+                badge.style.display = totalPending > 0 ? 'flex' : 'none';
+            }
             
-            const progressBar = document.getElementById('emailProgressBar');
-            if (progressBar) {
-                progressBar.style.width = '0%';
+            const pendingSync = document.getElementById('pendingSyncCount');
+            if (pendingSync) {
+                pendingSync.textContent = offlineQueue.length;
             }
         }
 
@@ -2177,16 +2752,10 @@
             if (emailQueue.length === 0 || emailSendingInProgress) return;
             
             emailSendingInProgress = true;
-            const progressBar = document.getElementById('emailProgressBar');
             
             try {
                 for (let i = 0; i < emailQueue.length; i++) {
                     const email = emailQueue[i];
-                    
-                    // Atualizar barra de progresso
-                    if (progressBar) {
-                        progressBar.style.width = `${((i + 1) / emailQueue.length) * 100}%`;
-                    }
                     
                     try {
                         await enviarEmailReal(email);
@@ -2202,7 +2771,7 @@
                         }
                         
                         // Salvar log
-                        salvarLogEmail({
+                        await salvarLogEmail({
                             usuarioId: currentUser.id,
                             dataEnvio: new Date().toISOString(),
                             tipo: email.tipo,
@@ -2232,6 +2801,7 @@
                 
                 salvarFilaEmail();
                 updateEmailQueueBadge();
+                updateSyncBadge();
                 
                 if (emailQueue.length === 0) {
                     showNotification('Todos os emails pendentes foram enviados!', 'success');
@@ -2239,12 +2809,6 @@
                 
             } finally {
                 emailSendingInProgress = false;
-                if (progressBar) {
-                    progressBar.style.width = '100%';
-                    setTimeout(() => {
-                        progressBar.style.width = '0%';
-                    }, 1000);
-                }
             }
         }
 
@@ -2290,10 +2854,11 @@
                             statusElement.classList.remove('d-none');
                             
                             // Mostrar notificação de reconexão
-                            showNotification('Conexão com a internet restaurada!', 'success');
+                            showNotification('Conexão com a internet restaurada! Sincronizando dados...', 'success');
                             
-                            // Processar fila de emails pendentes
+                            // Processar fila de sincronização
                             setTimeout(() => {
+                                processSyncQueue();
                                 processarFilaEmail();
                             }, 2000);
                             
@@ -2307,8 +2872,8 @@
                             statusText.textContent = 'Sem Conexão';
                             statusElement.classList.remove('d-none');
                             
-                            // Mostrar modal de aviso se tiver emails pendentes
-                            if (emailQueue.length > 0) {
+                            // Mostrar modal de aviso se tiver dados pendentes
+                            if (offlineQueue.length > 0 || emailQueue.length > 0) {
                                 setTimeout(() => {
                                     mostrarModalSemInternet();
                                 }, 1000);
@@ -2336,7 +2901,7 @@
 
         function mostrarModalSemInternet() {
             const modal = document.getElementById('modalInternetOffline');
-            if (modal && emailQueue.length > 0) {
+            if (modal && (offlineQueue.length > 0 || emailQueue.length > 0)) {
                 modal.style.display = 'flex';
             }
         }
@@ -2398,6 +2963,23 @@
                 };
             }
             return () => {};
+        }
+        
+        function showSyncStatus(message, isVisible = true) {
+            const syncStatus = document.getElementById('syncStatus');
+            const syncStatusText = document.getElementById('syncStatusText');
+            const syncProgress = document.getElementById('syncProgress');
+            
+            if (syncStatus && syncStatusText && syncProgress) {
+                if (isVisible) {
+                    syncStatusText.textContent = message;
+                    syncStatus.classList.remove('d-none');
+                    syncProgress.style.display = 'block';
+                } else {
+                    syncStatus.classList.add('d-none');
+                    syncProgress.style.display = 'none';
+                }
+            }
         }
 
         function updateDateTime() {
@@ -3564,7 +4146,7 @@
                 const dataInicio = document.getElementById('dataInicio')?.value;
                 const dataFim = document.getElementById('dataFim')?.value || new Date().toISOString().split('T')[0];
                 
-                const registros = buscarRegistros(currentUser.id, dataInicio, dataFim);
+                const registros = await buscarRegistros(currentUser.id, dataInicio, dataFim);
                 
                 if (registros.length === 0) {
                     stopLoading();
@@ -4060,7 +4642,7 @@
                 const seteDiasAtras = new Date(hoje);
                 seteDiasAtras.setDate(hoje.getDate() - 7);
                 
-                const registros7Dias = buscarRegistros(
+                const registros7Dias = buscarRegistrosLocal(
                     currentUser.id,
                     seteDiasAtras.toISOString().split('T')[0],
                     hoje.toISOString().split('T')[0]
@@ -4087,7 +4669,7 @@
         }
 
         // ========== MEUS REGISTROS ==========
-        function loadRegistrosTable(page = 1) {
+        async function loadRegistrosTable(page = 1) {
             if (!currentUser) return;
             
             try {
@@ -4096,7 +4678,7 @@
                 const dataInicio = document.getElementById('dataInicio')?.value;
                 const dataFim = document.getElementById('dataFim')?.value || new Date().toISOString().split('T')[0];
                 
-                const allRegistros = buscarRegistros(currentUser.id, dataInicio, dataFim);
+                const allRegistros = await buscarRegistros(currentUser.id, dataInicio, dataFim);
                 
                 const totalPages = Math.ceil(allRegistros.length / recordsPerPage);
                 const startIndex = (page - 1) * recordsPerPage;
@@ -4151,8 +4733,12 @@
                         '<i class="fas fa-file-signature" title="Com justificativa"></i>' : 
                         '<i class="fas fa-camera" title="Com selfie"></i>';
                     
+                    const sincIcon = reg.sincronizado ? 
+                        '<i class="fas fa-cloud-check text-success" title="Sincronizado"></i>' : 
+                        '<i class="fas fa-cloud-upload-alt text-warning" title="Pendente sincronização"></i>';
+                    
                     tr.innerHTML = `
-                        <td>${formatDate(reg.data)} ${tipoIcon} ${atrasado ? '<i class="fas fa-clock text-danger" title="Atrasado"></i>' : ''}</td>
+                        <td>${formatDate(reg.data)} ${tipoIcon} ${sincIcon} ${atrasado ? '<i class="fas fa-clock text-danger" title="Atrasado"></i>' : ''}</td>
                         <td>${reg.saidaIntervalo || '--:--'}</td>
                         <td>${reg.retornoIntervalo || '--:--'}</td>
                         <td><span class="badge ${statusClass}">${statusIcon} ${status}</span></td>
@@ -4289,6 +4875,7 @@
                             registro.tipoRegistro === 'com_justificativa_atrasada' ? 'Com Justificativa (Atrasado)' : 'Com Selfie'}</p>
                         <p><strong>Status:</strong> ${registro.saidaIntervalo && registro.retornoIntervalo ? 'Completo' : 'Parcial'}</p>
                         <p><strong>Email:</strong> ${registro.emailEnviado ? 'Enviado' : 'Pendente'}</p>
+                        <p><strong>Sincronizado:</strong> ${registro.sincronizado ? 'Sim' : 'Não'}</p>
                         <p><strong>Bloqueado:</strong> ${registro.bloqueado ? 'Sim' : 'Não'}</p>
                         <p><strong>Registrado em:</strong> ${formatDate(registro.dataRegistro, true)}</p>
                     </div>
@@ -4360,6 +4947,101 @@
             }
         }
 
+        // ========== FUNÇÕES DE BACKUP E RESTAURAÇÃO ==========
+        async function exportarBackupDados() {
+            try {
+                const backupData = {
+                    timestamp: new Date().toISOString(),
+                    usuario: currentUser,
+                    registros: JSON.parse(localStorage.getItem('ponto_record_registros') || '[]'),
+                    logsEmail: JSON.parse(localStorage.getItem('ponto_record_logs_email') || '[]'),
+                    registrosAtrasados: JSON.parse(localStorage.getItem('ponto_record_registros_atrasados') || '[]'),
+                    filaOffline: offlineQueue,
+                    filaEmail: emailQueue
+                };
+                
+                const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `backup_ponto_${currentUser.nomeCompleto}_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                URL.revokeObjectURL(url);
+                
+                showNotification('Backup dos dados exportado com sucesso!', 'success');
+                
+            } catch (error) {
+                console.error('Erro ao exportar backup:', error);
+                showNotification('Erro ao exportar backup', 'error');
+            }
+        }
+
+        async function importarBackupDados(file) {
+            try {
+                const reader = new FileReader();
+                
+                reader.onload = async (e) => {
+                    try {
+                        const backupData = JSON.parse(e.target.result);
+                        
+                        // Validar dados do backup
+                        if (!backupData.usuario || !backupData.timestamp) {
+                            throw new Error('Arquivo de backup inválido');
+                        }
+                        
+                        // Confirmar importação
+                        if (!confirm(`Deseja importar backup de ${new Date(backupData.timestamp).toLocaleString('pt-BR')}? Esta ação irá sobrescrever dados locais.`)) {
+                            return;
+                        }
+                        
+                        // Importar dados
+                        if (backupData.registros) {
+                            localStorage.setItem('ponto_record_registros', JSON.stringify(backupData.registros));
+                        }
+                        
+                        if (backupData.logsEmail) {
+                            localStorage.setItem('ponto_record_logs_email', JSON.stringify(backupData.logsEmail));
+                        }
+                        
+                        if (backupData.registrosAtrasados) {
+                            localStorage.setItem('ponto_record_registros_atrasados', JSON.stringify(backupData.registrosAtrasados));
+                        }
+                        
+                        if (backupData.filaOffline) {
+                            offlineQueue = backupData.filaOffline;
+                            saveOfflineQueue();
+                        }
+                        
+                        if (backupData.filaEmail) {
+                            emailQueue = backupData.filaEmail;
+                            salvarFilaEmail();
+                        }
+                        
+                        showNotification('Backup importado com sucesso!', 'success');
+                        
+                        // Recarregar página se estiver na página de registros
+                        if (document.getElementById('meusRegistrosPage').classList.contains('d-none') === false) {
+                            loadRegistrosTable(currentPage);
+                        }
+                        
+                    } catch (parseError) {
+                        console.error('Erro ao processar backup:', parseError);
+                        showNotification('Erro ao processar arquivo de backup', 'error');
+                    }
+                };
+                
+                reader.readAsText(file);
+                
+            } catch (error) {
+                console.error('Erro ao importar backup:', error);
+                showNotification('Erro ao importar backup', 'error');
+            }
+        }
+
         // ========== INICIALIZAÇÃO DO SISTEMA PRINCIPAL ==========
         function initSistemaPrincipal(user) {
             try {
@@ -4389,17 +5071,34 @@
                     });
                 }
                 
+                const syncBtn = document.getElementById('syncBtn');
+                if (syncBtn) {
+                    syncBtn.addEventListener('click', () => {
+                        if (navigator.onLine) {
+                            processSyncQueue();
+                            showNotification('Iniciando sincronização manual...', 'info');
+                        } else {
+                            showNotification('Sem conexão com a internet para sincronizar', 'warning');
+                        }
+                    });
+                }
+                
                 configurarEventosSistema();
                 
                 // Iniciar monitoramento de conexão
                 monitorarConexaoInternet();
                 
-                // Processar fila de emails pendentes se estiver online
-                if (isOnline && emailQueue.length > 0) {
+                // Processar fila de sincronização se estiver online
+                if (isOnline && (offlineQueue.length > 0 || emailQueue.length > 0)) {
                     setTimeout(() => {
-                        processarFilaEmail();
+                        processSyncQueue();
                     }, 3000);
                 }
+                
+                // Atualizar badge de sincronização periodicamente
+                setInterval(() => {
+                    updateSyncBadge();
+                }, 5000);
                 
                 showNotification(`Bem-vindo, ${user.nomeCompleto}! Sistema carregado com sucesso.`, 'success', 4000);
                 
@@ -4550,16 +5249,17 @@
                 exportarPDFBtn.addEventListener('click', exportarRelatorioCompletoPDF);
             }
             
-            const hoje = new Date().toISOString().split('T')[0];
-            const trintaDiasAtras = new Date();
-            trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
-            const dataInicio = trintaDiasAtras.toISOString().split('T')[0];
+            const exportarBackupBtn = document.getElementById('exportarBackupBtn');
+            if (exportarBackupBtn) {
+                exportarBackupBtn.addEventListener('click', exportarBackupDados);
+            }
             
-            const dataInicioElement = document.getElementById('dataInicio');
-            const dataFimElement = document.getElementById('dataFim');
-            
-            if (dataInicioElement) dataInicioElement.value = dataInicio;
-            if (dataFimElement) dataFimElement.value = hoje;
+            const importarBackupBtn = document.getElementById('importarBackupBtn');
+            if (importarBackupBtn) {
+                importarBackupBtn.addEventListener('click', () => {
+                    document.getElementById('importBackupInput').click();
+                });
+            }
             
             const btnCloseInternetModal = document.getElementById('btnCloseInternetModal');
             if (btnCloseInternetModal) {
@@ -4570,12 +5270,23 @@
                     }
                 });
             }
+            
+            const hoje = new Date().toISOString().split('T')[0];
+            const trintaDiasAtras = new Date();
+            trintaDiasAtras.setDate(trintaDiasAtras.getDate() - 30);
+            const dataInicio = trintaDiasAtras.toISOString().split('T')[0];
+            
+            const dataInicioElement = document.getElementById('dataInicio');
+            const dataFimElement = document.getElementById('dataFim');
+            
+            if (dataInicioElement) dataInicioElement.value = dataInicio;
+            if (dataFimElement) dataFimElement.value = hoje;
         }
 
         // ========== INICIALIZAÇÃO ==========
         async function init() {
             try {
-                const authenticatedUser = checkAuthentication();
+                const authenticatedUser = await checkAuthentication();
                 
                 if (!authenticatedUser) {
                     const goToLoginBtn = document.getElementById('goToLoginBtn');
@@ -4604,6 +5315,7 @@
         window.closeVisualizarModal = closeVisualizarModal;
         window.gerarPDFParaDownload = gerarPDFParaDownload;
         window.exportarRelatorioCompletoPDF = exportarRelatorioCompletoPDF;
+        window.exportarBackupDados = exportarBackupDados;
         
     </script>
 </body>
