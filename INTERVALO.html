@@ -1439,7 +1439,7 @@
                     </button>
                     <div class="camera-button" id="captureBtn" title="Tirar foto">
                         <i class="fas fa-camera"></i>
-                    </div>
+                    </button>
                     <button id="cancelCaptureBtn" class="switch-camera-btn d-none" title="Cancelar">
                         <i class="fas fa-times"></i>
                     </button>
@@ -1779,7 +1779,7 @@
                 
                 if (dadosColaborador) {
                     const dados = JSON.parse(dadosColaborador);
-                    user.nome = dados.nomeCompleto;
+                    user.nome = dados.nomeCompleto.split(' ')[0];
                     user.nomeCompleto = dados.nomeCompleto;
                     user.cpf = dados.cpf;
                     user.cpfFormatado = formatarCPF(dados.cpf);
@@ -1880,6 +1880,7 @@
                     localStorage.removeItem('isLoggedIn');
                     localStorage.removeItem('userEmail');
                     localStorage.removeItem('userId');
+                    // Redirecionar para a página de login
                     window.location.href = 'index.html';
                 });
             }
@@ -5101,6 +5102,7 @@
                         localStorage.removeItem('userEmail');
                         localStorage.removeItem('userId');
                         
+                        // Redirecionar para a página de login
                         window.location.href = 'index.html';
                     });
                 }
@@ -5318,23 +5320,6 @@
             if (dataFimElement) dataFimElement.value = hoje;
         }
 
-        // ========== CONFIGURAR EVENT LISTENERS PARA LOGIN ==========
-        function configurarEventListenersLogin() {
-            console.log('Configurando event listeners para login...');
-            
-            // Configurar botão "Ir para Página de Login"
-            const goToLoginBtn = document.getElementById('goToLoginBtn');
-            if (goToLoginBtn) {
-                console.log('Botão de login encontrado, configurando evento...');
-                goToLoginBtn.addEventListener('click', () => {
-                    console.log('Botão de login clicado, redirecionando...');
-                    window.location.href = 'index.html';
-                });
-            } else {
-                console.log('Botão de login NÃO encontrado!');
-            }
-        }
-
         // ========== INICIALIZAÇÃO ==========
         async function init() {
             try {
@@ -5344,7 +5329,14 @@
                 
                 if (!authenticatedUser) {
                     console.log('Nenhum usuário autenticado');
-                    return; // Removemos a configuração do botão daqui
+                    const goToLoginBtn = document.getElementById('goToLoginBtn');
+                    if (goToLoginBtn) {
+                        goToLoginBtn.addEventListener('click', () => {
+                            // Redirecionar para a página de login relativa
+                            window.location.href = 'index.html';
+                        });
+                    }
+                    return;
                 }
                 
                 if (authenticatedUser.dadosCompletos) {
@@ -5358,16 +5350,8 @@
             }
         }
 
-        // ========== INICIALIZAÇÃO QUANDO O DOM ESTIVER PRONTO ==========
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM completamente carregado e analisado');
-            
-            // Configurar botões de login primeiro (importante!)
-            configurarEventListenersLogin();
-            
-            // Depois inicializar o sistema
-            init();
-        });
+        // Adicionar event listeners quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', init);
 
         // Exportar funções para o escopo global
         window.verDetalhesRegistro = verDetalhesRegistro;
