@@ -1695,6 +1695,327 @@
         let syncRetryCount = 0;
         const MAX_RETRIES = 3;
 
+        // ========== CONFIGURAÇÃO DO SUPABASE ==========
+        const SUPABASE_URL = 'https://izilgduqnrhdsglfnsuh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6aWxnZHVxbnJoZHNnbGZuc3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjk1NTksImV4cCI6MjA4MzMwNTU1OX0.mvTGBwZg4vHTCGuwjKNxU-i1NFjr_xINUUDV_4MLP0E';
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ========== FUNÇÕES DE SINCRONIZAÇÃO SUPABASE ==========
+
+        // 1. Registrar/Login do usuário
+        async function registrarUsuarioSupabase(email, nomeCompleto, cpf, cargo) {
+            try {
+                const { data, error } = await supabaseClient.rpc('registrar_usuario', {
+                    p_email: email,
+                    p_nome_completo: nomeCompleto,
+                    p_cpf: cpf,
+                    p_cargo: cargo
+                });
+                
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Erro ao registrar usuário no Supabase:', error);
+                return null;
+            }
+        }
+
+        // 2. Sincronizar registro individual
+        async function sincronizarRegistroSupabase(registro) {
+            try {
+                const { data, error } = await supabaseClient.rpc('sincronizar_registro_local', {
+                    p_colaborador_id: currentUser.id,
+                    p_data: registro.data,
+                    p_saida_intervalo: registro.saidaIntervalo || null,
+                    p_retorno_intervalo: registro.retornoIntervalo || null,
+                    p_tipo_registro: registro.tipoRegistro || 'com_selfie',
+                    p_selfie_saida: registro.saidaSelfie || null,
+                    p_selfie_retorno: registro.retornoSelfie || null,
+                    p_justificativa_saida: registro.saidaJustificativa || null,
+                    p_justificativa_retorno: registro.retornoJustificativa || null,
+                    p_assinatura_saida: registro.saidaAssinatura || null,
+                    p_assinatura_retorno: registro.retornoAssinatura || null,
+                    p_pdf_data: registro.pdfData || null,
+                    p_email_enviado: registro.emailEnviado || false,
+                    p_bloqueado: registro.bloqueado || false
+                });
+                
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Erro ao sincronizar registro no Supabase:', error);
+                
+                // Adicionar à fila offline
+                addToSyncQueue('registros_intervalo', 'INSERT', {
+                    ...registro,
+                    colaborador_id: currentUser.id
+                });
+                
+                return null;
+            }
+        }
+
+        // 3. Sincronizar em lote (para quando voltar a ter internet)
+        async function sincronizarLoteSupabase(dadosLote) {
+            try {
+                const { data, error } = await supabaseClient.rpc('sincronizar_lote', {
+                    p_colaborador_id: currentUser.id,
+                    p_dados: dadosLote
+                });
+                
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Erro ao sincronizar lote no Supabase:', error);
+                return null;
+            }
+        }
+
+        // 4. Buscar registros do Supabase
+        async function buscarRegistrosSupabase(dataInicio, dataFim) {
+            try {
+                const { data, error } = await supabaseClient.rpc('buscar_registros_periodo', {
+                    p_colaborador_id: currentUser.id,
+                    p_data_inicio: dataInicio,
+                    p_data_fim: dataFim,
+                    p_limit: 100,
+                    p_offset: 0
+                });
+                
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Erro ao buscar registros do Supabase:', error);
+                return [];
+            }
+        }
+
+        // 5. Processar fila de sincronização quando online
+        async function processarFilaSincronizacao() {
+            if (!navigator.onLine || offlineQueue.length === 0 || syncInProgress) return;
+            
+            syncInProgress = true;
+            showSyncStatus('Sincronizando dados...', true);
+            
+            try {
+                // Converter fila offline para formato de lote
+                const lote = offlineQueue.map(item => ({
+                    tabela: item.table,
+                    operacao: item.operation,
+                    dados: item.data,
+                    id: item.id
+                }));
+                
+                // Atualizar progresso
+                const progressBar = document.getElementById('syncProgressBar');
+                if (progressBar) {
+                    progressBar.style.width = '50%';
+                }
+                
+                // Sincronizar em lote
+                const resultado = await sincronizarLoteSupabase(lote);
+                
+                if (resultado && resultado.status === 'success') {
+                    // Remover itens sincronizados da fila local
+                    offlineQueue = offlineQueue.filter(item => 
+                        !resultado.resultados.some(r => r.id === item.id && r.status === 'added_to_queue')
+                    );
+                    saveOfflineQueue();
+                    updateSyncBadge();
+                    
+                    // Atualizar progresso
+                    if (progressBar) {
+                        progressBar.style.width = '100%';
+                    }
+                    
+                    showNotification(`${resultado.sucessos} itens sincronizados com sucesso!`, 'success');
+                    
+                    // Atualizar registros locais com status sincronizado
+                    const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                    for (const item of offlineQueue) {
+                        if (item.table === 'registros_intervalo') {
+                            const index = registros.findIndex(r => r.id === item.data.id);
+                            if (index !== -1) {
+                                registros[index].sincronizado = true;
+                            }
+                        }
+                    }
+                    localStorage.setItem('ponto_record_registros', JSON.stringify(registros));
+                }
+                
+                syncRetryCount = 0; // Resetar contador de tentativas
+                
+            } catch (error) {
+                console.error('Erro ao processar fila de sincronização:', error);
+                syncRetryCount++;
+                
+                if (syncRetryCount < MAX_RETRIES) {
+                    showNotification(`Tentativa ${syncRetryCount} de sincronização falhou. Tentando novamente em 30 segundos...`, 'warning');
+                    
+                    // Tentar novamente após 30 segundos
+                    setTimeout(() => {
+                        processarFilaSincronizacao();
+                    }, 30000);
+                } else {
+                    showNotification('Falha ao sincronizar após várias tentativas. Dados mantidos localmente.', 'error');
+                }
+            } finally {
+                syncInProgress = false;
+                showSyncStatus('', false);
+                
+                // Resetar barra de progresso após 1 segundo
+                setTimeout(() => {
+                    const progressBar = document.getElementById('syncProgressBar');
+                    if (progressBar) {
+                        progressBar.style.width = '0%';
+                    }
+                }, 1000);
+            }
+        }
+
+        // ========== INTEGRAR COM O CÓDIGO EXISTENTE ==========
+
+        // Modificar a função salvarRegistro para sincronizar automaticamente
+        async function salvarRegistro(registro) {
+            try {
+                console.log('Salvando registro:', registro.data);
+                
+                // 1. Salvar localmente
+                const registroId = salvarRegistroLocal(registro);
+                
+                // 2. Tentar sincronizar com Supabase se online
+                if (navigator.onLine) {
+                    const resultado = await sincronizarRegistroSupabase({
+                        ...registro,
+                        id: registroId
+                    });
+                    
+                    if (resultado) {
+                        // Marcar como sincronizado no local
+                        const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                        const index = registros.findIndex(r => r.id === registroId);
+                        if (index !== -1) {
+                            registros[index].sincronizado = true;
+                            localStorage.setItem('ponto_record_registros', JSON.stringify(registros));
+                        }
+                        
+                        // Verificar envio de email
+                        if (registro.saidaIntervalo && registro.retornoIntervalo && !registro.emailEnviado) {
+                            adicionarEmailParaFila(registro);
+                        }
+                        
+                        return registroId;
+                    }
+                } else {
+                    // Se offline, adicionar à fila de sincronização
+                    addToSyncQueue('registros_intervalo', 'INSERT', {
+                        id: registroId,
+                        ...registro,
+                        colaborador_id: currentUser.id
+                    });
+                }
+                
+                // 3. Verificar se o registro está completo para email
+                if (registro.saidaIntervalo && registro.retornoIntervalo && !registro.emailEnviado) {
+                    adicionarEmailParaFila(registro);
+                }
+                
+                return registroId;
+            } catch (error) {
+                console.error('Erro ao salvar registro:', error);
+                throw error;
+            }
+        }
+
+        // Modificar função buscarRegistros para tentar buscar do Supabase primeiro
+        async function buscarRegistros(usuarioId, dataInicio, dataFim) {
+            try {
+                // Se estiver online, tentar buscar do Supabase
+                if (navigator.onLine) {
+                    console.log('Buscando registros do Supabase');
+                    const registrosSupabase = await buscarRegistrosSupabase(dataInicio, dataFim);
+                    
+                    if (registrosSupabase && registrosSupabase.length > 0) {
+                        // Converter formato do Supabase para formato local
+                        const registrosConvertidos = registrosSupabase.map(r => ({
+                            id: r.id,
+                            usuarioId: r.colaborador_id,
+                            usuarioNome: currentUser.nomeCompleto,
+                            data: r.data,
+                            saidaIntervalo: r.saida_intervalo,
+                            retornoIntervalo: r.retorno_intervalo,
+                            tipoRegistro: r.tipo_registro,
+                            saidaSelfie: r.selfie_saida,
+                            retornoSelfie: r.selfie_retorno,
+                            saidaJustificativa: r.justificativa_saida,
+                            retornoJustificativa: r.justificativa_retorno,
+                            saidaAssinatura: r.assinatura_saida,
+                            retornoAssinatura: r.assinatura_retorno,
+                            justificativa: r.justificativa_saida || r.justificativa_retorno,
+                            assinatura: r.assinatura_saida || r.assinatura_retorno,
+                            pdfData: r.pdf_data,
+                            emailEnviado: r.email_enviado,
+                            bloqueado: r.bloqueado,
+                            sincronizado: true,
+                            dataRegistro: r.created_at
+                        }));
+                        
+                        // Atualizar cache local
+                        const registrosLocais = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                        for (const registro of registrosConvertidos) {
+                            const index = registrosLocais.findIndex(r => r.data === registro.data && r.usuarioId === registro.usuarioId);
+                            if (index !== -1) {
+                                registrosLocais[index] = { ...registrosLocais[index], ...registro, sincronizado: true };
+                            } else {
+                                registrosLocais.push(registro);
+                            }
+                        }
+                        localStorage.setItem('ponto_record_registros', JSON.stringify(registrosLocais));
+                        
+                        return registrosConvertidos;
+                    }
+                }
+                
+                // Se offline ou sem dados no Supabase, buscar localmente
+                console.log('Buscando registros localmente');
+                return buscarRegistrosLocal(usuarioId, dataInicio, dataFim);
+                
+            } catch (error) {
+                console.error('Erro ao buscar registros:', error);
+                // Fallback para local
+                return buscarRegistrosLocal(usuarioId, dataInicio, dataFim);
+            }
+        }
+
+        // ========== SINCRONIZAÇÃO AUTOMÁTICA ==========
+
+        // Monitorar conexão para sincronizar automaticamente
+        window.addEventListener('online', () => {
+            showNotification('Conexão restaurada! Sincronizando dados...', 'success');
+            
+            // Processar fila de sincronização
+            setTimeout(() => {
+                processarFilaSincronizacao();
+                processarFilaEmail();
+            }, 2000);
+        });
+
+        // Sincronizar periodicamente (a cada 5 minutos)
+        setInterval(() => {
+            if (navigator.onLine && offlineQueue.length > 0 && !syncInProgress) {
+                console.log('Sincronização periódica iniciada...');
+                processarFilaSincronizacao();
+            }
+        }, 300000); // 5 minutos
+
+        // Sincronizar ao iniciar o app
+        if (navigator.onLine && offlineQueue.length > 0) {
+            setTimeout(() => {
+                processarFilaSincronizacao();
+            }, 5000);
+        }
+
         // ========== INICIALIZAÇÃO DO USUÁRIO ==========
         function initializeUser() {
             // Tentar obter dados do usuário do localStorage
@@ -1709,6 +2030,22 @@
                     cargo: parsedData.cargo || 'Funcionário',
                     dadosCompletos: true
                 };
+            }
+            
+            // Se o usuário tiver dados completos, tentar registrar no Supabase
+            if (currentUser.nomeCompleto && currentUser.email && currentUser.cpfFormatado) {
+                // Registrar no Supabase em background
+                registrarUsuarioSupabase(
+                    currentUser.email,
+                    currentUser.nomeCompleto,
+                    currentUser.cpfFormatado.replace(/\D/g, ''), // Remover formatação do CPF
+                    currentUser.cargo
+                ).then(usuarioSupabase => {
+                    if (usuarioSupabase && usuarioSupabase.id) {
+                        currentUser.id = usuarioSupabase.id;
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    }
+                });
             }
             
             // Atualizar interface com dados do usuário
@@ -1850,41 +2187,6 @@
         }
 
         // ========== FUNÇÕES DE BANCO DE DADOS ==========
-        async function salvarRegistro(registro) {
-            try {
-                console.log('Salvando registro:', registro.data);
-                const registroId = salvarRegistroLocal(registro);
-                
-                // Adicionar à fila de sincronização
-                addToSyncQueue('registros_intervalo', 'INSERT', {
-                    id: registroId,
-                    ...registro,
-                    colaborador_id: currentUser.id
-                });
-                
-                // Verificar se o registro está completo
-                if (registro.saidaIntervalo && registro.retornoIntervalo && !registro.emailEnviado) {
-                    adicionarEmailParaFila(registro);
-                }
-                
-                return registroId;
-            } catch (error) {
-                console.error('Erro ao salvar registro:', error);
-                throw error;
-            }
-        }
-
-        async function buscarRegistros(usuarioId, dataInicio, dataFim) {
-            try {
-                console.log('Buscando registros localmente');
-                return buscarRegistrosLocal(usuarioId, dataInicio, dataFim);
-                
-            } catch (error) {
-                console.error('Erro ao buscar registros:', error);
-                return [];
-            }
-        }
-
         function buscarRegistroHoje(usuarioId) {
             const hoje = new Date().toISOString().split('T')[0];
             const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
@@ -2507,6 +2809,7 @@ Sistema desenvolvido para controle interno de intervalos.
                             
                             // Processar fila de sincronização
                             setTimeout(() => {
+                                processarFilaSincronizacao();
                                 processarFilaEmail();
                             }, 2000);
                             
@@ -4739,7 +5042,7 @@ Sistema desenvolvido para controle interno de intervalos.
                 if (syncBtn) {
                     syncBtn.addEventListener('click', () => {
                         if (navigator.onLine) {
-                            processarFilaEmail();
+                            processarFilaSincronizacao();
                             showNotification('Sincronizando dados...', 'info');
                         } else {
                             showNotification('Sem conexão com a internet para sincronizar', 'warning');
@@ -5003,6 +5306,8 @@ Sistema desenvolvido para controle interno de intervalos.
         window.exportarRelatorioCompletoPDF = exportarRelatorioCompletoPDF;
         window.exportarBackupDados = exportarBackupDados;
         window.adicionarBotaoEmailManual = adicionarBotaoEmailManual;
+        window.processarFilaSincronizacao = processarFilaSincronizacao;
+        window.sincronizarRegistroSupabase = sincronizarRegistroSupabase;
 
         // Configurar input de backup
         document.getElementById('importBackupInput')?.addEventListener('change', function(e) {
