@@ -390,237 +390,225 @@
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Configuração do Supabase
-        const SUPABASE_URL = 'https://izilgduqnrhdsglfnsuh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6aWxnZHVxbnJoZHNnbGZuc3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjk1NTksImV4cCI6MjA4MzMwNTU1OX0.mvTGBwZg4vHTCGuwjKNxU-i1NFjr_xINUUDV_4MLP0E'; 
-        
-        // Inicializar cliente Supabase - CORRIGIDO
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        // Elementos do DOM
-        const loginForm = document.getElementById('loginForm');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const loginAlert = document.getElementById('loginAlert');
-        const alertMessage = document.getElementById('alertMessage');
-        const modalAlert = document.getElementById('modalAlert');
-        const modalAlertMessage = document.getElementById('modalAlertMessage');
-        const loginButton = document.getElementById('loginButton');
-        const loginButtonText = document.getElementById('loginButtonText');
-        const loginButtonSpinner = document.getElementById('loginButtonSpinner');
-        
-        // Variáveis para controlar tentativas de login
-        let loginAttempts = 0;
-        const maxLoginAttempts = 5;
-        
-        // E-mails específicos para cada tipo de acesso
-        const receptionEmails = [
-            'recepcaopoa@recordguaiba.tv.br',
-            'portaria@recordguaiba.tv.br'
-        ];
-        
-        const managementEmails = [
-            'eguimaraes@recordguaiba.tv.br',
-            'ti@recordguiaba.tv.br',
-            'mgodinho@recordguaiba.tv.br',
-            'bssantos@recordguaiba.tv.br',
-            'agawlinski@recordguaiba.tv.br'
-        ];
-        
-        // Processar login
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuração do Supabase
+            const SUPABASE_URL = 'https://izilgduqnrhdsglfnsuh.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6aWxnZHVxbnJoZHNnbGZuc3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjk1NTksImV4cCI6MjA4MzMwNTU1OX0.mvTGBwZg4vHTCGuwjKNxU-i1NFjr_xINUUDV_4MLP0E'; 
             
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
+            // Inicializar cliente Supabase
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             
-            // Validação básica
-            if (!email || !password) {
-                showAlert('Por favor, preencha todos os campos.', 'error');
-                return;
-            }
+            // Elementos do DOM
+            const loginForm = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const loginAlert = document.getElementById('loginAlert');
+            const alertMessage = document.getElementById('alertMessage');
+            const modalAlert = document.getElementById('modalAlert');
+            const modalAlertMessage = document.getElementById('modalAlertMessage');
+            const loginButton = document.getElementById('loginButton');
+            const loginButtonText = document.getElementById('loginButtonText');
+            const loginButtonSpinner = document.getElementById('loginButtonSpinner');
             
-            // Mostrar indicador de carregamento
-            setLoginButtonState(true);
+            // Variáveis para controlar tentativas de login
+            let loginAttempts = 0;
+            const maxLoginAttempts = 5;
             
-            try {
-                console.log('Tentando login com:', email);
+            // E-mails específicos para cada tipo de acesso (mantido para referência futura)
+            const receptionEmails = [
+                'recepcaopoa@recordguaiba.tv.br',
+                'portaria@recordguaiba.tv.br'
+            ];
+            
+            const managementEmails = [
+                'eguimaraes@recordguaiba.tv.br',
+                'ti@recordguiaba.tv.br',
+                'mgodinho@recordguaiba.tv.br',
+                'bssantos@recordguaiba.tv.br',
+                'agawlinski@recordguaiba.tv.br'
+            ];
+            
+            // Processar login
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
                 
-                // Tentar autenticação com Supabase
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
                 
-                console.log('Resposta do Supabase:', { data, error });
+                // Validação básica
+                if (!email || !password) {
+                    showAlert('Por favor, preencha todos os campos.', 'error');
+                    return;
+                }
                 
-                if (error) {
-                    // Tratar erro de autenticação
-                    console.error('Erro de autenticação:', error);
-                    loginAttempts++;
+                // Mostrar indicador de carregamento
+                setLoginButtonState(true);
+                
+                try {
+                    console.log('Tentando login com:', email);
                     
-                    if (error.message.includes('Invalid login credentials')) {
-                        showAlert('E-mail ou senha incorretos.', 'error');
-                    } else if (error.message.includes('Email not confirmed')) {
-                        showAlert('E-mail não confirmado. Verifique sua caixa de entrada.', 'warning');
-                    } else {
-                        showAlert('Erro ao fazer login: ' + error.message, 'error');
-                    }
+                    // Tentar autenticação com Supabase
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
                     
-                    // Limpar campo de senha
-                    passwordInput.value = '';
-                    passwordInput.focus();
+                    console.log('Resposta do Supabase:', { data, error });
                     
-                    // Bloquear após várias tentativas
-                    if (loginAttempts >= maxLoginAttempts) {
-                        showAlert('Muitas tentativas incorretas. Tente novamente mais tarde ou entre em contato com o suporte.', 'warning');
-                        loginButton.disabled = true;
+                    if (error) {
+                        // Tratar erro de autenticação
+                        console.error('Erro de autenticação:', error);
+                        loginAttempts++;
                         
-                        setTimeout(() => {
-                            loginButton.disabled = false;
-                            loginAttempts = 0;
-                        }, 30000); // 30 segundos
-                    }
-                } else {
-                    // Login bem-sucedido
-                    console.log('Autenticação bem-sucedida!', data);
-                    loginAttempts = 0;
-                    
-                    // Obter informações do usuário
-                    const user = data.user;
-                    
-                    // Armazenar informações no localStorage
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('userId', user.id);
-                    localStorage.setItem('userEmail', user.email);
-                    
-                    console.log('Login bem-sucedido. E-mail:', user.email);
-                    console.log('ID do usuário:', user.id);
-                    
-                    // REDIRECIONAMENTO BASEADO NO E-MAIL
-                    const userEmailLower = user.email.toLowerCase();
-                    console.log('E-mail para verificação:', userEmailLower);
-                    
-                    if (receptionEmails.includes(userEmailLower)) {
-                        console.log('Redirecionando para RECEPÇÃO');
-                        window.location.href = 'https://record-guaiba.github.io/controle-intervalo/';
-                    } else if (managementEmails.includes(userEmailLower)) {
-                        console.log('Redirecionando para GESTÃO');
-                        window.location.href = 'https://record-guaiba.github.io/controle-intervalo/';
+                        if (error.message.includes('Invalid login credentials')) {
+                            showAlert('E-mail ou senha incorretos.', 'error');
+                        } else if (error.message.includes('Email not confirmed')) {
+                            showAlert('E-mail não confirmado. Verifique sua caixa de entrada.', 'warning');
+                        } else if (error.message.includes('Failed to fetch')) {
+                            showAlert('Erro de conexão. Verifique sua internet.', 'error');
+                        } else {
+                            showAlert('Erro ao fazer login: ' + error.message, 'error');
+                        }
+                        
+                        // Limpar campo de senha
+                        passwordInput.value = '';
+                        passwordInput.focus();
+                        
+                        // Bloquear após várias tentativas
+                        if (loginAttempts >= maxLoginAttempts) {
+                            showAlert('Muitas tentativas incorretas. Tente novamente mais tarde ou entre em contato com o suporte.', 'warning');
+                            loginButton.disabled = true;
+                            
+                            setTimeout(() => {
+                                loginButton.disabled = false;
+                                loginAttempts = 0;
+                            }, 30000); // 30 segundos
+                        }
                     } else {
-                        // Para outros e-mails não listados, redirecionar para gestão como padrão
-                        console.log('E-mail não específico, redirecionando para GESTÃO');
-                        window.location.href = 'https://record-guaiba.github.io/controle-intervalo/';
+                        // Login bem-sucedido
+                        console.log('Autenticação bem-sucedida!', data);
+                        loginAttempts = 0;
+                        
+                        // Obter informações do usuário
+                        const user = data.user;
+                        
+                        // Armazenar informações no localStorage
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('userId', user.id);
+                        localStorage.setItem('userEmail', user.email);
+                        
+                        console.log('Login bem-sucedido. E-mail:', user.email);
+                        console.log('ID do usuário:', user.id);
+                        
+                        // REDIRECIONAMENTO PARA A PÁGINA INTERVALO.HTML
+                        console.log('Redirecionando para página principal...');
+                        window.location.href = 'https://record-guaiba.github.io/controle-intervalo/INTERVALO.html';
+                    }
+                } catch (error) {
+                    console.error('Erro inesperado:', error);
+                    showAlert('Erro inesperado ao fazer login. Tente novamente.', 'error');
+                } finally {
+                    // Restaurar estado do botão
+                    setLoginButtonState(false);
+                }
+            });
+            
+            // Função para mostrar alertas
+            function showAlert(message, type = 'error') {
+                alertMessage.textContent = message;
+                
+                // Definir classe de alerta baseada no tipo
+                loginAlert.className = 'alert';
+                if (type === 'error') {
+                    loginAlert.classList.add('alert-error');
+                } else if (type === 'warning') {
+                    loginAlert.classList.add('alert-warning');
+                } else if (type === 'success') {
+                    loginAlert.classList.add('alert-success');
+                } else if (type === 'info') {
+                    loginAlert.classList.add('alert-info');
+                }
+                
+                loginAlert.style.display = 'block';
+                
+                // Ocultar alerta após 5 segundos
+                setTimeout(() => {
+                    loginAlert.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Função para mostrar alerta no modal
+            function showModalAlert(message, type = 'success') {
+                modalAlertMessage.textContent = message;
+                
+                // Definir classe de alerta baseada no tipo
+                modalAlert.className = 'alert';
+                if (type === 'error') {
+                    modalAlert.classList.add('alert-error');
+                } else if (type === 'warning') {
+                    modalAlert.classList.add('alert-warning');
+                } else if (type === 'success') {
+                    modalAlert.classList.add('alert-success');
+                }
+                
+                modalAlert.style.display = 'block';
+                
+                // Ocultar alerta após 5 segundos
+                setTimeout(() => {
+                    modalAlert.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Função para controlar estado do botão de login
+            function setLoginButtonState(isLoading) {
+                if (isLoading) {
+                    loginButton.disabled = true;
+                    loginButtonText.style.display = 'none';
+                    loginButtonSpinner.style.display = 'inline-block';
+                } else {
+                    loginButton.disabled = false;
+                    loginButtonText.style.display = 'inline';
+                    loginButtonSpinner.style.display = 'none';
+                }
+            }
+            
+            // Prevenir redirecionamento por alteração de URL antes do login
+            window.addEventListener('beforeunload', function(e) {
+                // Verificar se o usuário não está logado
+                if (!localStorage.getItem('isLoggedIn')) {
+                    // Se houver dados nos campos de login, mostrar confirmação
+                    if (emailInput.value || passwordInput.value) {
+                        e.preventDefault();
+                        e.returnValue = 'Você tem dados não salvos no formulário de login. Tem certeza que deseja sair?';
+                        return e.returnValue;
                     }
                 }
-            } catch (error) {
-                console.error('Erro inesperado:', error);
-                showAlert('Erro inesperado ao fazer login. Tente novamente.', 'error');
-            } finally {
-                // Restaurar estado do botão
-                setLoginButtonState(false);
+            });
+            
+            // Evento quando o modal é aberto
+            const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+            if (forgotPasswordModal) {
+                forgotPasswordModal.addEventListener('show.bs.modal', function() {
+                    // Resetar alerta do modal quando abrir
+                    modalAlert.style.display = 'none';
+                });
+            }
+            
+            // Evento para o botão de enviar e-mail no modal
+            const sendEmailBtn = document.querySelector('a[href^="mailto:"]');
+            if (sendEmailBtn) {
+                sendEmailBtn.addEventListener('click', function() {
+                    showModalAlert('Abrindo cliente de e-mail. Preencha com suas informações e envie para o suporte.', 'success');
+                });
+            }
+            
+            // Verificar se já está logado
+            if (localStorage.getItem('isLoggedIn') === 'true') {
+                console.log('Usuário já está logado, redirecionando...');
+                window.location.href = 'https://record-guaiba.github.io/controle-intervalo/INTERVALO.html';
             }
         });
-        
-        // Função para mostrar alertas
-        function showAlert(message, type = 'error') {
-            alertMessage.textContent = message;
-            
-            // Definir classe de alerta baseada no tipo
-            loginAlert.className = 'alert';
-            if (type === 'error') {
-                loginAlert.classList.add('alert-error');
-            } else if (type === 'warning') {
-                loginAlert.classList.add('alert-warning');
-            } else if (type === 'success') {
-                loginAlert.classList.add('alert-success');
-            } else if (type === 'info') {
-                loginAlert.classList.add('alert-info');
-            }
-            
-            loginAlert.style.display = 'block';
-            
-            // Ocultar alerta após 5 segundos
-            setTimeout(() => {
-                loginAlert.style.display = 'none';
-            }, 5000);
-        }
-        
-        // Função para mostrar alerta no modal
-        function showModalAlert(message, type = 'success') {
-            modalAlertMessage.textContent = message;
-            
-            // Definir classe de alerta baseada no tipo
-            modalAlert.className = 'alert';
-            if (type === 'error') {
-                modalAlert.classList.add('alert-error');
-            } else if (type === 'warning') {
-                modalAlert.classList.add('alert-warning');
-            } else if (type === 'success') {
-                modalAlert.classList.add('alert-success');
-            }
-            
-            modalAlert.style.display = 'block';
-            
-            // Ocultar alerta após 5 segundos
-            setTimeout(() => {
-                modalAlert.style.display = 'none';
-            }, 5000);
-        }
-        
-        // Função para controlar estado do botão de login
-        function setLoginButtonState(isLoading) {
-            if (isLoading) {
-                loginButton.disabled = true;
-                loginButtonText.style.display = 'none';
-                loginButtonSpinner.style.display = 'inline-block';
-            } else {
-                loginButton.disabled = false;
-                loginButtonText.style.display = 'inline';
-                loginButtonSpinner.style.display = 'none';
-            }
-        }
-        
-        // Prevenir redirecionamento por alteração de URL antes do login
-        window.addEventListener('beforeunload', function(e) {
-            // Verificar se o usuário não está logado
-            if (!localStorage.getItem('isLoggedIn')) {
-                // Se houver dados nos campos de login, mostrar confirmação
-                if (emailInput.value || passwordInput.value) {
-                    e.preventDefault();
-                    e.returnValue = 'Você tem dados não salvos no formulário de login. Tem certeza que deseja sair?';
-                    return e.returnValue;
-                }
-            }
-        });
-        
-        // Evento quando o modal é aberto
-        const forgotPasswordModal = document.getElementById('forgotPasswordModal');
-        if (forgotPasswordModal) {
-            forgotPasswordModal.addEventListener('show.bs.modal', function() {
-                // Resetar alerta do modal quando abrir
-                modalAlert.style.display = 'none';
-            });
-        }
-        
-        // Evento para o botão de enviar e-mail no modal
-        const sendEmailBtn = document.querySelector('a[href^="mailto:"]');
-        if (sendEmailBtn) {
-            sendEmailBtn.addEventListener('click', function() {
-                showModalAlert('Abrindo cliente de e-mail. Preencha com suas informações e envie para o suporte.', 'success');
-            });
-        }
-        
-        // Verificar se já está logado
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            console.log('Usuário já está logado, redirecionando...');
-            window.location.href = 'https://record-guaiba.github.io/controle-intervalo/INTERVALO.html';
-        }
-    });
-</script>
+    </script>
 </body>
 </html>
-
-
