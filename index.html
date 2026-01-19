@@ -268,6 +268,14 @@
                     <input type="text" id="matricula" class="form-control" 
                            placeholder="Número de matrícula">
                 </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="email">
+                        <i class="fas fa-envelope"></i> E-mail (opcional)
+                    </label>
+                    <input type="email" id="email" class="form-control" 
+                           placeholder="seu.email@recordguaiba.tv.br">
+                </div>
                              
                 <div class="mb-4">
                     <div class="form-check">
@@ -286,9 +294,11 @@
             
             <div class="footer-links">
                 <a href="#" id="verDadosSalvosBtn">
+                    <i class="fas fa-database"></i> Ver dados salvos
                 </a>
                 <span style="margin: 0 10px; color: #ccc;">|</span>
                 <a href="#" id="limparDadosBtn">
+                    <i class="fas fa-trash-alt"></i> Limpar dados
                 </a>
             </div>
         </div>
@@ -450,8 +460,9 @@
                     const cpf = document.getElementById('cpf').value;
                     const cpfLimpo = cpf.replace(/\D/g, '');
                     
-                    if (document.querySelector('.user-type-btn.active').dataset.type === 'colaborador') {
-                        if (cpfLimpo.length !== 11 || !validarCPF(cpfLimpo)) {
+                    if (document.querySelector('.user-type-btn.active')) {
+                        const tipoUsuario = document.querySelector('.user-type-btn.active').dataset.type;
+                        if (tipoUsuario === 'colaborador' && (cpfLimpo.length !== 11 || !validarCPF(cpfLimpo))) {
                             showNotification('Por favor, insira um CPF válido (11 dígitos).', 'error');
                             return;
                         }
@@ -460,9 +471,10 @@
                     // Coletar dados do formulário
                     const usuario = {
                         id: Date.now(),
-                        tipoUsuario: document.querySelector('.user-type-btn.active').dataset.type,
+                        tipoUsuario: document.querySelector('.user-type-btn.active') ? 
+                            document.querySelector('.user-type-btn.active').dataset.type : 'colaborador',
                         nomeCompleto: document.getElementById('nomeCompleto').value.trim(),
-                        cpfFormatado: formatarCPF(cpf),
+                        cpfFormatado: cpfLimpo ? formatarCPF(cpf) : '',
                         cpfLimpo: cpfLimpo,
                         cargo: document.getElementById('cargo').value.trim() || 'Funcionário',
                         matricula: document.getElementById('matricula').value.trim() || '',
@@ -488,9 +500,9 @@
                     // Mostrar confirmação
                     showNotification(`Bem-vindo(a), ${usuario.nomeCompleto}!`, 'success', 2000);
                     
-                    // Redirecionar para o sistema após 2 segundos
+                    // Redirecionar para o sistema após 2 segundos - URL CORRIGIDA
                     setTimeout(() => {
-                        window.location.href = 'INTERVALO.html';
+                        window.location.href = 'https://record-guaiba.github.io/controle-intervalo/INTERVALO';
                     }, 2000);
                 });
             }
@@ -517,7 +529,7 @@
                     showNotification('Entrando como visitante...', 'info', 2000);
                     
                     setTimeout(() => {
-                        window.location.href = 'INTERVALO.html';
+                        window.location.href = 'https://record-guaiba.github.io/controle-intervalo/INTERVALO';
                     }, 2000);
                 });
             }
@@ -553,7 +565,7 @@
                         showNotification('Todos os dados locais foram removidos!', 'success', 3000);
                         
                         // Limpar formulário
-                        loginForm.reset();
+                        document.getElementById('loginForm').reset();
                     }
                 });
             }
