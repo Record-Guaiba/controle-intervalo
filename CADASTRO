@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Sistema de Controle de Intervalo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --vermelho: #4361ee;
+            --preto: #000000;
+            --branco: #FFFFFF;
+            --cinza-claro: #F5F5F5;
+            --cinza-escuro: #333333;
+            --verde: #28a745;
+            --vermelho-erro: #dc3545;
+            --laranja: #fd7e14;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--cinza-claro);
+            color: var(--cinza-escuro);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .cadastro-container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .cadastro-header {
+            background: linear-gradient(90deg, var(--verde), #1e7e34);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .cadastro-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .cadastro-header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .cadastro-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--cinza-escuro);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--verde);
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .form-control.error {
+            border-color: var(--vermelho-erro);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            gap: 0.5rem;
+        }
+
+        .btn-success {
+            background: linear-gradient(90deg, var(--verde), #1e7e34);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--cinza-claro);
+            color: var(--cinza-escuro);
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .instructions {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-left: 4px solid var(--verde);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .instructions h4 {
+            color: var(--verde);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .footer-links a {
+            color: var(--verde);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .text-muted {
+            font-size: 0.8rem;
+            color: #666;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .error-message {
+            color: var(--vermelho-erro);
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(40, 167, 69, 0.2);
+            border-top: 3px solid var(--verde);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .password-container .form-control {
+            padding-right: 40px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--verde);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 576px) {
+            .cadastro-container {
+                margin: 0 10px;
+            }
+            
+            .cadastro-header {
+                padding: 1.5rem 1rem;
+            }
+            
+            .cadastro-body {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cadastro-container">
+        <div class="cadastro-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h1>Record Guaíba - Cadastro</h1>
+            </div>
+            <p>Sistema de Controle de Intervalo</p>
+        </div>
+        
+        <div class="cadastro-body">
+            <a class="back-link" id="voltarLoginBtn" href="login.html">
+                <i class="fas fa-arrow-left"></i> Voltar para login
+            </a>
+            
+            <div class="instructions">
+                <h4><i class="fas fa-info-circle"></i> Cadastro Inicial</h4>
+                <p>Preencha seus dados para criar seu acesso ao sistema. Este cadastro é obrigatório apenas uma vez.</p>
+            </div>
+            
+            <form id="cadastroForm">
+                <div class="form-group">
+                    <label class="form-label" for="nomeCompleto">
+                        <i class="fas fa-user"></i> Nome Completo *
+                    </label>
+                    <input type="text" id="nomeCompleto" class="form-control" 
+                           placeholder="Digite seu nome completo" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="cpf">
+                        <i class="fas fa-id-card"></i> CPF *
+                    </label>
+                    <input type="text" id="cpf" class="form-control" 
+                           placeholder="000.000.000-00" maxlength="14" required>
+                    <span class="text-muted">Formato: 000.000.000-00</span>
+                </div>
+
+                    <div class="password-container">
+                        <input type="password" id="confirmPassword" class="form-control" 
+                               placeholder="Confirme sua senha" required>
+                        <button type="button" class="password-toggle" id="toggleConfirmPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div id="passwordError" class="error-message">As senhas não coincidem</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="cargo">
+                        <i class="fas fa-briefcase"></i> Cargo/Função *
+                    </label>
+                    <input type="text" id="cargo" class="form-control" 
+                           placeholder="Ex: Operador, Técnico, etc." required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="matricula">
+                        <i class="fas fa-hashtag"></i> Matrícula
+                    </label>
+                    <input type="text" id="matricula" class="form-control" 
+                           placeholder="Número de matrícula (opcional)">
+                </div>
+                                    
+                <div class="form-check">
+                    <input type="checkbox" id="salvarDados" class="form-check-input" checked>
+                    <label class="form-check-label" for="salvarDados" style="font-size: 0.9rem;">
+                        <i class="fas fa-save"></i> Salvar credenciais localmente
+                    </label>
+                </div>
+
+                <div class="loading" id="cadastroLoading">
+                    <div class="spinner"></div> Processando cadastro...
+                </div>
+                
+                <button type="submit" class="btn btn-success" id="btnCadastrar">
+                    <i class="fas fa-user-plus"></i> Completar Cadastro
+                </button>
+            </form>
+            
+            <div class="footer-links">
+                <span style="font-size: 0.85rem; color: #666;">
+                    <i class="fas fa-info-circle"></i> Após o cadastro, você poderá fazer login na página de login.
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; padding: 1rem 1.5rem; border-radius: 5px; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 1000;"></div>
+
+    <script>
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://izilgduqnrhdsglfnsuh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6aWxnZHVxbnJoZHNnbGZuc3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjk1NTksImV4cCI6MjA4MzMwNTU1OX0.mvTGBwZg4vHTCGuwjKNxU-i1NFjr_xINUUDV_4MLP0E';
+         
+        // Inicializar Supabase
+        let supabase;
+        let isSupabaseConnected = false;
+        
+        // Função para inicializar Supabase
+        function initSupabase() {
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                return true;
+            } catch (error) {
+                console.error('Erro ao inicializar Supabase:', error);
+                return false;
+            }
+        }
+        
+        // Função para testar conexão com Supabase
+        async function testSupabaseConnection() {
+            if (!supabase) return false;
+            
+            try {
+                const { data, error } = await supabase.from('usuarios').select('count').limit(1);
+                return true;
+            } catch (error) {
+                console.warn('Erro na conexão Supabase:', error.message);
+                return false;
+            }
+        }
+        
+        // Função para formatar CPF
+        function formatarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length === 11) {
+                return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            }
+            return cpf;
+        }
+        
+        // Função para mascarar CPF enquanto digita
+        function mascararCPF(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 3 && value.length <= 6) {
+                value = value.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+            } else if (value.length > 6 && value.length <= 9) {
+                value = value.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+            } else if (value.length > 9) {
+                value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+            }
+            
+            input.value = value;
+            return value;
+        }
+        
+        // Função para validar CPF
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            
+            if (cpf.length !== 11) return false;
+            
+            // Verifica se todos os dígitos são iguais
+            if (/^(\d)\1{10}$/.test(cpf)) return false;
+            
+            // Cálculo do primeiro dígito verificador
+            let soma = 0;
+            for (let i = 0; i < 9; i++) {
+                soma += parseInt(cpf.charAt(i)) * (10 - i);
+            }
+            let resto = soma % 11;
+            let digitoVerificador1 = resto < 2 ? 0 : 11 - resto;
+            
+            if (digitoVerificador1 !== parseInt(cpf.charAt(9))) return false;
+            
+            // Cálculo do segundo dígito verificador
+            soma = 0;
+            for (let i = 0; i < 10; i++) {
+                soma += parseInt(cpf.charAt(i)) * (11 - i);
+            }
+            resto = soma % 11;
+            let digitoVerificador2 = resto < 2 ? 0 : 11 - resto;
+            
+            if (digitoVerificador2 !== parseInt(cpf.charAt(10))) return false;
+            
+            return true;
+        }
+        
+        // Função para validar e-mail
+        function validarEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        // Função para mostrar notificação
+        function showNotification(message, type = 'info', duration = 5000) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            switch(type) {
+                case 'success':
+                    notification.style.backgroundColor = '#28a745';
+                    break;
+                case 'error':
+                    notification.style.backgroundColor = '#dc3545';
+                    break;
+                case 'warning':
+                    notification.style.backgroundColor = '#ffc107';
+                    notification.style.color = '#333';
+                    break;
+                case 'info':
+                default:
+                    notification.style.backgroundColor = '#4361ee';
+            }
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, duration);
+        }
+        
+        // Função para verificar se usuário já está cadastrado
+        async function verificarUsuarioCadastrado(email) {
+            if (isSupabaseConnected && supabase) {
+                try {
+                    const { data: usuarioSupabase, error } = await supabase
+                        .from('usuarios')
+                        .select('*')
+                        .eq('email', email.toLowerCase())
+                        .eq('ativo', true)
+                        .single();
+                    
+                    if (!error && usuarioSupabase) {
+                        return { cadastrado: true, origem: 'supabase', usuario: usuarioSupabase };
+                    }
+                } catch (err) {
+                    console.warn('Erro ao verificar no Supabase:', err);
+                }
+            }
+            
+            // Verificar localmente
+            const usuariosLocais = JSON.parse(localStorage.getItem('record_usuarios_cadastrados')) || [];
+            const usuarioLocal = usuariosLocais.find(u => u.email === email.toLowerCase() && u.ativo !== false);
+            
+            if (usuarioLocal) {
+                return { cadastrado: true, origem: 'local', usuario: usuarioLocal };
+            }
+            
+            return { cadastrado: false };
+        }
+        
+        // Função para cadastrar usuário no Supabase (com autenticação)
+        async function cadastrarUsuarioSupabase(usuarioData) {
+            const loading = document.getElementById('cadastroLoading');
+            const btnCadastrar = document.getElementById('btnCadastrar');
+            
+            loading.classList.add('active');
+            btnCadastrar.disabled = true;
+            
+            try {
+                // 1. Criar usuário no Supabase Auth
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: usuarioData.email.toLowerCase(),
+                    password: usuarioData.password,
+                    options: {
+                        data: {
+                            nome_completo: usuarioData.nomeCompleto,
+                            cpf: usuarioData.cpfLimpo,
+                            cargo: usuarioData.cargo
+                        }
+                    }
+                });
+                
+                if (authError) throw authError;
+                
+                // 2. Inserir usuário na tabela usuarios
+                const { data, error } = await supabase
+                    .from('usuarios')
+                    .insert({
+                        id: authData.user.id,
+                        email: usuarioData.email.toLowerCase(),
+                        nome_completo: usuarioData.nomeCompleto,
+                        cpf: usuarioData.cpfLimpo,
+                        cargo: usuarioData.cargo,
+                        matricula: usuarioData.matricula,
+                        ativo: true,
+                        tipo_usuario: 'funcionario',
+                        data_cadastro: new Date().toISOString()
+                    });
+                
+                if (error) throw error;
+                
+                return { 
+                    success: true, 
+                    message: 'Usuário cadastrado com sucesso!',
+                    userId: authData.user.id,
+                    usuario: {
+                        id: authData.user.id,
+                        email: usuarioData.email.toLowerCase(),
+                        nome_completo: usuarioData.nomeCompleto,
+                        cpf: usuarioData.cpfLimpo,
+                        cargo: usuarioData.cargo,
+                        matricula: usuarioData.matricula,
+                        ativo: true,
+                        tipo_usuario: 'funcionario',
+                        data_cadastro: new Date().toISOString()
+                    }
+                };
+                
+            } catch (error) {
+                console.error('Erro ao cadastrar no Supabase:', error);
+                let mensagem = 'Erro ao cadastrar usuário';
+                
+                if (error.message.includes('User already registered')) {
+                    mensagem = 'Este e-mail já está cadastrado';
+                } else if (error.message.includes('Password should be at least 6 characters')) {
+                    mensagem = 'A senha deve ter pelo menos 6 caracteres';
+                }
+                
+                return { 
+                    success: false, 
+                    message: mensagem 
+                };
+            } finally {
+                loading.classList.remove('active');
+                btnCadastrar.disabled = false;
+            }
+        }
+        
+        // Função para cadastrar localmente (fallback)
+        function cadastrarUsuarioLocal(usuarioData) {
+            const usuarios = JSON.parse(localStorage.getItem('record_usuarios_cadastrados')) || [];
+            
+            // Verificar se e-mail já existe
+            const emailExistente = usuarios.find(u => u.email === usuarioData.email.toLowerCase());
+            if (emailExistente) {
+                return { success: false, message: 'E-mail já cadastrado no sistema local' };
+            }
+            
+            // Gerar ID único
+            usuarioData.id = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            usuarioData.ativo = true;
+            usuarioData.tipo_usuario = 'funcionario';
+            usuarioData.data_cadastro = new Date().toISOString();
+            usuarioData.nome_completo = usuarioData.nomeCompleto;
+            usuarioData.cargo = usuarioData.cargo;
+            usuarioData.matricula = usuarioData.matricula;
+            
+            // Adicionar usuário
+            usuarios.push(usuarioData);
+            localStorage.setItem('record_usuarios_cadastrados', JSON.stringify(usuarios));
+            
+            return { 
+                success: true, 
+                message: 'Usuário cadastrado localmente!',
+                usuario: usuarioData
+            };
+        }
+        
+        // Inicializar a página
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 1. Inicializar Supabase
+            const supabaseInicializado = initSupabase();
+            
+            if (supabaseInicializado) {
+                // 2. Testar conexão
+                isSupabaseConnected = await testSupabaseConnection();
+            }
+            
+            // Verificar se veio com e-mail na URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailParam = urlParams.get('email');
+            if (emailParam) {
+                document.getElementById('email').value = emailParam;
+            }
+            
+            // Configurar máscara de CPF
+            const cpfInput = document.getElementById('cpf');
+            if (cpfInput) {
+                cpfInput.addEventListener('input', function() {
+                    mascararCPF(this);
+                });
+            }
+            
+            // Configurar toggle de senha
+            function setupPasswordToggle(inputId, toggleId) {
+                const input = document.getElementById(inputId);
+                const toggle = document.getElementById(toggleId);
+                
+                if (input && toggle) {
+                    toggle.addEventListener('click', function() {
+                        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                        input.setAttribute('type', type);
+                        toggle.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                    });
+                }
+            }
+            
+            // Configurar todos os toggles de senha
+            setupPasswordToggle('password', 'togglePassword');
+            setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
+            
+            // Configurar formulário de cadastro
+            const cadastroForm = document.getElementById('cadastroForm');
+            if (cadastroForm) {
+                cadastroForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Coletar dados
+                    const nomeCompleto = document.getElementById('nomeCompleto').value.trim();
+                    const email = document.getElementById('email').value.trim();
+                    const cpf = document.getElementById('cpf').value;
+                    const password = document.getElementById('password').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    const cargo = document.getElementById('cargo').value.trim();
+                    const matricula = document.getElementById('matricula').value.trim();
+                    
+                    // Limpar erros
+                    document.getElementById('passwordError').classList.remove('show');
+                    
+                    // Validações
+                    if (!nomeCompleto || !email || !cpf || !password || !confirmPassword || !cargo) {
+                        showNotification('Preencha todos os campos obrigatórios.', 'error');
+                        return;
+                    }
+                    
+                    if (!validarEmail(email)) {
+                        showNotification('E-mail inválido.', 'error');
+                        return;
+                    }
+                    
+                    const cpfLimpo = cpf.replace(/\D/g, '');
+                    if (cpfLimpo.length !== 11 || !validarCPF(cpfLimpo)) {
+                        showNotification('CPF inválido.', 'error');
+                        return;
+                    }
+                    
+                    if (password.length < 6) {
+                        showNotification('A senha deve ter pelo menos 6 caracteres.', 'error');
+                        return;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        document.getElementById('passwordError').classList.add('show');
+                        showNotification('As senhas não coincidem.', 'error');
+                        return;
+                    }
+                    
+                    // Verificar se já está cadastrado
+                    const verificado = await verificarUsuarioCadastrado(email);
+                    if (verificado.cadastrado) {
+                        showNotification('Este e-mail já está cadastrado. Faça login.', 'warning');
+                        setTimeout(() => {
+                            window.location.href = 'login.html?email=' + encodeURIComponent(email);
+                        }, 2000);
+                        return;
+                    }
+                    
+                    // Preparar dados do usuário
+                    const usuario = {
+                        nomeCompleto: nomeCompleto,
+                        email: email,
+                        cpfLimpo: cpfLimpo,
+                        password: password,
+                        cargo: cargo,
+                        matricula: matricula || ''
+                    };
+                    
+                    let resultado;
+                    
+                    if (isSupabaseConnected) {
+                        // Tentar cadastrar no Supabase
+                        resultado = await cadastrarUsuarioSupabase(usuario);
+                    } else {
+                        // Cadastrar localmente (sem senha por segurança)
+                        const usuarioLocal = { ...usuario };
+                        delete usuarioLocal.password; // Não salvar senha localmente
+                        resultado = cadastrarUsuarioLocal(usuarioLocal);
+                    }
+                    
+                    if (resultado.success) {
+                        showNotification(resultado.message, 'success', 5000);
+                        
+                        // Salvar dados localmente se solicitado
+                        if (document.getElementById('salvarDados').checked) {
+                            localStorage.setItem('ponto_record_usuario', JSON.stringify(usuario));
+                        }
+                        
+                        // Marcar como já cadastrado
+                        localStorage.setItem(`usuario_cadastrado_${email}`, 'true');
+                        
+                        // Redirecionar para login após 3 segundos
+                        setTimeout(() => {
+                            showNotification('Redirecionando para login...', 'info', 2000);
+                            setTimeout(() => {
+                                window.location.href = 'login.html?email=' + encodeURIComponent(email);
+                            }, 2000);
+                        }, 3000);
+                    } else {
+                        showNotification(resultado.message, 'error');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
