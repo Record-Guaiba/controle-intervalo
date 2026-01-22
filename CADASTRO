@@ -182,18 +182,6 @@
             margin-top: 5px;
         }
 
-        .form-check {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-check-input {
-            width: 18px;
-            height: 18px;
-        }
-
         .error-message {
             color: var(--vermelho-erro);
             font-size: 0.8rem;
@@ -230,25 +218,6 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-        }
-
-        .password-container {
-            position: relative;
-        }
-
-        .password-container .form-control {
-            padding-right: 40px;
         }
 
         .back-link {
@@ -294,13 +263,9 @@
         </div>
         
         <div class="cadastro-body">
-            <a class="back-link" id="voltarLoginBtn" href="login.html">
-                <i class="fas fa-arrow-left"></i> Voltar para login
-            </a>
-            
             <div class="instructions">
                 <h4><i class="fas fa-info-circle"></i> Cadastro Inicial</h4>
-                <p>Preencha seus dados para criar seu acesso ao sistema. Este cadastro é obrigatório apenas uma vez.</p>
+                <p>Preencha seus dados para registrar seu acesso ao sistema. Após o cadastro você será direcionado para o controle de intervalo.</p>
             </div>
             
             <form id="cadastroForm">
@@ -320,16 +285,6 @@
                            placeholder="000.000.000-00" maxlength="14" required>
                     <span class="text-muted">Formato: 000.000.000-00</span>
                 </div>
-
-                    <div class="password-container">
-                        <input type="password" id="confirmPassword" class="form-control" 
-                               placeholder="Confirme sua senha" required>
-                        <button type="button" class="password-toggle" id="toggleConfirmPassword">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    <div id="passwordError" class="error-message">As senhas não coincidem</div>
-                </div>
                 
                 <div class="form-group">
                     <label class="form-label" for="cargo">
@@ -341,17 +296,10 @@
                 
                 <div class="form-group">
                     <label class="form-label" for="matricula">
-                        <i class="fas fa-hashtag"></i> Matrícula
+                        <i class="fas fa-hashtag"></i> Matrícula *
                     </label>
                     <input type="text" id="matricula" class="form-control" 
-                           placeholder="Número de matrícula (opcional)">
-                </div>
-                                    
-                <div class="form-check">
-                    <input type="checkbox" id="salvarDados" class="form-check-input" checked>
-                    <label class="form-check-label" for="salvarDados" style="font-size: 0.9rem;">
-                        <i class="fas fa-save"></i> Salvar credenciais localmente
-                    </label>
+                           placeholder="Número de matrícula" required>
                 </div>
 
                 <div class="loading" id="cadastroLoading">
@@ -365,7 +313,7 @@
             
             <div class="footer-links">
                 <span style="font-size: 0.85rem; color: #666;">
-                    <i class="fas fa-info-circle"></i> Após o cadastro, você poderá fazer login na página de login.
+                    <i class="fas fa-info-circle"></i> Após o cadastro, você será direcionado para o sistema de controle de intervalo.
                 </span>
             </div>
         </div>
@@ -463,12 +411,6 @@
             return true;
         }
         
-        // Função para validar e-mail
-        function validarEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-        
         // Função para mostrar notificação
         function showNotification(message, type = 'info', duration = 5000) {
             const notification = document.getElementById('notification');
@@ -497,13 +439,15 @@
         }
         
         // Função para verificar se usuário já está cadastrado
-        async function verificarUsuarioCadastrado(email) {
+        async function verificarUsuarioCadastrado(cpf) {
+            const cpfLimpo = cpf.replace(/\D/g, '');
+            
             if (isSupabaseConnected && supabase) {
                 try {
                     const { data: usuarioSupabase, error } = await supabase
                         .from('usuarios')
                         .select('*')
-                        .eq('email', email.toLowerCase())
+                        .eq('cpf', cpfLimpo)
                         .eq('ativo', true)
                         .single();
                     
@@ -517,7 +461,7 @@
             
             // Verificar localmente
             const usuariosLocais = JSON.parse(localStorage.getItem('record_usuarios_cadastrados')) || [];
-            const usuarioLocal = usuariosLocais.find(u => u.email === email.toLowerCase() && u.ativo !== false);
+            const usuarioLocal = usuariosLocais.find(u => u.cpf === cpfLimpo && u.ativo !== false);
             
             if (usuarioLocal) {
                 return { cadastrado: true, origem: 'local', usuario: usuarioLocal };
@@ -526,7 +470,7 @@
             return { cadastrado: false };
         }
         
-        // Função para cadastrar usuário no Supabase (com autenticação)
+        // Função para cadastrar usuário no Supabase
         async function cadastrarUsuarioSupabase(usuarioData) {
             const loading = document.getElementById('cadastroLoading');
             const btnCadastrar = document.getElementById('btnCadastrar');
@@ -535,34 +479,18 @@
             btnCadastrar.disabled = true;
             
             try {
-                // 1. Criar usuário no Supabase Auth
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: usuarioData.email.toLowerCase(),
-                    password: usuarioData.password,
-                    options: {
-                        data: {
-                            nome_completo: usuarioData.nomeCompleto,
-                            cpf: usuarioData.cpfLimpo,
-                            cargo: usuarioData.cargo
-                        }
-                    }
-                });
-                
-                if (authError) throw authError;
-                
-                // 2. Inserir usuário na tabela usuarios
+                // Inserir usuário na tabela usuarios
                 const { data, error } = await supabase
                     .from('usuarios')
                     .insert({
-                        id: authData.user.id,
-                        email: usuarioData.email.toLowerCase(),
                         nome_completo: usuarioData.nomeCompleto,
                         cpf: usuarioData.cpfLimpo,
                         cargo: usuarioData.cargo,
                         matricula: usuarioData.matricula,
                         ativo: true,
                         tipo_usuario: 'funcionario',
-                        data_cadastro: new Date().toISOString()
+                        data_cadastro: new Date().toISOString(),
+                        ultimo_acesso: new Date().toISOString()
                     });
                 
                 if (error) throw error;
@@ -570,10 +498,7 @@
                 return { 
                     success: true, 
                     message: 'Usuário cadastrado com sucesso!',
-                    userId: authData.user.id,
                     usuario: {
-                        id: authData.user.id,
-                        email: usuarioData.email.toLowerCase(),
                         nome_completo: usuarioData.nomeCompleto,
                         cpf: usuarioData.cpfLimpo,
                         cargo: usuarioData.cargo,
@@ -588,10 +513,8 @@
                 console.error('Erro ao cadastrar no Supabase:', error);
                 let mensagem = 'Erro ao cadastrar usuário';
                 
-                if (error.message.includes('User already registered')) {
-                    mensagem = 'Este e-mail já está cadastrado';
-                } else if (error.message.includes('Password should be at least 6 characters')) {
-                    mensagem = 'A senha deve ter pelo menos 6 caracteres';
+                if (error.message.includes('duplicate key value')) {
+                    mensagem = 'CPF já cadastrado no sistema';
                 }
                 
                 return { 
@@ -608,10 +531,10 @@
         function cadastrarUsuarioLocal(usuarioData) {
             const usuarios = JSON.parse(localStorage.getItem('record_usuarios_cadastrados')) || [];
             
-            // Verificar se e-mail já existe
-            const emailExistente = usuarios.find(u => u.email === usuarioData.email.toLowerCase());
-            if (emailExistente) {
-                return { success: false, message: 'E-mail já cadastrado no sistema local' };
+            // Verificar se CPF já existe
+            const cpfExistente = usuarios.find(u => u.cpf === usuarioData.cpfLimpo);
+            if (cpfExistente) {
+                return { success: false, message: 'CPF já cadastrado no sistema local' };
             }
             
             // Gerar ID único
@@ -619,9 +542,7 @@
             usuarioData.ativo = true;
             usuarioData.tipo_usuario = 'funcionario';
             usuarioData.data_cadastro = new Date().toISOString();
-            usuarioData.nome_completo = usuarioData.nomeCompleto;
-            usuarioData.cargo = usuarioData.cargo;
-            usuarioData.matricula = usuarioData.matricula;
+            usuarioData.ultimo_acesso = new Date().toISOString();
             
             // Adicionar usuário
             usuarios.push(usuarioData);
@@ -644,13 +565,6 @@
                 isSupabaseConnected = await testSupabaseConnection();
             }
             
-            // Verificar se veio com e-mail na URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const emailParam = urlParams.get('email');
-            if (emailParam) {
-                document.getElementById('email').value = emailParam;
-            }
-            
             // Configurar máscara de CPF
             const cpfInput = document.getElementById('cpf');
             if (cpfInput) {
@@ -658,24 +572,6 @@
                     mascararCPF(this);
                 });
             }
-            
-            // Configurar toggle de senha
-            function setupPasswordToggle(inputId, toggleId) {
-                const input = document.getElementById(inputId);
-                const toggle = document.getElementById(toggleId);
-                
-                if (input && toggle) {
-                    toggle.addEventListener('click', function() {
-                        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                        input.setAttribute('type', type);
-                        toggle.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-                    });
-                }
-            }
-            
-            // Configurar todos os toggles de senha
-            setupPasswordToggle('password', 'togglePassword');
-            setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
             
             // Configurar formulário de cadastro
             const cadastroForm = document.getElementById('cadastroForm');
@@ -685,24 +581,13 @@
                     
                     // Coletar dados
                     const nomeCompleto = document.getElementById('nomeCompleto').value.trim();
-                    const email = document.getElementById('email').value.trim();
                     const cpf = document.getElementById('cpf').value;
-                    const password = document.getElementById('password').value;
-                    const confirmPassword = document.getElementById('confirmPassword').value;
                     const cargo = document.getElementById('cargo').value.trim();
                     const matricula = document.getElementById('matricula').value.trim();
                     
-                    // Limpar erros
-                    document.getElementById('passwordError').classList.remove('show');
-                    
                     // Validações
-                    if (!nomeCompleto || !email || !cpf || !password || !confirmPassword || !cargo) {
+                    if (!nomeCompleto || !cpf || !cargo || !matricula) {
                         showNotification('Preencha todos os campos obrigatórios.', 'error');
-                        return;
-                    }
-                    
-                    if (!validarEmail(email)) {
-                        showNotification('E-mail inválido.', 'error');
                         return;
                     }
                     
@@ -712,35 +597,19 @@
                         return;
                     }
                     
-                    if (password.length < 6) {
-                        showNotification('A senha deve ter pelo menos 6 caracteres.', 'error');
-                        return;
-                    }
-                    
-                    if (password !== confirmPassword) {
-                        document.getElementById('passwordError').classList.add('show');
-                        showNotification('As senhas não coincidem.', 'error');
-                        return;
-                    }
-                    
                     // Verificar se já está cadastrado
-                    const verificado = await verificarUsuarioCadastrado(email);
+                    const verificado = await verificarUsuarioCadastrado(cpf);
                     if (verificado.cadastrado) {
-                        showNotification('Este e-mail já está cadastrado. Faça login.', 'warning');
-                        setTimeout(() => {
-                            window.location.href = 'login.html?email=' + encodeURIComponent(email);
-                        }, 2000);
+                        showNotification('Este CPF já está cadastrado.', 'warning');
                         return;
                     }
                     
                     // Preparar dados do usuário
                     const usuario = {
                         nomeCompleto: nomeCompleto,
-                        email: email,
                         cpfLimpo: cpfLimpo,
-                        password: password,
                         cargo: cargo,
-                        matricula: matricula || ''
+                        matricula: matricula
                     };
                     
                     let resultado;
@@ -749,28 +618,22 @@
                         // Tentar cadastrar no Supabase
                         resultado = await cadastrarUsuarioSupabase(usuario);
                     } else {
-                        // Cadastrar localmente (sem senha por segurança)
-                        const usuarioLocal = { ...usuario };
-                        delete usuarioLocal.password; // Não salvar senha localmente
-                        resultado = cadastrarUsuarioLocal(usuarioLocal);
+                        // Cadastrar localmente
+                        resultado = cadastrarUsuarioLocal(usuario);
                     }
                     
                     if (resultado.success) {
-                        showNotification(resultado.message, 'success', 5000);
+                        showNotification(resultado.message, 'success', 3000);
                         
-                        // Salvar dados localmente se solicitado
-                        if (document.getElementById('salvarDados').checked) {
-                            localStorage.setItem('ponto_record_usuario', JSON.stringify(usuario));
-                        }
+                        // Salvar dados do usuário na sessão
+                        sessionStorage.setItem('record_usuario_logado', JSON.stringify(resultado.usuario));
+                        sessionStorage.setItem('record_usuario_cpf', cpfLimpo);
                         
-                        // Marcar como já cadastrado
-                        localStorage.setItem(`usuario_cadastrado_${email}`, 'true');
-                        
-                        // Redirecionar para login após 3 segundos
+                        // Redirecionar para o sistema de intervalo após 3 segundos
                         setTimeout(() => {
-                            showNotification('Redirecionando para login...', 'info', 2000);
+                            showNotification('Redirecionando para o sistema...', 'info', 2000);
                             setTimeout(() => {
-                                window.location.href = 'login.html?email=' + encodeURIComponent(email);
+                                window.location.href = 'https://record-guaiba.github.io/controle-intervalo/INTERVALO';
                             }, 2000);
                         }, 3000);
                     } else {
