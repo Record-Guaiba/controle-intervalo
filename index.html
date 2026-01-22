@@ -6,13 +6,18 @@
     <title>Login - Sistema de Controle de Intervalo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --vermelho: #4361ee;
+            --roxo-principal: #667eea;
+            --roxo-escuro: #764ba2;
             --preto: #000000;
             --branco: #FFFFFF;
             --cinza-claro: #F5F5F5;
             --cinza-escuro: #333333;
+            --verde: #28a745;
+            --vermelho-erro: #dc3545;
+            --laranja: #fd7e14;
         }
 
         * {
@@ -23,7 +28,7 @@
         }
 
         body {
-            background-color: var(--cinza-claro);
+            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
             color: var(--cinza-escuro);
             min-height: 100vh;
             display: flex;
@@ -37,12 +42,12 @@
             max-width: 500px;
             background: white;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             overflow: hidden;
         }
 
         .login-header {
-            background: linear-gradient(90deg, var(--vermelho), var(--preto));
+            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
             color: white;
             padding: 2rem;
             text-align: center;
@@ -84,8 +89,12 @@
 
         .form-control:focus {
             outline: none;
-            border-color: var(--vermelho);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+            border-color: var(--roxo-principal);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control.error {
+            border-color: var(--vermelho-erro);
         }
 
         .btn {
@@ -104,13 +113,13 @@
         }
 
         .btn-primary {
-            background: linear-gradient(90deg, var(--vermelho), var(--preto));
+            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
             color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
 
         .btn-secondary {
@@ -136,38 +145,9 @@
             color: white;
         }
 
-        .user-type-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 1.5rem;
-        }
-
-        .user-type-btn {
-            flex: 1;
-            padding: 1rem;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .user-type-btn.active {
-            border-color: var(--vermelho);
-            background-color: rgba(67, 97, 238, 0.1);
-        }
-
-        .user-type-btn i {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            display: block;
-            color: var(--vermelho);
-        }
-
         .instructions {
-            background-color: rgba(67, 97, 238, 0.1);
-            border-left: 4px solid var(--vermelho);
+            background-color: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid var(--roxo-principal);
             padding: 1rem;
             border-radius: 5px;
             margin-bottom: 1.5rem;
@@ -175,7 +155,7 @@
         }
 
         .instructions h4 {
-            color: var(--vermelho);
+            color: var(--roxo-principal);
             margin-bottom: 0.5rem;
         }
 
@@ -187,12 +167,72 @@
         }
 
         .footer-links a {
-            color: var(--vermelho);
+            color: var(--roxo-principal);
             text-decoration: none;
             font-size: 0.9rem;
         }
 
         .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .text-muted {
+            font-size: 0.8rem;
+            color: #666;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .error-message {
+            color: var(--vermelho-erro);
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top: 3px solid var(--roxo-principal);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--roxo-principal);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
             text-decoration: underline;
         }
 
@@ -208,10 +248,18 @@
             .login-body {
                 padding: 1.5rem;
             }
-            
-            .user-type-selector {
-                flex-direction: column;
-            }
+        }
+
+        #notification {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 5px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
         }
     </style>
 </head>
@@ -220,154 +268,85 @@
         <div class="login-header">
             <div class="logo">
                 <div class="logo-icon">
-                    <i class="fas fa-tv"></i>
+                    <i class="fas fa-clock"></i>
                 </div>
-                <h1>Record Guaíba</h1>
+                <h1>Record Guaíba - Login</h1>
             </div>
             <p>Sistema de Controle de Intervalo</p>
         </div>
         
         <div class="login-body">
             <div class="instructions">
-                <h4><i class="fas fa-info-circle"></i> Instruções</h4>
-                <p>Preencha seus dados abaixo para acessar o sistema.</p>
+                <h4><i class="fas fa-info-circle"></i> Acesso ao Sistema</h4>
+                <p>Digite seu e-mail e senha para acessar o sistema. Se for seu primeiro acesso, uma nova conta será criada automaticamente.</p>
             </div>
             
             <form id="loginForm">
                 <div class="form-group">
-                    <label class="form-label" for="nomeCompleto">
-                        <i class="fas fa-user"></i> Nome Completo *
-                    </label>
-                    <input type="text" id="nomeCompleto" class="form-control" 
-                           placeholder="Digite seu nome completo" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="cpf">
-                        <i class="fas fa-id-card"></i> CPF *
-                    </label>
-                    <input type="text" id="cpf" class="form-control" 
-                           placeholder="000.000.000-00" maxlength="14" required>
-                    <small class="text-muted" style="font-size: 0.8rem; color: #666; display: block; margin-top: 5px;">
-                        Formato: 000.000.000-00
-                    </small>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="cargo">
-                        <i class="fas fa-briefcase"></i> Cargo/Função
-                    </label>
-                    <input type="text" id="cargo" class="form-control" 
-                           placeholder="Ex: Operador, Técnico, etc.">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="matricula">
-                        <i class="fas fa-hashtag"></i> Matrícula (opcional)
-                    </label>
-                    <input type="text" id="matricula" class="form-control" 
-                           placeholder="Número de matrícula">
-                </div>
-                
-                <div class="form-group">
                     <label class="form-label" for="email">
-                        <i class="fas fa-envelope"></i> E-mail (opcional)
+                        <i class="fas fa-envelope"></i> E-mail *
                     </label>
                     <input type="email" id="email" class="form-control" 
-                           placeholder="seu.email@recordguaiba.tv.br">
-                </div>
-                             
-                <div class="mb-4">
-                    <div class="form-check">
-                        <input type="checkbox" id="salvarDados" class="form-check-input" checked>
-                        <label class="form-check-label" for="salvarDados" style="font-size: 0.9rem;">
-                            <i class="fas fa-save"></i> Salvar meus dados para próximos acessos
-                        </label>
-                    </div>
+                           placeholder="seu.email@exemplo.com" required>
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="loginBtn">
-                    <i class="fas fa-sign-in-alt"></i> Entrar no Sistema
+                <div class="form-group">
+                    <label class="form-label" for="password">
+                        <i class="fas fa-lock"></i> Senha *
+                    </label>
+                    <input type="password" id="password" class="form-control" 
+                           placeholder="Digite sua senha" required>
+                    <span class="text-muted">A senha deve ter pelo menos 6 caracteres</span>
+                </div>
+
+                <div class="loading" id="loginLoading">
+                    <div class="spinner"></div> Processando login...
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="btnLogin">
+                    <i class="fas fa-sign-in-alt"></i> Acessar Sistema
                 </button>
-                
             </form>
             
             <div class="footer-links">
-                <a href="#" id="verDadosSalvosBtn">
-                    <i class="fas fa-database"></i> Ver dados salvos
-                </a>
-                <span style="margin: 0 10px; color: #ccc;">|</span>
-                <a href="#" id="limparDadosBtn">
-                    <i class="fas fa-trash-alt"></i> Limpar dados
-                </a>
+                <span style="font-size: 0.85rem; color: #666;">
+                    <i class="fas fa-info-circle"></i> Primeiro acesso? Uma conta será criada automaticamente.
+                </span>
             </div>
         </div>
     </div>
 
-    <div id="notification" style="display: none; position: fixed; top: 20px; right: 20px; padding: 1rem 1.5rem; border-radius: 5px; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 1000;"></div>
+    <div id="notification"></div>
 
     <script>
-        // Função para formatar CPF
-        function formatarCPF(cpf) {
-            cpf = cpf.replace(/\D/g, '');
-            return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-        }
-
-        // Função para mascarar CPF enquanto digita
-        function mascararCPF(input) {
-            let value = input.value.replace(/\D/g, '');
-            
-            if (value.length > 3 && value.length <= 6) {
-                value = value.replace(/(\d{3})(\d{0,3})/, '$1.$2');
-            } else if (value.length > 6 && value.length <= 9) {
-                value = value.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
-            } else if (value.length > 9) {
-                value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://izilgduqnrhdsglfnsuh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6aWxnZHVxbnJoZHNnbGZuc3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjk1NTksImV4cCI6MjA4MzMwNTU1OX0.mvTGBwZg4vHTCGuwjKNxU-i1NFjr_xINUUDV_4MLP0E';
+        
+        // URLs de redirecionamento
+        const CADASTRO_URL = 'https://record-guaiba.github.io/controle-intervalo/CADASTRO';
+        const INTERVALO_URL = 'https://record-guaiba.github.io/controle-intervalo/INTERVALO';
+        
+        // Inicializar Supabase
+        let supabase;
+        
+        // Função para inicializar Supabase
+        function initSupabase() {
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                return true;
+            } catch (error) {
+                console.error('Erro ao inicializar Supabase:', error);
+                return false;
             }
-            
-            input.value = value;
-            return value;
         }
-
-        // Função para validar CPF
-        function validarCPF(cpf) {
-            cpf = cpf.replace(/\D/g, '');
-            
-            if (cpf.length !== 11) return false;
-            
-            // Verifica se todos os dígitos são iguais
-            if (/^(\d)\1{10}$/.test(cpf)) return false;
-            
-            // Cálculo do primeiro dígito verificador
-            let soma = 0;
-            for (let i = 0; i < 9; i++) {
-                soma += parseInt(cpf.charAt(i)) * (10 - i);
-            }
-            let resto = soma % 11;
-            let digitoVerificador1 = resto < 2 ? 0 : 11 - resto;
-            
-            if (digitoVerificador1 !== parseInt(cpf.charAt(9))) return false;
-            
-            // Cálculo do segundo dígito verificador
-            soma = 0;
-            for (let i = 0; i < 10; i++) {
-                soma += parseInt(cpf.charAt(i)) * (11 - i);
-            }
-            resto = soma % 11;
-            let digitoVerificador2 = resto < 2 ? 0 : 11 - resto;
-            
-            if (digitoVerificador2 !== parseInt(cpf.charAt(10))) return false;
-            
-            return true;
-        }
-
+        
         // Função para mostrar notificação
         function showNotification(message, type = 'info', duration = 5000) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.style.display = 'block';
             
-            // Definir cor baseada no tipo
             switch(type) {
                 case 'success':
                     notification.style.backgroundColor = '#28a745';
@@ -379,205 +358,209 @@
                     notification.style.backgroundColor = '#ffc107';
                     notification.style.color = '#333';
                     break;
+                case 'info':
                 default:
-                    notification.style.backgroundColor = '#4361ee';
+                    notification.style.backgroundColor = '#667eea';
             }
             
-            // Esconder após a duração
             setTimeout(() => {
                 notification.style.display = 'none';
             }, duration);
         }
-
-        // Função para verificar dados salvos
-        function verificarDadosSalvos() {
-            const dadosSalvos = localStorage.getItem('ponto_record_usuario');
-            if (dadosSalvos) {
-                try {
-                    const usuario = JSON.parse(dadosSalvos);
-                    
-                    // Preencher formulário com dados salvos
-                    document.getElementById('nomeCompleto').value = usuario.nomeCompleto || '';
-                    document.getElementById('cpf').value = usuario.cpfFormatado || '';
-                    document.getElementById('cargo').value = usuario.cargo || '';
-                    document.getElementById('matricula').value = usuario.matricula || '';
-                    document.getElementById('email').value = usuario.email || '';
-                    
-                    showNotification('Dados salvos encontrados e preenchidos automaticamente!', 'success', 3000);
-                    
-                    return usuario;
-                } catch (error) {
-                    console.error('Erro ao carregar dados salvos:', error);
-                }
-            }
-            return null;
+        
+        // Função para validar email
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
         }
-
-        // Inicializar a página
-        document.addEventListener('DOMContentLoaded', function() {
-            // Configurar máscara de CPF
-            const cpfInput = document.getElementById('cpf');
-            if (cpfInput) {
-                cpfInput.addEventListener('input', function() {
-                    mascararCPF(this);
-                    
-                    // Validar CPF em tempo real
-                    const cpfLimpo = this.value.replace(/\D/g, '');
-                    if (cpfLimpo.length === 11) {
-                        if (!validarCPF(cpfLimpo)) {
-                            showNotification('CPF inválido! Por favor, verifique o número.', 'warning');
-                        }
-                    }
-                });
+        
+        // Função para verificar se usuário já existe
+        async function checkUserExists(email) {
+            try {
+                const { data, error } = await supabase
+                    .from('usuarios')
+                    .select('id')
+                    .eq('email', email)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') {
+                    console.error('Erro ao verificar usuário:', error);
+                    return null;
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('Erro na verificação:', error);
+                return null;
             }
-            
-            // Configurar botões de tipo de usuário
-            const userTypeButtons = document.querySelectorAll('.user-type-btn');
-            userTypeButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    userTypeButtons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const tipo = this.getAttribute('data-type');
-                    if (tipo === 'visitante') {
-                        // Para visitantes, alguns campos podem ser opcionais
-                        document.getElementById('cpf').required = false;
-                        document.getElementById('nomeCompleto').placeholder = "Digite seu nome (visitante)";
-                    } else {
-                        document.getElementById('cpf').required = true;
-                        document.getElementById('nomeCompleto').placeholder = "Digite seu nome completo";
-                    }
+        }
+        
+        // Função para criar novo usuário
+        async function createUser(email, password) {
+            try {
+                // Primeiro, criar usuário no sistema de autenticação do Supabase
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
                 });
-            });
+                
+                if (authError) throw authError;
+                
+                // Em seguida, inserir na tabela de usuários
+                const { data: userData, error: userError } = await supabase
+                    .from('usuarios')
+                    .insert([
+                        {
+                            email: email,
+                            created_at: new Date().toISOString()
+                        }
+                    ])
+                    .select()
+                    .single();
+                
+                if (userError) throw userError;
+                
+                return { authData, userData };
+            } catch (error) {
+                console.error('Erro ao criar usuário:', error);
+                throw error;
+            }
+        }
+        
+        // Função para fazer login
+        async function loginUser(email, password) {
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                return data;
+            } catch (error) {
+                console.error('Erro no login:', error);
+                throw error;
+            }
+        }
+        
+        // Inicializar a página
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Inicializar Supabase
+            const supabaseInicializado = initSupabase();
+            
+            if (!supabaseInicializado) {
+                showNotification('Erro ao conectar com o servidor', 'error');
+            }
             
             // Configurar formulário de login
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
-                loginForm.addEventListener('submit', function(e) {
+                loginForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     
-                    // Validar CPF
-                    const cpf = document.getElementById('cpf').value;
-                    const cpfLimpo = cpf.replace(/\D/g, '');
+                    // Coletar dados
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value;
                     
-                    if (document.querySelector('.user-type-btn.active')) {
-                        const tipoUsuario = document.querySelector('.user-type-btn.active').dataset.type;
-                        if (tipoUsuario === 'colaborador' && (cpfLimpo.length !== 11 || !validarCPF(cpfLimpo))) {
-                            showNotification('Por favor, insira um CPF válido (11 dígitos).', 'error');
-                            return;
-                        }
-                    }
-                    
-                    // Coletar dados do formulário
-                    const usuario = {
-                        id: Date.now(),
-                        tipoUsuario: document.querySelector('.user-type-btn.active') ? 
-                            document.querySelector('.user-type-btn.active').dataset.type : 'colaborador',
-                        nomeCompleto: document.getElementById('nomeCompleto').value.trim(),
-                        cpfFormatado: cpfLimpo ? formatarCPF(cpf) : '',
-                        cpfLimpo: cpfLimpo,
-                        cargo: document.getElementById('cargo').value.trim() || 'Funcionário',
-                        matricula: document.getElementById('matricula').value.trim() || '',
-                        email: document.getElementById('email').value.trim() || 'funcionario@recordguaiba.tv.br',
-                        dataCadastro: new Date().toISOString(),
-                        dadosCompletos: true
-                    };
-                    
-                    // Verificar se nome está preenchido
-                    if (!usuario.nomeCompleto) {
-                        showNotification('Por favor, preencha seu nome completo.', 'error');
+                    // Validações
+                    if (!email || !password) {
+                        showNotification('Preencha todos os campos obrigatórios.', 'error');
                         return;
                     }
                     
-                    // Salvar dados do usuário
-                    localStorage.setItem('currentUser', JSON.stringify(usuario));
-                    
-                    // Salvar dados persistentes se solicitado
-                    if (document.getElementById('salvarDados').checked) {
-                        localStorage.setItem('ponto_record_usuario', JSON.stringify(usuario));
+                    if (!validateEmail(email)) {
+                        showNotification('Por favor, insira um e-mail válido.', 'error');
+                        return;
                     }
                     
-                    // Mostrar confirmação
-                    showNotification(`Bem-vindo(a), ${usuario.nomeCompleto}!`, 'success', 2000);
-                    
-                    // Redirecionar para o sistema após 2 segundos - URL CORRIGIDA
-                    setTimeout(() => {
-                        window.location.href = 'https://record-guaiba.github.io/controle-intervalo/INTERVALO';
-                    }, 2000);
-                });
-            }
-            
-            // Configurar botão de visitante
-            const visitanteBtn = document.getElementById('entrarComoVisitanteBtn');
-            if (visitanteBtn) {
-                visitanteBtn.addEventListener('click', function() {
-                    const usuario = {
-                        id: Date.now(),
-                        tipoUsuario: 'visitante',
-                        nomeCompleto: 'Visitante',
-                        cpfFormatado: '',
-                        cpfLimpo: '',
-                        cargo: 'Visitante',
-                        matricula: '',
-                        email: '',
-                        dataCadastro: new Date().toISOString(),
-                        dadosCompletos: false
-                    };
-                    
-                    localStorage.setItem('currentUser', JSON.stringify(usuario));
-                    
-                    showNotification('Entrando como visitante...', 'info', 2000);
-                    
-                    setTimeout(() => {
-                        window.location.href = 'https://record-guaiba.github.io/controle-intervalo/INTERVALO';
-                    }, 2000);
-                });
-            }
-            
-            // Configurar botão para ver dados salvos
-            const verDadosBtn = document.getElementById('verDadosSalvosBtn');
-            if (verDadosBtn) {
-                verDadosBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    const dados = localStorage.getItem('ponto_record_usuario');
-                    if (dados) {
-                        try {
-                            const usuario = JSON.parse(dados);
-                            alert(`Dados salvos:\n\nNome: ${usuario.nomeCompleto}\nCPF: ${usuario.cpfFormatado || 'Não informado'}\nCargo: ${usuario.cargo}\nÚltimo acesso: ${new Date(usuario.dataCadastro).toLocaleString()}`);
-                        } catch (error) {
-                            showNotification('Erro ao ler dados salvos.', 'error');
-                        }
-                    } else {
-                        showNotification('Nenhum dado salvo encontrado.', 'info');
+                    if (password.length < 6) {
+                        showNotification('A senha deve ter pelo menos 6 caracteres.', 'error');
+                        return;
                     }
-                });
-            }
-            
-            // Configurar botão para limpar dados
-            const limparDadosBtn = document.getElementById('limparDadosBtn');
-            if (limparDadosBtn) {
-                limparDadosBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
                     
-                    if (confirm('Tem certeza que deseja limpar todos os dados locais? Isso incluirá todos os registros, configurações e dados de usuário.')) {
-                        localStorage.clear();
-                        showNotification('Todos os dados locais foram removidos!', 'success', 3000);
+                    // Mostrar loading
+                    const loading = document.getElementById('loginLoading');
+                    const btnLogin = document.getElementById('btnLogin');
+                    
+                    loading.classList.add('active');
+                    btnLogin.disabled = true;
+                    
+                    try {
+                        // Verificar se é um novo usuário
+                        const existingUser = await checkUserExists(email);
                         
-                        // Limpar formulário
-                        document.getElementById('loginForm').reset();
+                        if (existingUser) {
+                            // Usuário existe, fazer login
+                            await loginUser(email, password);
+                            showNotification('Login realizado com sucesso!', 'success', 3000);
+                            
+                            // Redirecionar para página de intervalo após 3 segundos
+                            setTimeout(() => {
+                                showNotification('Redirecionando para o sistema...', 'info', 2000);
+                                setTimeout(() => {
+                                    window.location.href = INTERVALO_URL;
+                                }, 2000);
+                            }, 3000);
+                        } else {
+                            // Novo usuário, criar conta
+                            await createUser(email, password);
+                            showNotification('Conta criada com sucesso!', 'success', 3000);
+                            
+                            // Redirecionar para página de cadastro após 3 segundos
+                            setTimeout(() => {
+                                showNotification('Redirecionando para cadastro...', 'info', 2000);
+                                setTimeout(() => {
+                                    window.location.href = CADASTRO_URL;
+                                }, 2000);
+                            }, 3000);
+                        }
+                    } catch (error) {
+                        loading.classList.remove('active');
+                        btnLogin.disabled = false;
+                        
+                        // Tratar erros específicos
+                        if (error.message.includes('Invalid login credentials')) {
+                            showNotification('E-mail ou senha incorretos.', 'error');
+                        } else if (error.message.includes('User already registered')) {
+                            showNotification('Este e-mail já está cadastrado.', 'warning');
+                            // Tentar fazer login em vez de criar nova conta
+                            try {
+                                await loginUser(email, password);
+                                showNotification('Login realizado com sucesso!', 'success', 3000);
+                                
+                                setTimeout(() => {
+                                    window.location.href = INTERVALO_URL;
+                                }, 3000);
+                            } catch (loginError) {
+                                showNotification('Erro ao fazer login. Tente novamente.', 'error');
+                            }
+                        } else {
+                            showNotification('Erro ao processar sua solicitação. Tente novamente.', 'error');
+                        }
                     }
                 });
             }
             
-            // Tentar carregar dados salvos ao iniciar
-            const usuarioSalvo = verificarDadosSalvos();
-            if (usuarioSalvo) {
-                // Selecionar tipo de usuário correto
-                const tipoBtn = document.querySelector(`.user-type-btn[data-type="${usuarioSalvo.tipoUsuario}"]`);
-                if (tipoBtn) {
-                    tipoBtn.click();
+            // Verificar se já está autenticado ao carregar a página
+            async function checkAuthOnLoad() {
+                try {
+                    const { data } = await supabase.auth.getSession();
+                    if (data.session) {
+                        // Usuário já está logado, redirecionar diretamente
+                        showNotification('Sessão ativa detectada. Redirecionando...', 'info', 2000);
+                        setTimeout(() => {
+                            window.location.href = INTERVALO_URL;
+                        }, 2000);
+                    }
+                } catch (error) {
+                    console.error('Erro ao verificar sessão:', error);
                 }
+            }
+            
+            // Executar verificação ao carregar
+            if (supabaseInicializado) {
+                checkAuthOnLoad();
             }
         });
     </script>
