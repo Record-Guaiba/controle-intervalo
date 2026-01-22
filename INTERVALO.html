@@ -11,14 +11,17 @@
     <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.28/dist/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
+    <style>
         :root {
-            --vermelho:  #4361ee;
+            --roxo-principal: #667eea;
+            --roxo-escuro: #764ba2;
             --preto: #000000;
             --branco: #FFFFFF;
             --cinza-claro: #F5F5F5;
             --cinza-escuro: #333333;
-            --cinza-medio: #666666;
             --verde: #28a745;
+            --vermelho-erro: #dc3545;
+            --laranja: #fd7e14;
             --amarelo: #ffc107;
             --azul: #007bff;
             --vermelho-suave: rgba(220, 53, 69, 0.1);
@@ -46,7 +49,7 @@
         }
 
         .header {
-            background: linear-gradient(90deg, var(--vermelho), var(--preto));
+            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
             color: var(--branco);
             padding: 1rem 0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -90,7 +93,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--vermelho);
+            color: var(--roxo-principal);
             font-weight: bold;
         }
 
@@ -100,7 +103,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            border-left: 5px solid var(--vermelho);
+            border-left: 5px solid var(--roxo-principal);
         }
 
         .card-header {
@@ -134,12 +137,12 @@
         }
 
         .btn-primary {
-            background-color: var(--vermelho);
+            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
             color: var(--branco);
         }
 
         .btn-primary:hover {
-            background-color: #4361ee;
+            background: linear-gradient(135deg, var(--roxo-escuro) 0%, var(--roxo-principal) 100%);
             transform: translateY(-2px);
         }
 
@@ -215,8 +218,8 @@
 
         .form-control:focus {
             outline: none;
-            border-color: var(--vermelho);
-            box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.1);
+            border-color: var(--roxo-principal);
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
         }
 
         textarea.form-control {
@@ -225,11 +228,29 @@
         }
 
         .not-authenticated-container {
-            display: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
+            padding: 20px;
         }
 
         .not-authenticated-card {
-            display: none;
+            background-color: var(--branco);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+
+        .not-authenticated-title {
+            color: var(--roxo-principal);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
         }
 
         .ponto-container {
@@ -265,7 +286,7 @@
         }
 
         .ponto-hora.atrasado {
-            border-color: var(--vermelho);
+            border-color: var(--vermelho-erro);
             background-color: var(--vermelho-suave);
             animation: pulse 2s infinite;
         }
@@ -302,7 +323,7 @@
             width: 100%;
             max-width: 300px;
             height: 200px;
-            border: 2px dashed var(--cinza-medio);
+            border: 2px dashed var(--cinza-escuro);
             border-radius: 5px;
             margin: 0 auto 1rem;
             background-color: var(--cinza-claro);
@@ -320,7 +341,7 @@
 
         .selfie-icon {
             font-size: 3rem;
-            color: var(--cinza-medio);
+            color: var(--cinza-escuro);
         }
 
         .selfie-controls {
@@ -340,7 +361,7 @@
         }
 
         .assinatura-canvas-container {
-            border: 2px dashed var(--cinza-medio);
+            border: 2px dashed var(--cinza-escuro);
             border-radius: 5px;
             background-color: var(--cinza-claro);
             margin: 0 auto 1rem;
@@ -361,7 +382,7 @@
             width: 100%;
             max-width: 300px;
             height: 150px;
-            border: 2px dashed var(--cinza-medio);
+            border: 2px dashed var(--cinza-escuro);
             border-radius: 5px;
             margin: 0 auto 1rem;
             background-color: var(--cinza-claro);
@@ -385,7 +406,7 @@
 
         .assinatura-icon {
             font-size: 3rem;
-            color: var(--cinza-medio);
+            color: var(--cinza-escuro);
         }
 
         .camera-modal {
@@ -461,7 +482,7 @@
 
         .camera-button:hover {
             transform: scale(1.1);
-            border-color: var(--vermelho);
+            border-color: var(--roxo-principal);
         }
 
         .camera-button i {
@@ -516,7 +537,7 @@
         }
 
         .table tr:hover {
-            background-color: rgba(255, 0, 0, 0.05);
+            background-color: rgba(102, 126, 234, 0.05);
         }
 
         .badge {
@@ -557,7 +578,7 @@
             border: none;
             cursor: pointer;
             font-weight: 600;
-            color: var(--cinza-medio);
+            color: var(--cinza-escuro);
             position: relative;
             transition: all 0.3s;
             font-size: 0.9rem;
@@ -568,11 +589,11 @@
         }
 
         .nav-tab:hover {
-            color: var(--vermelho);
+            color: var(--roxo-principal);
         }
 
         .nav-tab.active {
-            color: var(--vermelho);
+            color: var(--roxo-principal);
         }
 
         .nav-tab.active::after {
@@ -582,7 +603,7 @@
             left: 0;
             width: 100%;
             height: 2px;
-            background-color: var(--vermelho);
+            background-color: var(--roxo-principal);
         }
 
         .status-indicator {
@@ -651,7 +672,7 @@
         }
 
         .notification-error {
-            background-color: var(--vermelho);
+            background-color: var(--vermelho-erro);
         }
 
         .notification-warning {
@@ -660,7 +681,7 @@
         }
 
         .notification-info {
-            background-color: var(--azul);
+            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
         }
 
         .close-notification {
@@ -770,7 +791,7 @@
         }
 
         .modal-justificativa-header {
-            background: linear-gradient(90deg, var(--vermelho), var(--preto));
+            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
             color: white;
             padding: 1.5rem;
             border-radius: 15px 15px 0 0;
@@ -792,14 +813,14 @@
 
         .alert-atraso {
             background-color: var(--vermelho-suave);
-            border-left: 4px solid var(--vermelho);
+            border-left: 4px solid var(--vermelho-erro);
             padding: 1rem;
             border-radius: 5px;
             margin-bottom: 1.5rem;
         }
 
         .alert-atraso h4 {
-            color: var(--vermelho);
+            color: var(--vermelho-erro);
             margin-bottom: 0.5rem;
         }
 
@@ -909,23 +930,23 @@
         .time-display {
             font-size: 0.9rem;
             font-weight: 600;
-            color: var(--vermelho);
-            background: rgba(255, 0, 0, 0.1);
+            color: var(--roxo-principal);
+            background: rgba(102, 126, 234, 0.1);
             padding: 0.5rem 1rem;
             border-radius: 5px;
             display: inline-block;
         }
 
         .instruction-box {
-            background-color: rgba(255, 0, 0, 0.05);
-            border-left: 4px solid var(--vermelho);
+            background-color: rgba(102, 126, 234, 0.05);
+            border-left: 4px solid var(--roxo-principal);
             padding: 1rem;
             border-radius: 5px;
             margin-bottom: 1rem;
         }
 
         .instruction-box h4 {
-            color: var(--vermelho);
+            color: var(--roxo-principal);
             margin-bottom: 0.5rem;
             font-size: 1rem;
         }
@@ -939,13 +960,13 @@
         .stat-value {
             font-size: 1.8rem;
             font-weight: 700;
-            color: var(--vermelho);
+            color: var(--roxo-principal);
             margin-bottom: 0.25rem;
         }
 
         .stat-label {
             font-size: 0.9rem;
-            color: var(--cinza-medio);
+            color: var(--cinza-escuro);
         }
 
         .modal-backdrop {
@@ -1053,8 +1074,8 @@
 
         .status-offline {
             background-color: rgba(220, 53, 69, 0.2);
-            color: var(--vermelho);
-            border: 1px solid var(--vermelho);
+            color: var(--vermelho-erro);
+            border: 1px solid var(--vermelho-erro);
             animation: pulse 2s infinite;
         }
 
@@ -1062,7 +1083,7 @@
             position: absolute;
             top: -5px;
             right: -5px;
-            background-color: var(--vermelho);
+            background-color: var(--roxo-principal);
             color: white;
             border-radius: 50%;
             width: 20px;
@@ -1084,7 +1105,7 @@
 
         .progress-fill {
             height: 100%;
-            background-color: var(--verde);
+            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
             border-radius: 5px;
             transition: width 0.3s ease;
         }
@@ -5364,3 +5385,4 @@ Este é um registro automático do Sistema de Controle de Intervalo da Record Gu
     </script>
 </body>
 </html>
+
