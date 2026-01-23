@@ -3,646 +3,818 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistema de Controle de Intervalo</title>
+    <title>Record - Login</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* Estilos mantidos iguais */
         :root {
-            --roxo-principal: #667eea;
-            --roxo-escuro: #764ba2;
-            --preto: #000000;
-            --branco: #FFFFFF;
-            --cinza-claro: #F5F5F5;
-            --cinza-escuro: #333333;
-            --verde: #28a745;
-            --vermelho-erro: #dc3545;
-            --laranja: #fd7e14;
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #4cc9f0;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-bg: #f8f9fc;
+            --dark-text: #2d3748;
+            --light-card: #ffffff;
+            --light-border: #e3e6f0;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
-            color: var(--cinza-escuro);
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            padding: 20px;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 15px;
         }
 
         .login-container {
             width: 100%;
-            max-width: 500px;
-            background: white;
+            max-width: 400px;
+            padding: 10px;
+        }
+
+        .login-card {
+            background: var(--light-card);
             border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
         }
 
         .login-header {
-            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 2rem;
+            padding: 25px 15px;
             text-align: center;
         }
 
-        .login-header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .login-header p {
-            opacity: 0.9;
-            font-size: 0.9rem;
+        .login-header h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 600;
         }
 
         .login-body {
-            padding: 2rem;
+            padding: 25px 20px;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 18px;
         }
 
         .form-label {
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 8px;
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--cinza-escuro);
         }
 
         .form-control {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 2px solid #ddd;
             border-radius: 8px;
-            font-size: 1rem;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
             transition: all 0.3s;
+            background-color: var(--light-card);
+            color: var(--dark-text);
+            width: 100%;
+            font-size: 16px;
         }
 
         .form-control:focus {
-            outline: none;
-            border-color: var(--roxo-principal);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
 
-        .form-control.error {
-            border-color: var(--vermelho-erro);
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 1rem;
+        .btn-login {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
+            padding: 12px;
             font-weight: 600;
+            width: 100%;
             cursor: pointer;
             transition: all 0.3s;
-            gap: 0.5rem;
+            margin-top: 10px;
+            font-size: 16px;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--roxo-principal) 0%, var(--roxo-escuro) 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
+        .btn-login:hover {
+            background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
-        .btn-secondary {
-            background-color: var(--cinza-claro);
-            color: var(--cinza-escuro);
-            border: 2px solid #ddd;
+        .btn-login:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
-        .btn-secondary:hover {
-            background-color: #e9ecef;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 1.5rem;
-        }
-
-        .logo-icon {
-            font-size: 2rem;
-            color: white;
-        }
-
-        .instructions {
-            background-color: rgba(102, 126, 234, 0.1);
-            border-left: 4px solid var(--roxo-principal);
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1.5rem;
+        .btn-forgot {
+            background: transparent;
+            color: var(--primary-color);
+            border: none;
             font-size: 0.9rem;
-        }
-
-        .instructions h4 {
-            color: var(--roxo-principal);
-            margin-bottom: 0.5rem;
-        }
-
-        .footer-links {
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            margin-top: 10px;
+            width: 100%;
             text-align: center;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #eee;
         }
 
-        .footer-links a {
-            color: var(--roxo-principal);
+        .btn-forgot:hover {
+            color: var(--secondary-color);
+        }
+
+        .alert {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .alert-error {
+            background-color: #fdf3f3;
+            color: #842029;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .alert-warning {
+            background-color: #fffbf0;
+            color: #664d03;
+            border-left: 4px solid #ffc107;
+        }
+
+        .alert-success {
+            background-color: #f0fdf4;
+            color: #166534;
+            border-left: 4px solid #22c55e;
+        }
+
+        .alert-info {
+            background-color: #f0f9ff;
+            color: #055fa6;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+
+        .login-footer a {
+            color: var(--primary-color);
             text-decoration: none;
-            font-size: 0.9rem;
         }
 
-        .footer-links a:hover {
+        .login-footer a:hover {
             text-decoration: underline;
         }
 
-        .text-muted {
-            font-size: 0.8rem;
-            color: #666;
-            display: block;
-            margin-top: 5px;
+        /* Modal de recuperação de senha */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
         }
 
-        .error-message {
-            color: var(--vermelho-erro);
-            font-size: 0.8rem;
-            margin-top: 5px;
-            display: none;
+        .modal-header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 15px 15px 0 0;
+            border-bottom: none;
+            padding: 20px;
         }
 
-        .error-message.show {
-            display: block;
+        .modal-title {
+            font-weight: 600;
         }
 
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 1rem 0;
+        .modal-body {
+            padding: 25px;
         }
 
-        .loading.active {
-            display: block;
+        .btn-modal {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-weight: 600;
+            transition: all 0.3s;
         }
 
-        .spinner {
-            border: 3px solid rgba(102, 126, 234, 0.2);
-            border-top: 3px solid var(--roxo-principal);
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 10px;
-            vertical-align: middle;
+        .btn-modal:hover {
+            background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .contact-info {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
         }
 
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            color: var(--roxo-principal);
+        .contact-info p {
+            margin-bottom: 5px;
+        }
+
+        .contact-info a {
+            color: var(--primary-color);
             text-decoration: none;
-            margin-bottom: 1rem;
-            cursor: pointer;
             font-weight: 500;
         }
 
-        .back-link:hover {
+        .contact-info a:hover {
             text-decoration: underline;
         }
 
-        @media (max-width: 576px) {
+        .spinner-border {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+        }
+
+        /* Media Queries para responsividade */
+        @media (max-width: 480px) {
             .login-container {
-                margin: 0 10px;
+                padding: 5px;
             }
             
             .login-header {
-                padding: 1.5rem 1rem;
+                padding: 20px 15px;
+            }
+            
+            .login-header h2 {
+                font-size: 1.4rem;
             }
             
             .login-body {
-                padding: 1.5rem;
+                padding: 20px 15px;
+            }
+            
+            .form-control, .btn-login {
+                padding: 10px 12px;
+            }
+            
+            .modal-body {
+                padding: 20px 15px;
             }
         }
 
-        #notification {
-            display: none;
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 5px;
-            color: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
+        @media (max-width: 360px) {
+            .login-header {
+                padding: 15px 10px;
+            }
+            
+            .login-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .login-body {
+                padding: 15px 10px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <div class="login-header">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <h1>Record Guaíba - Login</h1>
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Record Guaíba</h2>
             </div>
-            <p>Sistema de Controle de Intervalo</p>
-        </div>
-        
-        <div class="login-body">
-            <div class="instructions">
-                <h4><i class="fas fa-info-circle"></i> Acesso ao Sistema</h4>
-                <p>Digite seu e-mail e senha para acessar o sistema. Se for seu primeiro acesso, uma nova conta será criada automaticamente.</p>
-            </div>
-            
-            <form id="loginForm">
-                <div class="form-group">
-                    <label class="form-label" for="email">
-                        <i class="fas fa-envelope"></i> E-mail *
-                    </label>
-                    <input type="email" id="email" class="form-control" 
-                           placeholder="seu.email@exemplo.com" required>
+            <div class="login-body">
+                <div id="loginAlert" class="alert alert-error">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span id="alertMessage">Usuário ou senha incorretos</span>
                 </div>
                 
-                <div class="form-group">
-                    <label class="form-label" for="password">
-                        <i class="fas fa-lock"></i> Senha *
-                    </label>
-                    <input type="password" id="password" class="form-control" 
-                           placeholder="Digite sua senha" required>
-                    <span class="text-muted">A senha deve ter pelo menos 6 caracteres</span>
-                </div>
-
-                <div class="loading" id="loginLoading">
-                    <div class="spinner"></div> Processando login...
-                </div>
-                
-                <button type="submit" class="btn btn-primary" id="btnLogin">
-                    <i class="fas fa-sign-in-alt"></i> Acessar Sistema
-                </button>
-            </form>
-            
-            <div class="footer-links">
-                <span style="font-size: 0.85rem; color: #666;">
-                    <i class="fas fa-info-circle"></i> Primeiro acesso? Uma conta será criada automaticamente.
-                </span>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input type="email" class="form-control" id="email" placeholder="Digite seu e-mail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="password" placeholder="Digite sua senha" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-login" id="loginButton">
+                        <span id="loginButtonText">
+                            <i class="fas fa-sign-in-alt me-2"></i> Entrar
+                        </span>
+                        <span id="loginButtonSpinner" class="spinner-border spinner-border-sm" role="status" style="display: none;"></span>
+                    </button>
+                    
+                    <button type="button" class="btn-forgot" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
+                        <i class="fas fa-key me-1"></i> Esqueci minha senha
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 
-    <div id="notification"></div>
+    <!-- Modal de Recuperação de Senha -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="forgotPasswordModalLabel">
+                        <i class="fas fa-key me-2"></i>Recuperação de Senha
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalAlert" class="alert alert-success" style="display: none;">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span id="modalAlertMessage">Solicitação enviada com sucesso!</span>
+                    </div>
+                    
+                    <p>Para solicitar a troca de senha ou esclarecer dúvidas, entre em contato com nosso suporte técnico:</p>
+                    
+                    <div class="contact-info">
+                        <p><strong>E-mail de suporte:</strong></p>
+                        <p><a href="mailto:ti@recordguiaba.tv.br"><i class="fas fa-envelope me-2"></i>ti@recordguiaba.tv.br</a></p>
+                        
+                        <p class="mt-3"><strong>Informações para contato:</strong></p>
+                        <p>Envie um e-mail para o endereço acima informando:</p>
+                        <ul>
+                            <li>Seu nome completo</li>
+                            <li>Seu e-mail de acesso ao sistema</li>
+                            <li>O motivo do contato (troca de senha, dúvidas, etc.)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <a href="mailto:ti@recordguiaba.tv.br?subject=Solicitação de Troca de Senha&body=Prezados,%0D%0A%0D%0AGostaria de solicitar a troca de minha senha no sistema.%0D%0A%0D%0ANome completo: %0D%0AE-mail de acesso: %0D%0A%0D%0AAtenciosamente," class="btn btn-modal">
+                            <i class="fas fa-paper-plane me-2"></i> Enviar E-mail
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script>
-        // Configuração do Supabase
-        const SUPABASE_URL = 'https://izilgduqnrhdsglfnsuh.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6aWxnZHVxbnJoZHNnbGZuc3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjk1NTksImV4cCI6MjA4MzMwNTU1OX0.mvTGBwZg4vHTCGuwjKNxU-i1NFjr_xINUUDV_4MLP0E';
-        
-        // URLs de redirecionamento
-        const CADASTRO_URL = 'https://record-guaiba.github.io/controle-intervalo/CADASTRO';
-        const INTERVALO_URL = 'https://record-guaiba.github.io/controle-intervalo/INTERVALO';
-        
-        // Inicializar Supabase
-        let supabase;
-        
-        // Função para inicializar Supabase
-        function initSupabase() {
-            try {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log('Supabase inicializado com sucesso');
-                return true;
-            } catch (error) {
-                console.error('Erro ao inicializar Supabase:', error);
-                return false;
-            }
-        }
-        
-        // Função para mostrar notificação
-        function showNotification(message, type = 'info', duration = 5000) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.style.display = 'block';
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuração do Supabase atualizada
+            const SUPABASE_URL = 'https://izilgduqnrhdsglfnsuh.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6aWxnZHVxbnJoZHNnbGZuc3VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3Mjk1NTksImV4cCI6MjA4MzMwNTU1OX0.mvTGBwZg4vHTCGuwjKNxU-i1NFjr_xINUUDV_4MLP0E';
             
-            switch(type) {
-                case 'success':
-                    notification.style.backgroundColor = '#28a745';
-                    break;
-                case 'error':
-                    notification.style.backgroundColor = '#dc3545';
-                    break;
-                case 'warning':
-                    notification.style.backgroundColor = '#ffc107';
-                    notification.style.color = '#333';
-                    break;
-                case 'info':
-                default:
-                    notification.style.backgroundColor = '#667eea';
-            }
+            // Inicializar cliente Supabase
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, duration);
-        }
-        
-        // Função para validar email
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-        
-        // Função simplificada para verificar se usuário existe
-        async function checkUserExists(email) {
-            try {
-                // Primeiro, tentamos fazer login para ver se o usuário já existe no auth
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: 'temporary_password' // Senha temporária apenas para teste
-                });
-                
-                // Se não houver erro de credenciais inválidas, o usuário existe
-                if (error) {
-                    if (error.message === 'Invalid login credentials') {
-                        // Usuário não existe ou senha incorreta
-                        return false;
-                    }
-                    // Outro erro
-                    console.error('Erro ao verificar usuário:', error);
-                    return null;
-                }
-                
-                // Se chegou aqui, o usuário existe
-                return true;
-                
-            } catch (error) {
-                console.error('Erro na verificação:', error);
-                return null;
-            }
-        }
-        
-        // Função para criar novo usuário
-        async function createUser(email, password) {
-            try {
-                console.log('Criando usuário:', email);
-                
-                // Criar usuário no sistema de autenticação do Supabase
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: email,
-                    password: password,
-                });
-                
-                if (authError) {
-                    console.error('Erro no signUp:', authError);
-                    throw authError;
-                }
-                
-                console.log('Usuário criado no auth:', authData);
-                
-                // Verificar se a tabela usuarios existe e tentar inserir
+            // Elementos do DOM
+            const loginForm = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const loginAlert = document.getElementById('loginAlert');
+            const alertMessage = document.getElementById('alertMessage');
+            const modalAlert = document.getElementById('modalAlert');
+            const modalAlertMessage = document.getElementById('modalAlertMessage');
+            const loginButton = document.getElementById('loginButton');
+            const loginButtonText = document.getElementById('loginButtonText');
+            const loginButtonSpinner = document.getElementById('loginButtonSpinner');
+            
+            // Variáveis para controlar tentativas de login
+            let loginAttempts = 0;
+            const maxLoginAttempts = 5;
+            
+            // URLs para redirecionamento
+            const CADASTRO_URL = 'https://record-guaiba.github.io/controle-intervalo/CADASTRO';
+            const INTERVALO_URL = 'https://record-guaiba.github.io/controle-intervalo/INTERVALO';
+            
+            // Função para verificar se o usuário já tem cadastro
+            async function checkUserRegistration(userId) {
                 try {
-                    const { data: userData, error: userError } = await supabase
-                        .from('usuarios')
-                        .insert([
-                            {
-                                email: email,
-                                created_at: new Date().toISOString()
-                            }
-                        ])
-                        .select()
+                    console.log('Verificando cadastro para usuário:', userId);
+                    
+                    // Verificar no localStorage primeiro (mais rápido)
+                    const localRegistration = localStorage.getItem(`user_registered_${userId}`);
+                    if (localRegistration === 'true') {
+                        console.log('Cadastro encontrado no localStorage');
+                        return true;
+                    }
+                    
+                    // Se não estiver no localStorage, verificar no Supabase
+                    console.log('Consultando Supabase para verificar cadastro...');
+                    const { data, error } = await supabase
+                        .from('users')
+                        .select('is_registered')
+                        .eq('id', userId)
                         .single();
                     
-                    if (userError) {
-                        console.warn('Aviso ao inserir na tabela usuarios:', userError);
-                        // Não lançar erro aqui, pois o usuário já foi criado no auth
-                    }
-                    
-                    return { authData, userData };
-                } catch (tableError) {
-                    console.warn('Tabela usuarios pode não existir:', tableError);
-                    return { authData };
-                }
-                
-            } catch (error) {
-                console.error('Erro ao criar usuário:', error);
-                throw error;
-            }
-        }
-        
-        // Função para fazer login
-        async function loginUser(email, password) {
-            try {
-                console.log('Tentando login para:', email);
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-                
-                if (error) {
-                    console.error('Erro no login:', error);
-                    throw error;
-                }
-                
-                console.log('Login bem-sucedido:', data);
-                return data;
-            } catch (error) {
-                console.error('Erro no login:', error);
-                throw error;
-            }
-        }
-        
-        // Função para processar login/cadastro
-        async function processLogin(email, password) {
-            try {
-                // Primeiro, tentar fazer login
-                console.log('Tentando login...');
-                const loginData = await loginUser(email, password);
-                
-                if (loginData && loginData.user) {
-                    // Login bem-sucedido
-                    showNotification('Login realizado com sucesso!', 'success', 3000);
-                    
-                    // Redirecionar para página de intervalo após 2 segundos
-                    setTimeout(() => {
-                        window.location.href = INTERVALO_URL;
-                    }, 2000);
-                    
-                    return { success: true, isNewUser: false };
-                }
-                
-            } catch (loginError) {
-                console.log('Erro no login, tentando criar nova conta...', loginError);
-                
-                // Se falhou no login, tentar criar nova conta
-                if (loginError.message === 'Invalid login credentials') {
-                    try {
-                        // Criar novo usuário
-                        console.log('Criando nova conta...');
-                        const userData = await createUser(email, password);
+                    if (error) {
+                        console.warn('Erro ao verificar cadastro no Supabase:', error.message);
                         
-                        if (userData && userData.authData && userData.authData.user) {
-                            showNotification('Conta criada com sucesso! Faça login agora.', 'success', 3000);
-                            
-                            // Tentar login novamente com a nova conta
-                            setTimeout(async () => {
-                                try {
-                                    const newLogin = await loginUser(email, password);
-                                    if (newLogin && newLogin.user) {
-                                        showNotification('Login realizado! Redirecionando para cadastro...', 'success', 2000);
-                                        setTimeout(() => {
-                                            window.location.href = CADASTRO_URL;
-                                        }, 2000);
-                                    }
-                                } catch (error) {
-                                    showNotification('Erro ao fazer login após criação. Tente novamente.', 'error');
-                                }
-                            }, 1000);
-                            
-                            return { success: true, isNewUser: true };
-                        }
-                    } catch (createError) {
-                        console.error('Erro ao criar usuário:', createError);
-                        
-                        if (createError.message.includes('User already registered')) {
-                            showNotification('Este e-mail já está cadastrado. Verifique sua senha.', 'error');
-                        } else {
-                            showNotification('Erro ao criar conta. Tente novamente.', 'error');
+                        // Se a tabela não existir ainda, considerar que o usuário não está registrado
+                        if (error.message.includes('does not exist') || error.code === 'PGRST116') {
+                            console.log('Tabela users não encontrada. Usuário será redirecionado para cadastro.');
+                            return false;
                         }
                         
-                        return { success: false, error: createError };
+                        // Para outros erros, retornar false para forçar o cadastro
+                        return false;
                     }
-                } else {
-                    showNotification('Erro ao fazer login. Tente novamente.', 'error');
-                    return { success: false, error: loginError };
+                    
+                    console.log('Resposta do Supabase:', data);
+                    
+                    // Se encontrar registro no Supabase, salvar no localStorage
+                    if (data && data.is_registered) {
+                        console.log('Usuário já cadastrado no Supabase');
+                        localStorage.setItem(`user_registered_${userId}`, 'true');
+                        return true;
+                    }
+                    
+                    console.log('Usuário não cadastrado no Supabase');
+                    return false;
+                } catch (error) {
+                    console.error('Erro ao verificar cadastro:', error);
+                    return false;
                 }
             }
             
-            return { success: false, error: 'Erro desconhecido' };
-        }
-        
-        // Inicializar a página
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('DOM carregado, inicializando...');
-            
-            // Inicializar Supabase
-            const supabaseInicializado = initSupabase();
-            
-            if (!supabaseInicializado) {
-                showNotification('Erro ao conectar com o servidor', 'error');
-            }
-            
-            // Verificar se já está autenticado
-            async function checkExistingSession() {
+            // Função para criar usuário na tabela users se não existir
+            async function createUserIfNotExists(userId, userEmail) {
                 try {
-                    const { data, error } = await supabase.auth.getSession();
+                    console.log('Verificando/criando usuário na tabela users...');
+                    
+                    // Primeiro, verificar se o usuário já existe
+                    const { data: existingUser, error: fetchError } = await supabase
+                        .from('users')
+                        .select('id')
+                        .eq('id', userId)
+                        .single();
+                    
+                    // Se o usuário não existir, criar um novo registro
+                    if (fetchError || !existingUser) {
+                        console.log('Criando novo registro na tabela users...');
+                        
+                        const { error: insertError } = await supabase
+                            .from('users')
+                            .insert([
+                                {
+                                    id: userId,
+                                    email: userEmail,
+                                    is_registered: false,
+                                    created_at: new Date().toISOString()
+                                }
+                            ]);
+                        
+                        if (insertError) {
+                            console.warn('Erro ao criar usuário na tabela:', insertError.message);
+                            
+                            // Tentar usar a função RPC como fallback
+                            try {
+                                const { error: rpcError } = await supabase.rpc('create_user_record', {
+                                    p_user_id: userId,
+                                    p_user_email: userEmail
+                                });
+                                
+                                if (rpcError) {
+                                    console.warn('Erro ao usar função RPC:', rpcError.message);
+                                }
+                            } catch (rpcErr) {
+                                console.warn('Exceção ao chamar função RPC:', rpcErr);
+                            }
+                        } else {
+                            console.log('Usuário criado com sucesso na tabela users');
+                        }
+                    } else {
+                        console.log('Usuário já existe na tabela users');
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao criar/verificar usuário:', error);
+                    return false;
+                }
+            }
+            
+            // Processar login
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                
+                // Validação básica
+                if (!email || !password) {
+                    showAlert('Por favor, preencha todos os campos.', 'error');
+                    return;
+                }
+                
+                // Mostrar indicador de carregamento
+                setLoginButtonState(true);
+                
+                try {
+                    console.log('Iniciando autenticação para:', email);
+                    
+                    // Tentar autenticação com Supabase
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+                    
+                    if (error) {
+                        // Tratar erro de autenticação
+                        loginAttempts++;
+                        
+                        console.error('Erro de autenticação:', error.message);
+                        
+                        if (error.message.includes('Invalid login credentials')) {
+                            showAlert('E-mail ou senha incorretos.', 'error');
+                        } else if (error.message.includes('Email not confirmed')) {
+                            showAlert('E-mail não confirmado. Verifique sua caixa de entrada.', 'warning');
+                        } else if (error.message.includes('rate limit')) {
+                            showAlert('Muitas tentativas. Aguarde alguns minutos e tente novamente.', 'warning');
+                        } else {
+                            showAlert('Erro ao fazer login: ' + error.message, 'error');
+                        }
+                        
+                        // Limpar campo de senha
+                        passwordInput.value = '';
+                        passwordInput.focus();
+                        
+                        // Bloquear após várias tentativas
+                        if (loginAttempts >= maxLoginAttempts) {
+                            showAlert('Muitas tentativas incorretas. Tente novamente mais tarde ou entre em contato com o suporte.', 'warning');
+                            loginButton.disabled = true;
+                            
+                            setTimeout(() => {
+                                loginButton.disabled = false;
+                                loginAttempts = 0;
+                            }, 30000); // 30 segundos
+                        }
+                    } else {
+                        // Login bem-sucedido
+                        loginAttempts = 0;
+                        
+                        // Obter informações do usuário
+                        const user = data.user;
+                        
+                        console.log('Login bem-sucedido. Usuário:', {
+                            id: user.id,
+                            email: user.email,
+                            created_at: user.created_at
+                        });
+                        
+                        // Armazenar informações no localStorage
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('userId', user.id);
+                        localStorage.setItem('userEmail', user.email);
+                        localStorage.setItem('authToken', data.session.access_token);
+                        
+                        // Garantir que o usuário exista na tabela users
+                        await createUserIfNotExists(user.id, user.email);
+                        
+                        // Verificar se o usuário já tem cadastro
+                        const isRegistered = await checkUserRegistration(user.id);
+                        
+                        console.log('Status de cadastro:', isRegistered ? 'CADASTRADO' : 'NÃO CADASTRADO');
+                        
+                        // Redirecionar baseado no status de cadastro
+                        if (isRegistered) {
+                            console.log('Usuário já cadastrado, redirecionando para INTERVALO');
+                            
+                            // Adicionar token de autenticação à URL
+                            const intervaloUrl = new URL(INTERVALO_URL);
+                            intervaloUrl.searchParams.append('token', data.session.access_token);
+                            intervaloUrl.searchParams.append('userId', user.id);
+                            
+                            window.location.href = intervaloUrl.toString();
+                        } else {
+                            console.log('Usuário não cadastrado, redirecionando para CADASTRO');
+                            
+                            // Adicionar parâmetros ao URL de cadastro para identificar o usuário
+                            const cadastroUrl = new URL(CADASTRO_URL);
+                            cadastroUrl.searchParams.append('userId', user.id);
+                            cadastroUrl.searchParams.append('userEmail', user.email);
+                            cadastroUrl.searchParams.append('token', data.session.access_token);
+                            
+                            // Marcar que o usuário foi redirecionado para cadastro
+                            localStorage.setItem('redirectedToCadastro', 'true');
+                            localStorage.setItem('cadastroUserId', user.id);
+                            
+                            window.location.href = cadastroUrl.toString();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erro inesperado:', error);
+                    showAlert('Erro inesperado ao fazer login. Tente novamente.', 'error');
+                } finally {
+                    // Restaurar estado do botão
+                    setLoginButtonState(false);
+                }
+            });
+            
+            // Função para mostrar alertas
+            function showAlert(message, type = 'error') {
+                alertMessage.textContent = message;
+                
+                // Definir classe de alerta baseada no tipo
+                loginAlert.className = 'alert';
+                if (type === 'error') {
+                    loginAlert.classList.add('alert-error');
+                } else if (type === 'warning') {
+                    loginAlert.classList.add('alert-warning');
+                } else if (type === 'success') {
+                    loginAlert.classList.add('alert-success');
+                } else if (type === 'info') {
+                    loginAlert.classList.add('alert-info');
+                }
+                
+                loginAlert.style.display = 'block';
+                
+                // Ocultar alerta após 5 segundos
+                setTimeout(() => {
+                    loginAlert.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Função para mostrar alerta no modal
+            function showModalAlert(message, type = 'success') {
+                modalAlertMessage.textContent = message;
+                
+                // Definir classe de alerta baseada no tipo
+                modalAlert.className = 'alert';
+                if (type === 'error') {
+                    modalAlert.classList.add('alert-error');
+                } else if (type === 'warning') {
+                    modalAlert.classList.add('alert-warning');
+                } else if (type === 'success') {
+                    modalAlert.classList.add('alert-success');
+                }
+                
+                modalAlert.style.display = 'block';
+                
+                // Ocultar alerta após 5 segundos
+                setTimeout(() => {
+                    modalAlert.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Função para controlar estado do botão de login
+            function setLoginButtonState(isLoading) {
+                if (isLoading) {
+                    loginButton.disabled = true;
+                    loginButtonText.style.display = 'none';
+                    loginButtonSpinner.style.display = 'inline-block';
+                } else {
+                    loginButton.disabled = false;
+                    loginButtonText.style.display = 'inline';
+                    loginButtonSpinner.style.display = 'none';
+                }
+            }
+            
+            // Prevenir redirecionamento por alteração de URL antes do login
+            window.addEventListener('beforeunload', function(e) {
+                // Verificar se o usuário não está logado
+                if (!localStorage.getItem('isLoggedIn')) {
+                    // Se houver dados nos campos de login, mostrar confirmação
+                    if (emailInput.value || passwordInput.value) {
+                        e.preventDefault();
+                        e.returnValue = 'Você tem dados não salvos no formulário de login. Tem certeza que deseja sair?';
+                        return e.returnValue;
+                    }
+                }
+            });
+            
+            // Evento quando o modal é aberto
+            const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+            if (forgotPasswordModal) {
+                forgotPasswordModal.addEventListener('show.bs.modal', function() {
+                    // Resetar alerta do modal quando abrir
+                    modalAlert.style.display = 'none';
+                });
+            }
+            
+            // Evento para o botão de enviar e-mail no modal
+            const sendEmailBtn = document.querySelector('a[href^="mailto:"]');
+            if (sendEmailBtn) {
+                sendEmailBtn.addEventListener('click', function() {
+                    showModalAlert('Abrindo cliente de e-mail. Preencha com suas informações e envie para o suporte.', 'success');
+                });
+            }
+            
+            // Verificar se já está logado ao carregar a página
+            checkIfAlreadyLoggedIn();
+            
+            async function checkIfAlreadyLoggedIn() {
+                try {
+                    console.log('Verificando se usuário já está logado...');
+                    
+                    const { data: { session }, error } = await supabase.auth.getSession();
                     
                     if (error) {
                         console.error('Erro ao verificar sessão:', error);
                         return;
                     }
                     
-                    if (data.session) {
-                        console.log('Sessão ativa encontrada:', data.session.user.email);
-                        showNotification('Sessão ativa detectada. Redirecionando...', 'info', 2000);
-                        setTimeout(() => {
-                            window.location.href = INTERVALO_URL;
-                        }, 2000);
+                    if (session) {
+                        console.log('Sessão encontrada, usuário já está logado:', session.user.email);
+                        
+                        // Armazenar informações no localStorage
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('userId', session.user.id);
+                        localStorage.setItem('userEmail', session.user.email);
+                        localStorage.setItem('authToken', session.access_token);
+                        
+                        // Verificar cadastro e redirecionar
+                        const isRegistered = await checkUserRegistration(session.user.id);
+                        
+                        if (isRegistered) {
+                            console.log('Usuário já cadastrado, redirecionando para INTERVALO');
+                            
+                            // Adicionar token de autenticação à URL
+                            const intervaloUrl = new URL(INTERVALO_URL);
+                            intervaloUrl.searchParams.append('token', session.access_token);
+                            intervaloUrl.searchParams.append('userId', session.user.id);
+                            
+                            window.location.href = intervaloUrl.toString();
+                        } else {
+                            console.log('Usuário não cadastrado, redirecionando para CADASTRO');
+                            
+                            // Adicionar parâmetros ao URL de cadastro
+                            const cadastroUrl = new URL(CADASTRO_URL);
+                            cadastroUrl.searchParams.append('userId', session.user.id);
+                            cadastroUrl.searchParams.append('userEmail', session.user.email);
+                            cadastroUrl.searchParams.append('token', session.access_token);
+                            
+                            window.location.href = cadastroUrl.toString();
+                        }
+                    } else {
+                        console.log('Nenhuma sessão encontrada, mostrando tela de login');
                     }
                 } catch (error) {
-                    console.error('Erro na verificação de sessão:', error);
+                    console.error('Erro ao verificar se está logado:', error);
                 }
             }
             
-            // Verificar sessão existente
-            if (supabaseInicializado) {
-                await checkExistingSession();
+            // Função auxiliar para logout
+            async function logout() {
+                try {
+                    await supabase.auth.signOut();
+                    localStorage.clear();
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Erro ao fazer logout:', error);
+                }
             }
             
-            // Configurar formulário de login
-            const loginForm = document.getElementById('loginForm');
-            if (loginForm) {
-                loginForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    // Coletar dados
-                    const email = document.getElementById('email').value.trim();
-                    const password = document.getElementById('password').value;
-                    
-                    // Validações básicas
-                    if (!email || !password) {
-                        showNotification('Preencha todos os campos obrigatórios.', 'error');
-                        return;
-                    }
-                    
-                    if (!validateEmail(email)) {
-                        showNotification('Por favor, insira um e-mail válido.', 'error');
-                        return;
-                    }
-                    
-                    if (password.length < 6) {
-                        showNotification('A senha deve ter pelo menos 6 caracteres.', 'error');
-                        return;
-                    }
-                    
-                    // Mostrar loading
-                    const loading = document.getElementById('loginLoading');
-                    const btnLogin = document.getElementById('btnLogin');
-                    
-                    loading.classList.add('active');
-                    btnLogin.disabled = true;
-                    btnLogin.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Processando...';
-                    
-                    try {
-                        // Processar login/cadastro
-                        const result = await processLogin(email, password);
-                        
-                        if (!result.success) {
-                            // Resetar botão se falhou
-                            loading.classList.remove('active');
-                            btnLogin.disabled = false;
-                            btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Acessar Sistema';
-                        }
-                        // Se success, o redirecionamento será feito dentro da função
-                        
-                    } catch (error) {
-                        console.error('Erro no processamento:', error);
-                        showNotification('Erro no processo de autenticação. Tente novamente.', 'error');
-                        
-                        // Resetar botão
-                        loading.classList.remove('active');
-                        btnLogin.disabled = false;
-                        btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Acessar Sistema';
-                    }
-                });
+            // Adicionar botão de logout se estiver em desenvolvimento
+            if (window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1')) {
+                const logoutBtn = document.createElement('button');
+                logoutBtn.textContent = 'Logout (Dev)';
+                logoutBtn.style.position = 'fixed';
+                logoutBtn.style.top = '10px';
+                logoutBtn.style.right = '10px';
+                logoutBtn.style.zIndex = '1000';
+                logoutBtn.style.padding = '5px 10px';
+                logoutBtn.style.backgroundColor = '#dc3545';
+                logoutBtn.style.color = 'white';
+                logoutBtn.style.border = 'none';
+                logoutBtn.style.borderRadius = '5px';
+                logoutBtn.style.cursor = 'pointer';
+                logoutBtn.addEventListener('click', logout);
+                document.body.appendChild(logoutBtn);
             }
         });
-        
-        // Adicionar console.log para debug
-        console.log('Script carregado');
     </script>
 </body>
 </html>
