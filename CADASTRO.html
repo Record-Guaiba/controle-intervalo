@@ -313,8 +313,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="phone" class="form-label">Telefone</label>
-                        <input type="tel" class="form-control" id="phone" placeholder="(51) 99999-9999">
+                        <label for="cpf" class="form-label">CPF *</label>
+                        <input type="text" class="form-control" id="cpf" placeholder="000.000.000-00" required>
                     </div>
                     
                     <button type="submit" class="btn-login" id="submitButton">
@@ -351,7 +351,7 @@
             const fullNameInput = document.getElementById('fullName');
             const departmentInput = document.getElementById('department');
             const positionInput = document.getElementById('position');
-            const phoneInput = document.getElementById('phone');
+            const cpfInput = document.getElementById('cpf');
             const submitButton = document.getElementById('submitButton');
             const buttonText = document.getElementById('buttonText');
             const buttonSpinner = document.getElementById('buttonSpinner');
@@ -426,7 +426,7 @@
                         .eq('id', userId)
                         .single();
                     
-                    if (error) {
+                    if (error && error.code !== 'PGRST116') { // PGRST116 é "no rows returned"
                         console.warn('Erro ao verificar cadastro:', error.message);
                         return false;
                     }
@@ -443,6 +443,44 @@
                 }
             }
             
+            // Função para validar CPF
+            function validateCPF(cpf) {
+                cpf = cpf.replace(/[^\d]/g, '');
+                
+                if (cpf.length !== 11) {
+                    return false;
+                }
+                
+                // Verificar CPFs inválidos conhecidos
+                if (/^(\d)\1+$/.test(cpf)) {
+                    return false;
+                }
+                
+                // Validar primeiro dígito verificador
+                let sum = 0;
+                for (let i = 0; i < 9; i++) {
+                    sum += parseInt(cpf.charAt(i)) * (10 - i);
+                }
+                let remainder = (sum * 10) % 11;
+                if (remainder === 10 || remainder === 11) remainder = 0;
+                if (remainder !== parseInt(cpf.charAt(9))) {
+                    return false;
+                }
+                
+                // Validar segundo dígito verificador
+                sum = 0;
+                for (let i = 0; i < 10; i++) {
+                    sum += parseInt(cpf.charAt(i)) * (11 - i);
+                }
+                remainder = (sum * 10) % 11;
+                if (remainder === 10 || remainder === 11) remainder = 0;
+                if (remainder !== parseInt(cpf.charAt(10))) {
+                    return false;
+                }
+                
+                return true;
+            }
+            
             // Função para completar o cadastro
             async function completeRegistration(userData) {
                 try {
@@ -453,35 +491,53 @@
                     console.log('Completando cadastro para:', currentUser.id);
                     console.log('Dados:', userData);
                     
-                    // Método 1: Usar RPC function (recomendado)
-                    try {
-                        const { data, error } = await supabase.rpc('mark_user_as_registered', {
-                            user_id: currentUser.id,
-                            user_full_name: userData.fullName,
-                            user_department: userData.department,
-                            user_position: userData.position,
-                            user_phone: userData.phone
-                        });
+                    // Primeiro, verificar se o usuário já existe na tabela
+                    const { data: existingUser, error: fetchError } = await supabase
+                        .from('users')
+                        .select('id')
+                        .eq('id', currentUser.id)
+                        .single();
+                    
+                    let result;
+                    
+                    if (fetchError && fetchError.code === 'PGRST116') {
+                        // Usuário não existe, fazer INSERT
+                        console.log('Inserindo novo usuário...');
+                        
+                        const { data, error } = await supabase
+                            .from('users')
+                            .insert({
+                                id: currentUser.id,
+                                email: currentUser.email,
+                                full_name: userData.fullName,
+                                department: userData.department,
+                                position: userData.position,
+                                cpf: userData.cpf.replace(/[^\d]/g, ''),
+                                is_registered: true,
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString()
+                            })
+                            .select();
                         
                         if (error) {
-                            console.warn('Erro RPC, tentando método direto...', error.message);
                             throw error;
                         }
                         
-                        console.log('Cadastro realizado via RPC:', data);
-                        return data;
-                    } catch (rpcError) {
-                        // Método 2: Atualização direta (fallback)
-                        console.log('Usando método de atualização direta...');
+                        result = data;
+                        console.log('Usuário inserido com sucesso:', data);
+                        
+                    } else if (existingUser) {
+                        // Usuário existe, fazer UPDATE
+                        console.log('Atualizando usuário existente...');
                         
                         const { data, error } = await supabase
                             .from('users')
                             .update({
-                                is_registered: true,
                                 full_name: userData.fullName,
                                 department: userData.department,
                                 position: userData.position,
-                                phone: userData.phone,
+                                cpf: userData.cpf.replace(/[^\d]/g, ''),
+                                is_registered: true,
                                 updated_at: new Date().toISOString()
                             })
                             .eq('id', currentUser.id)
@@ -491,12 +547,40 @@
                             throw error;
                         }
                         
-                        console.log('Cadastro realizado via update direto:', data);
-                        return data;
+                        result = data;
+                        console.log('Usuário atualizado com sucesso:', data);
+                    } else {
+                        throw new Error('Erro ao verificar usuário existente');
                     }
+                    
+                    return result;
+                    
                 } catch (error) {
                     console.error('Erro ao completar cadastro:', error);
-                    throw error;
+                    
+                    // Tentar método alternativo usando auth.users
+                    try {
+                        console.log('Tentando método alternativo via auth.users...');
+                        
+                        const { data, error } = await supabase.auth.updateUser({
+                            data: {
+                                full_name: userData.fullName,
+                                department: userData.department,
+                                position: userData.position,
+                                cpf: userData.cpf.replace(/[^\d]/g, ''),
+                                is_registered: true
+                            }
+                        });
+                        
+                        if (error) throw error;
+                        
+                        console.log('Dados salvos via auth.updateUser:', data);
+                        return data;
+                        
+                    } catch (authError) {
+                        console.error('Erro no método alternativo:', authError);
+                        throw new Error(`Erro ao salvar dados: ${error.message}`);
+                    }
                 }
             }
             
@@ -548,12 +632,26 @@
                     return;
                 }
                 
+                // Validar CPF
+                const cpfValue = cpfInput.value.trim();
+                if (!cpfValue) {
+                    showError('Por favor, informe seu CPF.');
+                    cpfInput.focus();
+                    return;
+                }
+                
+                if (!validateCPF(cpfValue)) {
+                    showError('CPF inválido. Por favor, verifique o número.');
+                    cpfInput.focus();
+                    return;
+                }
+                
                 // Coletar dados
                 const userData = {
                     fullName: fullNameInput.value.trim(),
                     department: departmentInput.value,
                     position: positionInput.value.trim(),
-                    phone: phoneInput.value.trim()
+                    cpf: cpfValue
                 };
                 
                 // Verificar autenticação
@@ -588,7 +686,9 @@
                     if (error.message.includes('permission denied')) {
                         errorMsg += 'Permissão negada. Contate o administrador.';
                     } else if (error.message.includes('does not exist')) {
-                        errorMsg += 'Tabela não configurada. Execute o SQL fornecido no Supabase.';
+                        errorMsg += 'Tabela não configurada. Execute o SQL fornecido.';
+                    } else if (error.message.includes('duplicate key')) {
+                        errorMsg += 'Usuário já cadastrado.';
                     } else {
                         errorMsg += 'Tente novamente ou contate o suporte.';
                     }
@@ -599,18 +699,21 @@
                 }
             });
             
-            // Mascarar telefone
-            phoneInput.addEventListener('input', function(e) {
+            // Mascarar CPF
+            cpfInput.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
                 
-                if (value.length > 10) {
-                    value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
-                } else if (value.length > 6) {
-                    value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
-                } else if (value.length > 2) {
-                    value = value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
-                } else if (value.length > 0) {
-                    value = value.replace(/^(\d*)/, '($1');
+                if (value.length <= 11) {
+                    if (value.length > 9) {
+                        value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{1,2}).*/, '$1.$2.$3-$4');
+                    } else if (value.length > 6) {
+                        value = value.replace(/^(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+                    } else if (value.length > 3) {
+                        value = value.replace(/^(\d{3})(\d{0,3})/, '$1.$2');
+                    }
+                } else {
+                    value = value.substring(0, 11);
+                    value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2}).*/, '$1.$2.$3-$4');
                 }
                 
                 e.target.value = value;
