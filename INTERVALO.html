@@ -226,6 +226,206 @@
             resize: vertical;
         }
 
+        /* NOVO: Container para selfies lado a lado */
+        .selfies-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .selfies-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .selfie-box {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: white;
+            text-align: center;
+        }
+
+        .selfie-box-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--roxo-principal);
+            font-size: 0.9rem;
+        }
+
+        .selfie-preview-container {
+            width: 100%;
+            height: 150px;
+            border: 2px dashed var(--cinza-escuro);
+            border-radius: 5px;
+            background-color: var(--cinza-claro);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .selfie-preview-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .selfie-placeholder {
+            font-size: 2.5rem;
+            color: var(--cinza-escuro);
+        }
+
+        .selfie-indicator {
+            font-size: 0.8rem;
+            color: var(--verde);
+            margin-top: 0.25rem;
+        }
+
+        .selfie-indicator.pendente {
+            color: var(--vermelho-erro);
+        }
+
+        /* NOVO: Container para justificativas lado a lado */
+        .justificativas-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .justificativas-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .justificativa-box {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: white;
+            text-align: left;
+        }
+
+        .justificativa-box-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--roxo-principal);
+            font-size: 0.9rem;
+        }
+
+        .justificativa-texto {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: var(--cinza-escuro);
+            max-height: 100px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background-color: var(--cinza-claro);
+            border-radius: 4px;
+        }
+
+        .assinaturas-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .assinaturas-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .assinatura-box {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: white;
+            text-align: center;
+        }
+
+        .assinatura-box-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--roxo-principal);
+            font-size: 0.9rem;
+        }
+
+        .assinatura-preview-container {
+            width: 100%;
+            height: 80px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .assinatura-preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .assinatura-indicator {
+            font-size: 0.8rem;
+            color: var(--verde);
+            margin-top: 0.25rem;
+        }
+
+        .assinatura-indicator.pendente {
+            color: var(--vermelho-erro);
+        }
+
+        /* NOVO: Informações do colaborador */
+        .colaborador-info-box {
+            background-color: rgba(102, 126, 234, 0.05);
+            border-left: 4px solid var(--roxo-principal);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+        }
+
+        .colaborador-info-title {
+            font-weight: 600;
+            color: var(--roxo-principal);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .colaborador-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .colaborador-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .colaborador-info-label {
+            font-size: 0.8rem;
+            color: var(--cinza-escuro);
+            font-weight: 500;
+        }
+
+        .colaborador-info-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--preto);
+        }
+
         .not-authenticated-container {
             display: flex;
             justify-content: center;
@@ -1195,6 +1395,29 @@
                     <div id="pontoDateTime" class="time-display"></div>
                 </div>
                 
+                <!-- NOVA SEÇÃO: Informações do Colaborador -->
+                <div class="colaborador-info-box">
+                    <h4 class="colaborador-info-title"><i class="fas fa-user-circle"></i> Dados do Colaborador</h4>
+                    <div class="colaborador-info-grid">
+                        <div class="colaborador-info-item">
+                            <span class="colaborador-info-label">Nome Completo:</span>
+                            <span class="colaborador-info-value" id="infoNomeCompleto">Carregando...</span>
+                        </div>
+                        <div class="colaborador-info-item">
+                            <span class="colaborador-info-label">CPF:</span>
+                            <span class="colaborador-info-value" id="infoCPF">Carregando...</span>
+                        </div>
+                        <div class="colaborador-info-item">
+                            <span class="colaborador-info-label">Cargo:</span>
+                            <span class="colaborador-info-value" id="infoCargo">Carregando...</span>
+                        </div>
+                        <div class="colaborador-info-item">
+                            <span class="colaborador-info-label">Departamento:</span>
+                            <span class="colaborador-info-value" id="infoDepartamento">TI</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="instruction-box">
                     <h4><i class="fas fa-info-circle"></i> Instruções Importantes:</h4>
                     <p>1. Selfie é obrigatória para todos os registros</p>
@@ -1326,6 +1549,29 @@
                         <button id="importarBackupBtn" class="btn btn-info btn-sm">
                             <i class="fas fa-upload"></i> Restaurar
                         </button>
+                    </div>
+                </div>
+                
+                <!-- Informações do Colaborador na página de registros -->
+                <div class="colaborador-info-box mb-3">
+                    <h4 class="colaborador-info-title"><i class="fas fa-user-circle"></i> Dados do Colaborador</h4>
+                    <div class="colaborador-info-grid">
+                        <div class="colaborador-info-item">
+                            <span class="colaborador-info-label">Nome Completo:</span>
+                            <span class="colaborador-info-value" id="registrosInfoNome">Carregando...</span>
+                        </div>
+                        <div class="colaborador-info-item">
+                            <span class="colaborador-info-label">CPF:</span>
+                            <span class="colaborador-info-value" id="registrosInfoCPF">Carregando...</span>
+                        </div>
+                        <div class="colaborador-info-item">
+                            <span class="colaborador-info-label">Cargo:</span>
+                            <span class="colaborador-info-value" id="registrosInfoCargo">Carregando...</span>
+                        </div>
+                        <div class="colaborador-info-item">
+                            <span class="colaborador-info-label">Departamento:</span>
+                            <span class="colaborador-info-value" id="registrosInfoDepartamento">TI</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -1611,6 +1857,12 @@
                 </div>
                 
                 <div class="form-group">
+                    <label class="form-label">Departamento</label>
+                    <input type="text" id="modalDepartamento" class="form-control" 
+                           placeholder="Ex: TI, RH, Administrativo" value="TI">
+                </div>
+                
+                <div class="form-group">
                     <label class="form-label">Matrícula (opcional)</label>
                     <input type="text" id="modalMatricula" class="form-control" 
                            placeholder="Número de matrícula">
@@ -1687,6 +1939,8 @@
             email: localStorage.getItem('currentUserEmail') || 'funcionario@recordguaiba.tv.br',
             cpfFormatado: localStorage.getItem('currentUserCPF') || '',
             cargo: localStorage.getItem('currentUserCargo') || 'Funcionário',
+            departamento: localStorage.getItem('currentUserDepartamento') || 'TI',
+            matricula: localStorage.getItem('currentUserMatricula') || '',
             dadosCompletos: true
         };
         
@@ -1721,16 +1975,564 @@
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // ========== NOVAS FUNÇÕES PARA ATUALIZAR INFORMAÇÕES DO COLABORADOR ==========
+        function atualizarInformacoesColaborador() {
+            // Atualizar na página de registro
+            document.getElementById('infoNomeCompleto').textContent = currentUser.nomeCompleto || 'Não informado';
+            document.getElementById('infoCPF').textContent = currentUser.cpfFormatado || 'Não informado';
+            document.getElementById('infoCargo').textContent = currentUser.cargo || 'Não informado';
+            document.getElementById('infoDepartamento').textContent = currentUser.departamento || 'TI';
+            
+            // Atualizar na página de registros
+            document.getElementById('registrosInfoNome').textContent = currentUser.nomeCompleto || 'Não informado';
+            document.getElementById('registrosInfoCPF').textContent = currentUser.cpfFormatado || 'Não informado';
+            document.getElementById('registrosInfoCargo').textContent = currentUser.cargo || 'Não informado';
+            document.getElementById('registrosInfoDepartamento').textContent = currentUser.departamento || 'TI';
+        }
+
+        // ========== FUNÇÃO MELHORADA PARA VISUALIZAR REGISTRO ==========
+        function verDetalhesRegistro(registroId) {
+            try {
+                const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
+                const registro = registros.find(r => r.id === registroId);
+                
+                if (!registro) {
+                    showNotification('Registro não encontrado!', 'error');
+                    return;
+                }
+                
+                const modal = document.getElementById('visualizarModal');
+                const conteudo = document.getElementById('visualizarConteudo');
+                
+                if (!modal || !conteudo) return;
+                
+                const hoje = new Date();
+                const dataRegistro = parseDataBrasileira(registro.data);
+                const diferencaDias = Math.floor((hoje - dataRegistro) / (1000 * 60 * 60 * 24));
+                const atrasado = diferencaDias > 1 && (!registro.saidaIntervalo || !registro.retornoIntervalo);
+                
+                let html = `
+                    <div class="mb-3">
+                        ${atrasado ? '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> REGISTRO ATRASADO</div>' : ''}
+                        
+                        <h4 class="mb-3">Informações do Colaborador</h4>
+                        <div class="colaborador-info-grid mb-3">
+                            <div class="colaborador-info-item">
+                                <span class="colaborador-info-label">Nome Completo:</span>
+                                <span class="colaborador-info-value">${currentUser.nomeCompleto}</span>
+                            </div>
+                            ${currentUser.cpfFormatado ? `
+                            <div class="colaborador-info-item">
+                                <span class="colaborador-info-label">CPF:</span>
+                                <span class="colaborador-info-value">${currentUser.cpfFormatado}</span>
+                            </div>` : ''}
+                            ${currentUser.cargo ? `
+                            <div class="colaborador-info-item">
+                                <span class="colaborador-info-label">Cargo:</span>
+                                <span class="colaborador-info-value">${currentUser.cargo}</span>
+                            </div>` : ''}
+                            <div class="colaborador-info-item">
+                                <span class="colaborador-info-label">Departamento:</span>
+                                <span class="colaborador-info-value">${currentUser.departamento || 'TI'}</span>
+                            </div>
+                        </div>
+                        
+                        <h4 class="mb-3">Detalhes do Registro</h4>
+                        <p><strong>Data:</strong> ${registro.data}</p>
+                        <p><strong>Saída Intervalo:</strong> ${registro.saidaIntervalo || '--:--'}</p>
+                        <p><strong>Retorno Intervalo:</strong> ${registro.retornoIntervalo || '--:--'}</p>
+                        <p><strong>Tipo de Registro:</strong> ${registro.tipoRegistro === 'com_justificativa' ? 'Com Justificativa' : 
+                            registro.tipoRegistro === 'com_justificativa_atrasada' ? 'Com Justificativa (Atrasado)' : 'Com Selfie'}</p>
+                        <p><strong>Status:</strong> ${registro.saidaIntervalo && registro.retornoIntervalo ? 'Completo' : 'Parcial'}</p>
+                        <p><strong>Email:</strong> ${registro.emailEnviado ? 'Enviado' : 'Pendente'}</p>
+                        <p><strong>Sincronizado:</strong> ${registro.sincronizado ? 'Sim' : 'Não'}</p>
+                        <p><strong>Bloqueado:</strong> ${registro.bloqueado ? 'Sim' : 'Não'}</p>
+                        <p><strong>Registrado em:</strong> ${formatDate(registro.dataRegistro, true)}</p>
+                    </div>
+                `;
+                
+                // Adicionar selfies lado a lado se existirem
+                if (registro.saidaSelfie || registro.retornoSelfie) {
+                    html += `
+                        <div class="mb-3">
+                            <h4 class="mb-3">Selfies do Registro</h4>
+                            <div class="selfies-container">
+                                ${registro.saidaSelfie ? `
+                                <div class="selfie-box">
+                                    <div class="selfie-box-title">Saída para Intervalo</div>
+                                    <div class="selfie-preview-container">
+                                        <img src="${registro.saidaSelfie}" alt="Selfie Saída">
+                                    </div>
+                                    <div class="selfie-indicator">
+                                        <i class="fas fa-check-circle"></i> Capturada
+                                    </div>
+                                </div>` : `
+                                <div class="selfie-box">
+                                    <div class="selfie-box-title">Saída para Intervalo</div>
+                                    <div class="selfie-preview-container">
+                                        <div class="selfie-placeholder">
+                                            <i class="fas fa-user-slash"></i>
+                                        </div>
+                                    </div>
+                                    <div class="selfie-indicator pendente">
+                                        <i class="fas fa-times-circle"></i> Não capturada
+                                    </div>
+                                </div>`}
+                                
+                                ${registro.retornoSelfie ? `
+                                <div class="selfie-box">
+                                    <div class="selfie-box-title">Retorno do Intervalo</div>
+                                    <div class="selfie-preview-container">
+                                        <img src="${registro.retornoSelfie}" alt="Selfie Retorno">
+                                    </div>
+                                    <div class="selfie-indicator">
+                                        <i class="fas fa-check-circle"></i> Capturada
+                                    </div>
+                                </div>` : `
+                                <div class="selfie-box">
+                                    <div class="selfie-box-title">Retorno do Intervalo</div>
+                                    <div class="selfie-preview-container">
+                                        <div class="selfie-placeholder">
+                                            <i class="fas fa-user-slash"></i>
+                                        </div>
+                                    </div>
+                                    <div class="selfie-indicator pendente">
+                                        <i class="fas fa-times-circle"></i> Não capturada
+                                    </div>
+                                </div>`}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Adicionar justificativas lado a lado se existirem
+                if (registro.saidaJustificativa || registro.retornoJustificativa || registro.justificativa) {
+                    html += `
+                        <div class="mb-3">
+                            <h4 class="mb-3">Justificativas</h4>
+                            <div class="justificativas-container">
+                                ${registro.saidaJustificativa ? `
+                                <div class="justificativa-box">
+                                    <div class="justificativa-box-title">Justificativa da Saída</div>
+                                    <div class="justificativa-texto">
+                                        ${registro.saidaJustificativa}
+                                    </div>
+                                </div>` : `
+                                <div class="justificativa-box">
+                                    <div class="justificativa-box-title">Justificativa da Saída</div>
+                                    <div class="justificativa-texto" style="color: var(--cinza-escuro); font-style: italic;">
+                                        Nenhuma justificativa fornecida
+                                    </div>
+                                </div>`}
+                                
+                                ${registro.retornoJustificativa ? `
+                                <div class="justificativa-box">
+                                    <div class="justificativa-box-title">Justificativa do Retorno</div>
+                                    <div class="justificativa-texto">
+                                        ${registro.retornoJustificativa}
+                                    </div>
+                                </div>` : `
+                                <div class="justificativa-box">
+                                    <div class="justificativa-box-title">Justificativa do Retorno</div>
+                                    <div class="justificativa-texto" style="color: var(--cinza-escuro); font-style: italic;">
+                                        Nenhuma justificativa fornecida
+                                    </div>
+                                </div>`}
+                            </div>
+                            ${registro.justificativa && (!registro.saidaJustificativa && !registro.retornoJustificativa) ? `
+                            <div class="justificativa-box mt-2">
+                                <div class="justificativa-box-title">Justificativa Geral</div>
+                                <div class="justificativa-texto">
+                                    ${registro.justificativa}
+                                </div>
+                            </div>` : ''}
+                        </div>
+                    `;
+                }
+                
+                // Adicionar assinaturas lado a lado se existirem
+                if (registro.saidaAssinatura || registro.retornoAssinatura || registro.assinatura) {
+                    html += `
+                        <div class="mb-3">
+                            <h4 class="mb-3">Assinaturas Digitais</h4>
+                            <div class="assinaturas-container">
+                                ${registro.saidaAssinatura ? `
+                                <div class="assinatura-box">
+                                    <div class="assinatura-box-title">Assinatura da Saída</div>
+                                    <div class="assinatura-preview-container">
+                                        <img src="${registro.saidaAssinatura}" alt="Assinatura Saída">
+                                    </div>
+                                    <div class="assinatura-indicator">
+                                        <i class="fas fa-check-circle"></i> Assinada
+                                    </div>
+                                </div>` : `
+                                <div class="assinatura-box">
+                                    <div class="assinatura-box-title">Assinatura da Saída</div>
+                                    <div class="assinatura-preview-container">
+                                        <div class="selfie-placeholder">
+                                            <i class="fas fa-signature"></i>
+                                        </div>
+                                    </div>
+                                    <div class="assinatura-indicator pendente">
+                                        <i class="fas fa-times-circle"></i> Não assinada
+                                    </div>
+                                </div>`}
+                                
+                                ${registro.retornoAssinatura ? `
+                                <div class="assinatura-box">
+                                    <div class="assinatura-box-title">Assinatura do Retorno</div>
+                                    <div class="assinatura-preview-container">
+                                        <img src="${registro.retornoAssinatura}" alt="Assinatura Retorno">
+                                    </div>
+                                    <div class="assinatura-indicator">
+                                        <i class="fas fa-check-circle"></i> Assinada
+                                    </div>
+                                </div>` : `
+                                <div class="assinatura-box">
+                                    <div class="assinatura-box-title">Assinatura do Retorno</div>
+                                    <div class="assinatura-preview-container">
+                                        <div class="selfie-placeholder">
+                                            <i class="fas fa-signature"></i>
+                                        </div>
+                                    </div>
+                                    <div class="assinatura-indicator pendente">
+                                        <i class="fas fa-times-circle"></i> Não assinada
+                                    </div>
+                                </div>`}
+                            </div>
+                            ${registro.assinatura && (!registro.saidaAssinatura && !registro.retornoAssinatura) ? `
+                            <div class="assinatura-box mt-2">
+                                <div class="assinatura-box-title">Assinatura Geral</div>
+                                <div class="assinatura-preview-container">
+                                    <img src="${registro.assinatura}" alt="Assinatura Geral">
+                                </div>
+                                <div class="assinatura-indicator">
+                                    <i class="fas fa-check-circle"></i> Assinada
+                                </div>
+                            </div>` : ''}
+                        </div>
+                    `;
+                }
+                
+                if (registro.pdfData) {
+                    html += `
+                        <div class="mb-3">
+                            <h4 class="mb-3">Documentação</h4>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-danger" onclick="gerarPDFParaDownload(${registro.id})">
+                                    <i class="fas fa-file-pdf"></i> Baixar PDF Completo
+                                </button>
+                                <button class="btn btn-success" onclick="adicionarBotaoEmailManual(${registro.id})">
+                                    <i class="fas fa-paper-plane"></i> Enviar por Email
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                conteudo.innerHTML = html;
+                modal.style.display = 'flex';
+            } catch (error) {
+                console.error('Erro ao visualizar registro:', error);
+                showNotification('Erro ao carregar detalhes do registro', 'error');
+            }
+        }
+
+        // ========== FUNÇÃO MELHORADA PARA GERAR PDF ==========
+        async function gerarPDFRegistro(registro) {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                const marginLeft = 15;
+                const marginTop = 20;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                
+                let yPos = marginTop;
+                
+                // Cabeçalho do PDF
+                doc.setFontSize(20);
+                doc.setTextColor(67, 97, 238);
+                doc.text('RECORD GUAÍBA', pageWidth / 2, yPos, { align: 'center' });
+                
+                yPos += 8;
+                doc.setFontSize(16);
+                doc.setTextColor(0, 0, 0);
+                doc.text('COMPROVANTE DE REGISTRO DE INTERVALO', pageWidth / 2, yPos, { align: 'center' });
+                
+                yPos += 15;
+                
+                // Informações da empresa
+                doc.setFontSize(10);
+                doc.text('Empresa: Record Guaíba', marginLeft, yPos);
+                yPos += 6;
+                doc.text(`Departamento: ${currentUser.departamento || 'TI'}`, marginLeft, yPos);
+                yPos += 6;
+                doc.text('Email: agawlinski@recordguaiba.tv.br', marginLeft, yPos);
+                
+                yPos += 10;
+                
+                // Linha divisória
+                doc.setDrawColor(67, 97, 238);
+                doc.setLineWidth(0.5);
+                doc.line(marginLeft, yPos, pageWidth - marginLeft, yPos);
+                
+                yPos += 10;
+                
+                // Informações do colaborador (COM TODOS OS DADOS)
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('DADOS DO COLABORADOR', marginLeft, yPos);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Nome: ${currentUser.nomeCompleto || registro.usuarioNome}`, marginLeft, yPos);
+                yPos += 6;
+                
+                if (currentUser && currentUser.cpfFormatado) {
+                    doc.text(`CPF: ${currentUser.cpfFormatado}`, marginLeft, yPos);
+                    yPos += 6;
+                }
+                
+                if (currentUser && currentUser.cargo) {
+                    doc.text(`Cargo: ${currentUser.cargo}`, marginLeft, yPos);
+                    yPos += 6;
+                }
+                
+                doc.text(`Departamento: ${currentUser.departamento || 'TI'}`, marginLeft, yPos);
+                yPos += 6;
+                
+                if (currentUser && currentUser.matricula) {
+                    doc.text(`Matrícula: ${currentUser.matricula}`, marginLeft, yPos);
+                    yPos += 6;
+                }
+                
+                doc.text(`Data do Registro: ${registro.data}`, marginLeft, yPos);
+                yPos += 6;
+                doc.text(`Hora do Registro: ${formatDate(registro.dataRegistro, true)}`, marginLeft, yPos);
+                yPos += 6;
+                doc.text(`Tipo de Registro: ${registro.tipoRegistro === 'com_selfie' ? 'Com Selfie' : 
+                    registro.tipoRegistro === 'com_justificativa_atrasada' ? 'Com Justificativa (Atrasado)' : 'Com Justificativa'}`, marginLeft, yPos);
+                
+                yPos += 10;
+                
+                // Horários registrados
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('HORÁRIOS REGISTRADOS', marginLeft, yPos);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                
+                const tableData = [
+                    ['Tipo', 'Horário', 'Comprovação'],
+                    [
+                        'Saída para Intervalo', 
+                        registro.saidaIntervalo || 'Não registrado',
+                        registro.saidaSelfie ? 'Selfie ✓' : registro.saidaJustificativa ? 'Justificativa ✓' : 'N/A'
+                    ],
+                    [
+                        'Retorno do Intervalo', 
+                        registro.retornoIntervalo || 'Não registrado',
+                        registro.retornoSelfie ? 'Selfie ✓' : registro.retornoJustificativa ? 'Justificativa ✓' : 'N/A'
+                    ]
+                ];
+                
+                doc.autoTable({
+                    startY: yPos,
+                    head: [tableData[0]],
+                    body: tableData.slice(1),
+                    margin: { left: marginLeft },
+                    headStyles: { fillColor: [67, 97, 238], textColor: 255 },
+                    theme: 'grid',
+                    columnStyles: {
+                        2: { cellWidth: 40 }
+                    }
+                });
+                
+                yPos = doc.lastAutoTable.finalY + 10;
+                
+                // Adicionar selfies lado a lado se possível
+                if (registro.saidaSelfie || registro.retornoSelfie) {
+                    if (yPos > pageHeight - 100) {
+                        doc.addPage();
+                        yPos = marginTop;
+                    }
+                    
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('SELFIES DO REGISTRO', marginLeft, yPos);
+                    yPos += 8;
+                    
+                    try {
+                        // Adicionar selfies lado a lado
+                        const selfieWidth = 80;
+                        const selfieHeight = 60;
+                        
+                        if (registro.saidaSelfie) {
+                            await adicionarImagemAoPDF(doc, registro.saidaSelfie, marginLeft, yPos, selfieWidth, selfieHeight);
+                            doc.setFontSize(9);
+                            doc.text('Saída', marginLeft + selfieWidth/2 - 5, yPos + selfieHeight + 5, { align: 'center' });
+                        }
+                        
+                        if (registro.retornoSelfie) {
+                            await adicionarImagemAoPDF(doc, registro.retornoSelfie, marginLeft + selfieWidth + 10, yPos, selfieWidth, selfieHeight);
+                            doc.setFontSize(9);
+                            doc.text('Retorno', marginLeft + selfieWidth + 10 + selfieWidth/2 - 10, yPos + selfieHeight + 5, { align: 'center' });
+                        }
+                        
+                        yPos += selfieHeight + 15;
+                    } catch (error) {
+                        console.error('Erro ao adicionar selfies ao PDF:', error);
+                        doc.text('Erro ao carregar selfies', marginLeft, yPos);
+                        yPos += 10;
+                    }
+                }
+                
+                // Adicionar justificativas
+                if (registro.saidaJustificativa || registro.retornoJustificativa || registro.justificativa) {
+                    if (yPos > pageHeight - 100) {
+                        doc.addPage();
+                        yPos = marginTop;
+                    }
+                    
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('JUSTIFICATIVAS', marginLeft, yPos);
+                    yPos += 8;
+                    
+                    if (registro.saidaJustificativa) {
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('Saída para Intervalo:', marginLeft, yPos);
+                        yPos += 5;
+                        
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'normal');
+                        const saidaLines = doc.splitTextToSize(registro.saidaJustificativa, 180);
+                        doc.text(saidaLines, marginLeft, yPos);
+                        yPos += (saidaLines.length * 4) + 10;
+                    }
+                    
+                    if (registro.retornoJustificativa) {
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('Retorno do Intervalo:', marginLeft, yPos);
+                        yPos += 5;
+                        
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'normal');
+                        const retornoLines = doc.splitTextToSize(registro.retornoJustificativa, 180);
+                        doc.text(retornoLines, marginLeft, yPos);
+                        yPos += (retornoLines.length * 4) + 10;
+                    }
+                    
+                    if (registro.justificativa && !registro.saidaJustificativa && !registro.retornoJustificativa) {
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('Justificativa Geral:', marginLeft, yPos);
+                        yPos += 5;
+                        
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'normal');
+                        const geralLines = doc.splitTextToSize(registro.justificativa, 180);
+                        doc.text(geralLines, marginLeft, yPos);
+                        yPos += (geralLines.length * 4) + 10;
+                    }
+                }
+                
+                // Adicionar assinaturas lado a lado
+                if (registro.saidaAssinatura || registro.retornoAssinatura || registro.assinatura) {
+                    if (yPos > pageHeight - 60) {
+                        doc.addPage();
+                        yPos = marginTop;
+                    }
+                    
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('ASSINATURAS DIGITAIS', marginLeft, yPos);
+                    yPos += 8;
+                    
+                    try {
+                        const assinaturaWidth = 70;
+                        const assinaturaHeight = 30;
+                        
+                        if (registro.saidaAssinatura) {
+                            await adicionarImagemAoPDF(doc, registro.saidaAssinatura, marginLeft, yPos, assinaturaWidth, assinaturaHeight);
+                            doc.setFontSize(8);
+                            doc.text('Saída', marginLeft + assinaturaWidth/2 - 5, yPos + assinaturaHeight + 3, { align: 'center' });
+                        }
+                        
+                        if (registro.retornoAssinatura) {
+                            await adicionarImagemAoPDF(doc, registro.retornoAssinatura, marginLeft + assinaturaWidth + 10, yPos, assinaturaWidth, assinaturaHeight);
+                            doc.setFontSize(8);
+                            doc.text('Retorno', marginLeft + assinaturaWidth + 10 + assinaturaWidth/2 - 8, yPos + assinaturaHeight + 3, { align: 'center' });
+                        }
+                        
+                        if (registro.assinatura && !registro.saidaAssinatura && !registro.retornoAssinatura) {
+                            await adicionarImagemAoPDF(doc, registro.assinatura, marginLeft, yPos, assinaturaWidth, assinaturaHeight);
+                            doc.setFontSize(8);
+                            doc.text('Assinatura', marginLeft + assinaturaWidth/2 - 10, yPos + assinaturaHeight + 3, { align: 'center' });
+                        }
+                        
+                        yPos += assinaturaHeight + 10;
+                    } catch (error) {
+                        console.error('Erro ao adicionar assinaturas ao PDF:', error);
+                        doc.text('Erro ao carregar assinaturas', marginLeft, yPos);
+                        yPos += 10;
+                    }
+                }
+                
+                // Adicionar rodapé
+                yPos = pageHeight - 20;
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Documento gerado automaticamente pelo Sistema de Controle de Intervalo - Record Guaíba', pageWidth / 2, yPos, { align: 'center' });
+                yPos += 4;
+                doc.text(`Gerado em: ${formatDate(new Date(), true)}`, pageWidth / 2, yPos, { align: 'center' });
+                
+                // Salvar PDF
+                const pdfOutput = doc.output('datauristring');
+                
+                return pdfOutput;
+                
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                throw error;
+            }
+        }
+
+        async function adicionarImagemAoPDF(doc, imagemData, x, y, width, height) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = function() {
+                    try {
+                        doc.addImage(img, 'JPEG', x, y, width, height);
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                img.onerror = reject;
+                img.src = imagemData;
+            });
+        }
+
         // ========== FUNÇÕES DE SINCRONIZAÇÃO SUPABASE ==========
 
         // 1. Registrar/Login do usuário
-        async function registrarUsuarioSupabase(email, nomeCompleto, cpf, cargo) {
+        async function registrarUsuarioSupabase(email, nomeCompleto, cpf, cargo, departamento, matricula) {
             try {
                 const { data, error } = await supabaseClient.rpc('registrar_usuario', {
                     p_email: email,
                     p_nome_completo: nomeCompleto,
                     p_cpf: cpf,
-                    p_cargo: cargo
+                    p_cargo: cargo,
+                    p_departamento: departamento,
+                    p_matricula: matricula
                 });
                 
                 if (error) throw error;
@@ -2048,6 +2850,8 @@
                     email: parsedData.email || 'funcionario@recordguaiba.tv.br',
                     cpfFormatado: parsedData.cpfFormatado || '',
                     cargo: parsedData.cargo || 'Funcionário',
+                    departamento: parsedData.departamento || 'TI',
+                    matricula: parsedData.matricula || '',
                     dadosCompletos: true
                 };
             }
@@ -2059,7 +2863,9 @@
                     currentUser.email,
                     currentUser.nomeCompleto,
                     currentUser.cpfFormatado.replace(/\D/g, ''), // Remover formatação do CPF
-                    currentUser.cargo
+                    currentUser.cargo,
+                    currentUser.departamento,
+                    currentUser.matricula
                 ).then(usuarioSupabase => {
                     if (usuarioSupabase && usuarioSupabase.id) {
                         currentUser.id = usuarioSupabase.id;
@@ -2070,6 +2876,7 @@
             
             // Atualizar interface com dados do usuário
             updateUserInterface();
+            atualizarInformacoesColaborador();
         }
 
         function updateUserInterface() {
@@ -2413,8 +3220,10 @@ Retorno Intervalo: ${emailData.retorno || 'Não registrado'}
 Tipo: ${emailData.tipoRegistro || 'Com Selfie'}
 
 Colaborador: ${currentUser.nomeCompleto}
+Cargo: ${currentUser.cargo || 'Não informado'}
+Departamento: ${currentUser.departamento || 'TI'}
 ${currentUser.cpfFormatado ? `CPF: ${currentUser.cpfFormatado}` : ''}
-${currentUser.cargo ? `Cargo: ${currentUser.cargo}` : ''}
+${currentUser.matricula ? `Matrícula: ${currentUser.matricula}` : ''}
 
 Registrado em: ${formatDate(emailData.timestamp, true)}
 
@@ -2727,8 +3536,10 @@ Retorno Intervalo: ${registro.retornoIntervalo || 'Não registrado'}
 Tipo: ${registro.tipoRegistro === 'com_selfie' ? 'Com Selfie' : 'Com Justificativa'}
 
 Colaborador: ${currentUser.nomeCompleto}
+Cargo: ${currentUser.cargo || 'Não informado'}
+Departamento: ${currentUser.departamento || 'TI'}
 ${currentUser.cpfFormatado ? `CPF: ${currentUser.cpfFormatado}` : ''}
-${currentUser.cargo ? `Cargo: ${currentUser.cargo}` : ''}
+${currentUser.matricula ? `Matrícula: ${currentUser.matricula}` : ''}
 
 Registrado em: ${formatDate(registro.dataRegistro, true)}
 
@@ -3530,6 +4341,7 @@ Este é um registro automático do Sistema de Controle de Intervalo da Record Gu
                 updateRegisterButton();
                 verificarRegistrosAtrasados();
                 verificarEnviosAutomaticos();
+                atualizarInformacoesColaborador();
                 
             } catch (error) {
                 console.error('Erro ao carregar página de ponto:', error);
@@ -3886,269 +4698,6 @@ Este é um registro automático do Sistema de Controle de Intervalo da Record Gu
             }
         }
 
-        // ========== FUNÇÕES DE PDF ==========
-        async function gerarPDFRegistro(registro) {
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4');
-                
-                const marginLeft = 15;
-                const marginTop = 20;
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const pageHeight = doc.internal.pageSize.getHeight();
-                
-                let yPos = marginTop;
-                
-                // Cabeçalho do PDF
-                doc.setFontSize(20);
-                doc.setTextColor(67, 97, 238);
-                doc.text('RECORD GUAÍBA', pageWidth / 2, yPos, { align: 'center' });
-                
-                yPos += 8;
-                doc.setFontSize(16);
-                doc.setTextColor(0, 0, 0);
-                doc.text('COMPROVANTE DE REGISTRO DE INTERVALO', pageWidth / 2, yPos, { align: 'center' });
-                
-                yPos += 15;
-                
-                // Informações da empresa
-                doc.setFontSize(10);
-                doc.text('Empresa: Record Guaíba', marginLeft, yPos);
-                yPos += 6;
-                doc.text('Departamento: TI', marginLeft, yPos);
-                yPos += 6;
-                doc.text('Email: agawlinski@recordguaiba.tv.br', marginLeft, yPos);
-                
-                yPos += 10;
-                
-                // Linha divisória
-                doc.setDrawColor(67, 97, 238);
-                doc.setLineWidth(0.5);
-                doc.line(marginLeft, yPos, pageWidth - marginLeft, yPos);
-                
-                yPos += 10;
-                
-                // Informações do colaborador (COM CPF)
-                doc.setFontSize(12);
-                doc.setFont(undefined, 'bold');
-                doc.text('DADOS DO COLABORADOR', marginLeft, yPos);
-                yPos += 8;
-                
-                doc.setFontSize(10);
-                doc.setFont(undefined, 'normal');
-                doc.text(`Nome: ${currentUser.nomeCompleto || registro.usuarioNome}`, marginLeft, yPos);
-                yPos += 6;
-                
-                if (currentUser && currentUser.cpfFormatado) {
-                    doc.text(`CPF: ${currentUser.cpfFormatado}`, marginLeft, yPos);
-                    yPos += 6;
-                }
-                
-                if (currentUser && currentUser.cargo) {
-                    doc.text(`Cargo: ${currentUser.cargo}`, marginLeft, yPos);
-                    yPos += 6;
-                }
-                
-                doc.text(`Data do Registro: ${registro.data}`, marginLeft, yPos);
-                yPos += 6;
-                doc.text(`Hora do Registro: ${formatDate(registro.dataRegistro, true)}`, marginLeft, yPos);
-                yPos += 6;
-                doc.text(`Tipo de Registro: ${registro.tipoRegistro === 'com_selfie' ? 'Com Selfie' : 
-                    registro.tipoRegistro === 'com_justificativa_atrasada' ? 'Com Justificativa (Atrasado)' : 'Com Justificativa'}`, marginLeft, yPos);
-                
-                yPos += 10;
-                
-                // Horários registrados
-                doc.setFontSize(12);
-                doc.setFont(undefined, 'bold');
-                doc.text('HORÁRIOS REGISTRADOS', marginLeft, yPos);
-                yPos += 8;
-                
-                doc.setFontSize(10);
-                doc.setFont(undefined, 'normal');
-                
-                const tableData = [
-                    ['Tipo', 'Horário', 'Comprovação'],
-                    [
-                        'Saída para Intervalo', 
-                        registro.saidaIntervalo || 'Não registrado',
-                        registro.saidaSelfie ? 'Selfie ✓' : registro.saidaJustificativa ? 'Justificativa ✓' : 'N/A'
-                    ],
-                    [
-                        'Retorno do Intervalo', 
-                        registro.retornoIntervalo || 'Não registrado',
-                        registro.retornoSelfie ? 'Selfie ✓' : registro.retornoJustificativa ? 'Justificativa ✓' : 'N/A'
-                    ]
-                ];
-                
-                doc.autoTable({
-                    startY: yPos,
-                    head: [tableData[0]],
-                    body: tableData.slice(1),
-                    margin: { left: marginLeft },
-                    headStyles: { fillColor: [67, 97, 238], textColor: 255 },
-                    theme: 'grid',
-                    columnStyles: {
-                        2: { cellWidth: 40 }
-                    }
-                });
-                
-                yPos = doc.lastAutoTable.finalY + 10;
-                
-                // Adicionar selfies e justificativas
-                if (registro.saidaSelfie) {
-                    yPos = await adicionarSelfieAoPDF(doc, registro.saidaSelfie, 'SELFIE DA SAÍDA', yPos, marginLeft, pageHeight, marginTop);
-                }
-                
-                if (registro.retornoSelfie) {
-                    yPos = await adicionarSelfieAoPDF(doc, registro.retornoSelfie, 'SELFIE DO RETORNO', yPos, marginLeft, pageHeight, marginTop);
-                }
-                
-                if (registro.saidaJustificativa) {
-                    yPos = await adicionarJustificativaAoPDF(doc, registro.saidaJustificativa, 'JUSTIFICATIVA DA SAÍDA', yPos, marginLeft, pageHeight, marginTop);
-                }
-                
-                if (registro.retornoJustificativa) {
-                    yPos = await adicionarJustificativaAoPDF(doc, registro.retornoJustificativa, 'JUSTIFICATIVA DO RETORNO', yPos, marginLeft, pageHeight, marginTop);
-                }
-                
-                if (registro.assinatura) {
-                    yPos = await adicionarAssinaturaAoPDF(doc, registro.assinatura, 'ASSINATURA DIGITAL', yPos, marginLeft, pageHeight, marginTop);
-                }
-                
-                // Adicionar rodapé
-                yPos = pageHeight - 20;
-                doc.setFontSize(8);
-                doc.setTextColor(100, 100, 100);
-                doc.text('Documento gerado automaticamente pelo Sistema de Controle de Intervalo - Record Guaíba', pageWidth / 2, yPos, { align: 'center' });
-                yPos += 4;
-                doc.text(`Gerado em: ${formatDate(new Date(), true)}`, pageWidth / 2, yPos, { align: 'center' });
-                
-                // Salvar PDF
-                const pdfOutput = doc.output('datauristring');
-                
-                return pdfOutput;
-                
-            } catch (error) {
-                console.error('Erro ao gerar PDF:', error);
-                throw error;
-            }
-        }
-
-        async function adicionarSelfieAoPDF(doc, selfieData, titulo, yPos, marginLeft, pageHeight, marginTop) {
-            try {
-                if (yPos > pageHeight - 100) {
-                    doc.addPage();
-                    yPos = marginTop;
-                }
-                
-                doc.setFontSize(12);
-                doc.setFont(undefined, 'bold');
-                doc.text(titulo, marginLeft, yPos);
-                yPos += 8;
-                
-                const img = new Image();
-                img.src = selfieData;
-                
-                await new Promise((resolve) => {
-                    img.onload = () => {
-                        const maxWidth = 60;
-                        const maxHeight = 80;
-                        const imgWidth = Math.min(maxWidth, img.width);
-                        const imgHeight = (img.height * imgWidth) / img.width;
-                        
-                        if (imgHeight > maxHeight) {
-                            const scale = maxHeight / imgHeight;
-                            const finalWidth = imgWidth * scale;
-                            const finalHeight = imgHeight * scale;
-                            doc.addImage(img, 'JPEG', marginLeft, yPos, finalWidth, finalHeight);
-                            yPos += finalHeight + 10;
-                        } else {
-                            doc.addImage(img, 'JPEG', marginLeft, yPos, imgWidth, imgHeight);
-                            yPos += imgHeight + 10;
-                        }
-                        resolve();
-                    };
-                    
-                    img.onerror = () => {
-                        doc.text('Selfie não disponível', marginLeft, yPos);
-                        yPos += 10;
-                        resolve();
-                    };
-                });
-                
-                return yPos;
-            } catch (error) {
-                console.error('Erro ao adicionar selfie ao PDF:', error);
-                doc.text('Erro ao carregar selfie', marginLeft, yPos);
-                return yPos + 10;
-            }
-        }
-
-        async function adicionarJustificativaAoPDF(doc, justificativa, titulo, yPos, marginLeft, pageHeight, marginTop) {
-            try {
-                if (yPos > pageHeight - 50) {
-                    doc.addPage();
-                    yPos = marginTop;
-                }
-                
-                doc.setFontSize(12);
-                doc.setFont(undefined, 'bold');
-                doc.text(titulo, marginLeft, yPos);
-                yPos += 8;
-                
-                doc.setFontSize(10);
-                doc.setFont(undefined, 'normal');
-                
-                const justificativaLines = doc.splitTextToSize(justificativa, 180);
-                doc.text(justificativaLines, marginLeft, yPos);
-                yPos += (justificativaLines.length * 5) + 10;
-                
-                return yPos;
-            } catch (error) {
-                console.error('Erro ao adicionar justificativa ao PDF:', error);
-                return yPos + 10;
-            }
-        }
-
-        async function adicionarAssinaturaAoPDF(doc, assinaturaData, titulo, yPos, marginLeft, pageHeight, marginTop) {
-            try {
-                if (yPos > pageHeight - 50) {
-                    doc.addPage();
-                    yPos = marginTop;
-                }
-                
-                doc.setFontSize(12);
-                doc.setFont(undefined, 'bold');
-                doc.text(titulo, marginLeft, yPos);
-                yPos += 8;
-                
-                const img = new Image();
-                img.src = assinaturaData;
-                
-                await new Promise((resolve) => {
-                    img.onload = () => {
-                        const imgWidth = 80;
-                        const imgHeight = 30;
-                        doc.addImage(img, 'PNG', marginLeft, yPos, imgWidth, imgHeight);
-                        yPos += imgHeight + 10;
-                        resolve();
-                    };
-                    
-                    img.onerror = () => {
-                        doc.text('Assinatura não disponível', marginLeft, yPos);
-                        yPos += 10;
-                        resolve();
-                    };
-                });
-                
-                return yPos;
-            } catch (error) {
-                console.error('Erro ao adicionar assinatura ao PDF:', error);
-                return yPos + 10;
-            }
-        }
-
         function gerarPDFParaDownload(registroId) {
             try {
                 const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
@@ -4257,7 +4806,7 @@ Este é um registro automático do Sistema de Controle de Intervalo da Record Gu
                 
                 yPos += 10;
                 
-                // Informações do colaborador (COM CPF)
+                // Informações do colaborador (COM TODOS OS DADOS)
                 doc.setFontSize(10);
                 doc.text('Empresa: Record Guaíba', marginLeft, yPos);
                 yPos += 5;
@@ -4271,6 +4820,14 @@ Este é um registro automático do Sistema de Controle de Intervalo da Record Gu
                 
                 if (currentUser && currentUser.cargo) {
                     doc.text(`Cargo: ${currentUser.cargo}`, marginLeft, yPos);
+                    yPos += 5;
+                }
+                
+                doc.text(`Departamento: ${currentUser.departamento || 'TI'}`, marginLeft, yPos);
+                yPos += 5;
+                
+                if (currentUser && currentUser.matricula) {
+                    doc.text(`Matrícula: ${currentUser.matricula}`, marginLeft, yPos);
                     yPos += 5;
                 }
                 
@@ -4825,120 +5382,6 @@ Este é um registro automático do Sistema de Controle de Intervalo da Record Gu
             }
         }
 
-        function verDetalhesRegistro(registroId) {
-            try {
-                const registros = JSON.parse(localStorage.getItem('ponto_record_registros') || '[]');
-                const registro = registros.find(r => r.id === registroId);
-                
-                if (!registro) {
-                    showNotification('Registro não encontrado!', 'error');
-                    return;
-                }
-                
-                const modal = document.getElementById('visualizarModal');
-                const conteudo = document.getElementById('visualizarConteudo');
-                
-                if (!modal || !conteudo) return;
-                
-                const hoje = new Date();
-                const dataRegistro = parseDataBrasileira(registro.data);
-                const diferencaDias = Math.floor((hoje - dataRegistro) / (1000 * 60 * 60 * 24));
-                const atrasado = diferencaDias > 1 && (!registro.saidaIntervalo || !registro.retornoIntervalo);
-                
-                let html = `
-                    <div class="mb-3">
-                        ${atrasado ? '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> REGISTRO ATRASADO</div>' : ''}
-                    <p><strong>Colaborador:</strong> ${currentUser.nomeCompleto}</p>
-                `;
-                
-                if (currentUser && currentUser.cpfFormatado) {
-                    html += `<p><strong>CPF:</strong> ${currentUser.cpfFormatado}</p>`;
-                }
-                
-                if (currentUser && currentUser.cargo) {
-                    html += `<p><strong>Cargo:</strong> ${currentUser.cargo}</p>`;
-                }
-                
-                html += `
-                        <p><strong>Data:</strong> ${registro.data}</p>
-                        <p><strong>Saída Intervalo:</strong> ${registro.saidaIntervalo || '--:--'}</p>
-                        <p><strong>Retorno Intervalo:</strong> ${registro.retornoIntervalo || '--:--'}</p>
-                        <p><strong>Tipo de Registro:</strong> ${registro.tipoRegistro === 'com_justificativa' ? 'Com Justificativa' : 
-                            registro.tipoRegistro === 'com_justificativa_atrasada' ? 'Com Justificativa (Atrasado)' : 'Com Selfie'}</p>
-                        <p><strong>Status:</strong> ${registro.saidaIntervalo && registro.retornoIntervalo ? 'Completo' : 'Parcial'}</p>
-                        <p><strong>Email:</strong> ${registro.emailEnviado ? 'Enviado' : 'Pendente'}</p>
-                        <p><strong>Sincronizado:</strong> ${registro.sincronizado ? 'Sim' : 'Não'}</p>
-                        <p><strong>Bloqueado:</strong> ${registro.bloqueado ? 'Sim' : 'Não'}</p>
-                        <p><strong>Registrado em:</strong> ${formatDate(registro.dataRegistro, true)}</p>
-                    </div>
-                `;
-                
-                if (registro.selfie) {
-                    html += `
-                        <div class="mb-3">
-                            <strong>Selfie do Registro:</strong>
-                            <div class="mt-2">
-                                <img src="${registro.selfie}" style="max-width: 100%; border-radius: 5px; border: 1px solid #ddd;">
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                if (registro.justificativa) {
-                    html += `
-                        <div class="mb-3">
-                            <strong>Justificativa:</strong>
-                            <p class="mt-1 p-2" style="background: var(--cinza-claro); border-radius: 5px;">${registro.justificativa}</p>
-                        </div>
-                    `;
-                }
-                
-                if (registro.assinatura) {
-                    if (registro.assinatura.startsWith('data:image/')) {
-                        html += `
-                            <div class="mb-3">
-                                <strong>Assinatura Digital:</strong>
-                                <div class="mt-2">
-                                    <img src="${registro.assinatura}" style="max-width: 100%; border-radius: 5px; border: 1px solid #ddd; background-color: white; padding: 10px;">
-                                </div>
-                                <p class="mt-1" style="font-size: 0.8rem; color: var(--cinza-medio);">
-                                    <i class="fas fa-info-circle"></i> Assinatura capturada em: ${formatDate(registro.dataRegistro, true)}
-                                </p>
-                            </div>
-                        `;
-                    } else {
-                        html += `
-                            <div class="mb-3">
-                                <strong>Assinatura Digital:</strong>
-                                <p class="mt-1 p-2" style="background: var(--cinza-claro); border-radius: 5px;">
-                                    <i class="fas fa-signature"></i> Assinatura disponível no sistema
-                                </p>
-                            </div>
-                        `;
-                    }
-                }
-                
-                if (registro.pdfData) {
-                    html += `
-                        <div class="mb-3">
-                            <strong>PDF Gerado:</strong>
-                            <div class="mt-2">
-                                <button class="btn btn-danger" onclick="gerarPDFParaDownload(${registro.id})">
-                                    <i class="fas fa-file-pdf"></i> Baixar PDF
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                conteudo.innerHTML = html;
-                modal.style.display = 'flex';
-            } catch (error) {
-                console.error('Erro ao visualizar registro:', error);
-                showNotification('Erro ao carregar detalhes do registro', 'error');
-            }
-        }
-
         // ========== FUNÇÕES DE BACKUP E RESTAURAÇÃO ==========
         async function exportarBackupDados() {
             try {
@@ -5017,6 +5460,7 @@ Este é um registro automático do Sistema de Controle de Intervalo da Record Gu
                         if (backupData.usuario) {
                             currentUser = backupData.usuario;
                             updateUserInterface();
+                            atualizarInformacoesColaborador();
                         }
                         
                         showNotification('Backup importado com sucesso!', 'success');
@@ -5068,6 +5512,8 @@ Este é um registro automático do Sistema de Controle de Intervalo da Record Gu
                         localStorage.removeItem('currentUserEmail');
                         localStorage.removeItem('currentUserCPF');
                         localStorage.removeItem('currentUserCargo');
+                        localStorage.removeItem('currentUserDepartamento');
+                        localStorage.removeItem('currentUserMatricula');
                         
                         // CORREÇÃO: Redirecionar corretamente para a página de login
                         // Verificar se estamos no GitHub Pages ou localmente
@@ -5384,5 +5830,3 @@ Este é um registro automático do Sistema de Controle de Intervalo da Record Gu
     </script>
 </body>
 </html>
-
-
